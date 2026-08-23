@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>TRJT 3A — Developer Simulation Sandbox</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/favicon.svg">
+  <link rel="apple-touch-icon" href="../assets/icons/app-icon.svg">
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Design System Stylesheet -->
+  <link rel="stylesheet" href="../css/design-system.css">
+
+  <style>
+    .dev-wrapper {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px 16px 60px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .dev-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 16px 20px;
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border-card);
+      border-radius: var(--radius-inner);
+      box-shadow: var(--shadow-subtle);
+    }
+    .dev-grid-2col {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    @media (min-width: 768px) {
+      .dev-grid-2col {
+        grid-template-columns: 380px 1fr;
+      }
+    }
+    .dev-control-card {
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border-card);
+      border-radius: var(--radius-card);
+      padding: 20px;
+      box-shadow: var(--shadow-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .dev-preview-card {
+      background-color: var(--color-app-bg);
+      border: 1px solid var(--color-border-card);
+      border-radius: var(--radius-card);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: var(--shadow-subtle);
+    }
+    .preset-btn-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .preset-action-btn {
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border-card);
+      padding: 10px 12px;
+      border-radius: var(--radius-btn);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-primary-text);
+      cursor: pointer;
+      text-align: left;
+      transition: all var(--transition-fast);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .preset-action-btn:hover, .preset-action-btn.active {
+      background-color: var(--color-very-light-blue);
+      border-color: var(--color-primary-blue);
+      color: var(--color-deep-blue);
+    }
+    .preset-action-btn.active {
+      box-shadow: 0 2px 6px rgba(47, 128, 237, 0.2);
+    }
+    .inspector-box {
+      background-color: #0F172A;
+      color: #38BDF8;
+      font-family: monospace;
+      font-size: 12px;
+      padding: 14px;
+      border-radius: var(--radius-btn);
+      overflow-x: auto;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dev-wrapper">
+
+    <!-- Developer Topbar -->
+    <div class="dev-topbar">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div class="brand-logo-box" style="background-color: #FEF3C7; border-color: #FCD34D;">
+          <i data-lucide="wrench" style="width: 20px; height: 20px; color: #B45309;"></i>
+        </div>
+        <div>
+          <h1 style="font-size: 1.125rem; font-weight: 700; color: var(--color-primary-text);">TRJT 3A — Developer Sandbox</h1>
+          <p style="font-size: 12px; color: var(--color-secondary-text);">Simulasi status jadwal & pengujian tanpa mengubah production</p>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span class="soft-badge-success" style="font-size: 11px;">Sandbox Aman (FCM Isolated)</span>
+        <a href="../index.html" class="btn-secondary" style="font-size: 13px; text-decoration: none;">
+          <i data-lucide="arrow-left" style="width: 14px; height: 14px;"></i> Kembali ke App
+        </a>
+      </div>
+    </div>
+
+    <div class="dev-grid-2col">
+
+      <!-- Left Column: Controls & Presets -->
+      <div class="dev-control-card">
+        <div>
+          <h2 style="font-size: var(--font-size-base); font-weight: 700; color: var(--color-primary-text);">Preset Pengujian Cepat</h2>
+          <p style="font-size: var(--font-size-xs); color: var(--color-secondary-text); margin-top: 2px;">Pilih kondisi untuk simulasi instan:</p>
+        </div>
+
+        <div class="preset-btn-grid">
+          <button class="preset-action-btn active" data-preset="realtime">
+            <span>🕒 Waktu Nyata</span>
+            <span style="font-size: 11px; color: var(--color-secondary-text);">Asia/Jakarta asli</span>
+          </button>
+
+          <button class="preset-action-btn" data-preset="senin-h10">
+            <span>🔔 H-10 Menit</span>
+            <span style="font-size: 11px; color: var(--color-secondary-text);">Senin 07.22 (8m sblm kelas)</span>
+          </button>
+
+          <button class="preset-action-btn" data-preset="senin-ongoing">
+            <span>● Kelas Aktif</span>
+            <span style="font-size: 11px; color: var(--color-secondary-text);">Senin 10.45 (Kuliah R16)</span>
+          </button>
+
+          <button class="preset-action-btn" data-preset="selasa-upcoming">
+            <span>📅 Upcoming</span>
+            <span style="font-size: 11px; color: var(--color-secondary-text);">Selasa 07.15 (Praktikum)</span>
+          </button>
+
+          <button class="preset-action-btn" data-preset="senin-finished">
+            <span>✅ Semua Selesai</span>
+            <span style="font-size: 11px; color: var(--color-secondary-text);">Senin 17.00 (Selesai semua)</span>
+          </button>
+
+          <button class="preset-action-btn" data-preset="weekend-empty">
+            <span>🏖️ Weekend (Libur)</span>
+            <span style="font-size: 11px; color: var(--color-secondary-text);">Minggu 14.00 (Empty state)</span>
+          </button>
+        </div>
+
+        <!-- Custom Manual Time Picker -->
+        <div style="display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--color-border-subtle); padding-top: 14px;">
+          <label style="font-size: var(--font-size-xs); font-weight: 700; color: var(--color-primary-text);">Set Waktu Manual:</label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <select id="select-day" style="padding: 8px; border-radius: 10px; border: 1px solid var(--color-border-card); font-family: inherit; font-size: 13px;">
+              <option value="1">Senin</option>
+              <option value="2">Selasa</option>
+              <option value="3">Rabu</option>
+              <option value="4">Kamis</option>
+              <option value="5">Jumat</option>
+              <option value="6">Sabtu</option>
+              <option value="0">Minggu</option>
+            </select>
+            <input type="time" id="input-time" value="07:22" style="padding: 8px; border-radius: 10px; border: 1px solid var(--color-border-card); font-family: inherit; font-size: 13px;">
+          </div>
+          <button id="btn-apply-manual" class="btn-primary" style="padding: 8px 12px; font-size: 13px; margin-top: 4px;">
+            Terapkan Waktu Kustom
+          </button>
+        </div>
+
+        <!-- Speed Multiplier -->
+        <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--color-border-subtle); padding-top: 12px;">
+          <span style="font-size: var(--font-size-xs); font-weight: 600; color: var(--color-secondary-text);">Kecepatan Waktu:</span>
+          <div style="display: flex; gap: 4px;">
+            <button class="btn-secondary btn-speed active" data-speed="1" style="padding: 4px 8px; font-size: 11px;">1x</button>
+            <button class="btn-secondary btn-speed" data-speed="5" style="padding: 4px 8px; font-size: 11px;">5x</button>
+            <button class="btn-secondary btn-speed" data-speed="60" style="padding: 4px 8px; font-size: 11px;">60x</button>
+          </div>
+        </div>
+
+        <!-- Firestore Database One-Click Seeder -->
+        <div style="border-top: 1px solid var(--color-border-subtle); padding-top: 14px; display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <span style="font-size: var(--font-size-xs); font-weight: 700; color: var(--color-primary-text);">🔥 Firestore Database</span>
+            <span id="firestore-status-badge" class="soft-badge-info" style="font-size: 10px;">Siap</span>
+          </div>
+          <p style="font-size: 11px; color: var(--color-secondary-text);">Upload 11 jadwal resmi TRJT 3A langsung ke Firestore cloud:</p>
+          <button id="btn-seed-firestore" class="btn-secondary" style="padding: 8px 12px; font-size: 12px; font-weight: 600; color: var(--color-primary-blue); border-color: var(--color-primary-blue); display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <i data-lucide="cloud-upload" style="width: 14px; height: 14px;"></i> Upload Jadwal ke Firestore
+          </button>
+          <span id="seed-feedback-msg" style="font-size: 11px; font-weight: 600; display: none;"></span>
+        </div>
+
+        <!-- State Inspector -->
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <span style="font-size: var(--font-size-xs); font-weight: 700; color: var(--color-secondary-text);">STATE INSPECTOR (LIVE)</span>
+          <pre id="state-inspector" class="inspector-box">Memuat state...</pre>
+        </div>
+      </div>
+
+      <!-- Right Column: Live Sandbox Preview -->
+      <div class="dev-preview-card">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <span style="font-size: var(--font-size-sm); font-weight: 700; color: var(--color-deep-blue); display: flex; align-items: center; gap: 6px;">
+            <i data-lucide="smartphone" style="width: 16px; height: 16px;"></i>
+            Live Sandbox Preview
+          </span>
+          <span id="preview-timestamp" class="soft-badge-info" style="font-size: 11px;">--:--:--</span>
+        </div>
+
+        <!-- Simulated Header -->
+        <div style="background-color: var(--color-surface); border: 1px solid var(--color-border-card); border-radius: var(--radius-inner); padding: 14px 16px;">
+          <h2 id="header-greeting" style="font-size: 1.25rem; font-weight: 700; color: var(--color-primary-text);">Selamat pagi 👋</h2>
+          <p id="header-date" style="font-size: 13px; color: var(--color-secondary-text); margin-top: 2px;">Senin, 24 Agustus 2026</p>
+        </div>
+
+        <!-- Hero Card Sandbox -->
+        <div id="hero-card-container"></div>
+
+        <!-- Quick Stats Sandbox -->
+        <div class="quick-stats-grid">
+          <div class="quick-stat-card">
+            <div class="stat-icon-circle blue">
+              <i data-lucide="calendar" style="width: 18px; height: 18px;"></i>
+            </div>
+            <div class="stat-info-wrap">
+              <span class="stat-label-text">Hari Ini</span>
+              <span id="quick-stat-total" class="stat-value-text">0 Kelas</span>
+            </div>
+          </div>
+
+          <div class="quick-stat-card">
+            <div class="stat-icon-circle green">
+              <i data-lucide="check-circle-2" style="width: 18px; height: 18px;"></i>
+            </div>
+            <div class="stat-info-wrap">
+              <span class="stat-label-text">Selesai</span>
+              <span id="quick-stat-completed" class="stat-value-text" style="color: var(--color-primary-blue);">0 / 0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Today Timeline Sandbox -->
+        <div>
+          <h3 style="font-size: 1.125rem; font-weight: 700; color: var(--color-primary-text); margin-bottom: 12px;">Jadwal Hari Ini</h3>
+          <div id="today-timeline-container" class="timeline-list"></div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Firebase App & Services -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
+  <script src="../js/firebase-config.js"></script>
+
+  <!-- Scripts -->
+  <script src="../js/time-provider.js"></script>
+  <script src="../js/data.js"></script>
+  <script src="../js/app.js"></script>
+
+  <script>
+    (function () {
+      // One-click Firestore Seeder
+      const seedBtn = document.getElementById('btn-seed-firestore');
+      const seedMsg = document.getElementById('seed-feedback-msg');
+      const statusBadge = document.getElementById('firestore-status-badge');
+
+      if (seedBtn) {
+        seedBtn.addEventListener('click', async () => {
+          if (!window.firebase || !window.firebase.apps.length) {
+            alert('Firebase belum terhubung. Pastikan internet aktif.');
+            return;
+          }
+          const db = window.firebase.firestore();
+          seedBtn.disabled = true;
+          seedBtn.innerHTML = '<i data-lucide="loader" style="width: 14px; height: 14px; animation: spin 1s linear infinite;"></i> Mengunggah...';
+          seedMsg.style.display = 'block';
+          seedMsg.style.color = 'var(--color-primary-blue)';
+          seedMsg.innerText = 'Mengunggah 11 jadwal resmi ke Firestore...';
+
+          try {
+            const batch = db.batch();
+            const classes = window.TRJT_SCHEDULE.classes;
+            for (const item of classes) {
+              const docRef = db.collection('schedules').doc(item.id);
+              batch.set(docRef, item, { merge: true });
+            }
+            await batch.commit();
+            seedMsg.style.color = '#15803D';
+            seedMsg.innerText = '✅ 11 Jadwal TRJT 3A Berhasil Disimpan ke Firestore!';
+            statusBadge.className = 'soft-badge-success';
+            statusBadge.innerText = 'Tersinkron';
+          } catch (err) {
+            seedMsg.style.color = '#DC2626';
+            seedMsg.innerText = '❌ Gagal: ' + err.message;
+            console.error('Firestore upload error:', err);
+          } finally {
+            seedBtn.disabled = false;
+            seedBtn.innerHTML = '<i data-lucide="cloud-upload" style="width: 14px; height: 14px;"></i> Upload Jadwal ke Firestore';
+            if (window.lucide) window.lucide.createIcons();
+          }
+        });
+      }
+      // Create FakeTimeProvider for the simulation page
+      const fakeProvider = new window.FakeTimeProvider();
+      let activePreset = 'realtime';
+
+      function applyPreset(preset) {
+        activePreset = preset;
+        document.querySelectorAll('.preset-action-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.getAttribute('data-preset') === preset);
+        });
+
+        if (preset === 'realtime') {
+          fakeProvider.setTime(new window.RealJakartaTimeProvider().now());
+        } else if (preset === 'senin-h10') {
+          // Senin 07:22 (8m before 07.30)
+          fakeProvider.setTime(new Date(2026, 7, 24, 7, 22, 0));
+        } else if (preset === 'senin-ongoing') {
+          // Senin 10:45 (Ongoing)
+          fakeProvider.setTime(new Date(2026, 7, 24, 10, 45, 0));
+        } else if (preset === 'selasa-upcoming') {
+          // Selasa 07:15 (Upcoming)
+          fakeProvider.setTime(new Date(2026, 7, 25, 7, 15, 0));
+        } else if (preset === 'senin-finished') {
+          // Senin 17.00 (All finished)
+          fakeProvider.setTime(new Date(2026, 7, 24, 17, 0, 0));
+        } else if (preset === 'weekend-empty') {
+          // Minggu 14:00
+          fakeProvider.setTime(new Date(2026, 7, 23, 14, 0, 0));
+        }
+        updateLoop();
+      }
+
+      function updateLoop() {
+        if (activePreset === 'realtime') {
+          fakeProvider.setTime(new window.RealJakartaTimeProvider().now());
+        } else {
+          fakeProvider.advanceSeconds(1);
+        }
+
+        const state = window.evaluateScheduleState(fakeProvider, window.TRJT_SCHEDULE);
+        if (!state) return;
+
+        // Update timestamp badge
+        const timeBadge = document.getElementById('preview-timestamp');
+        if (timeBadge) timeBadge.innerText = state.now.toLocaleTimeString('id-ID');
+
+        // Update Inspector
+        const inspector = document.getElementById('state-inspector');
+        if (inspector) {
+          inspector.innerText = JSON.stringify({
+            simulatedTime: state.now.toISOString(),
+            dayOfWeek: state.dayIndex,
+            currentStatus: state.inProgressClass ? 'IN_PROGRESS' : (state.isH10 ? 'H10_ALERT' : (state.nextUpcomingClass ? 'UPCOMING' : 'EMPTY_STATE')),
+            inProgressCourse: state.inProgressClass ? state.inProgressClass.courseName : null,
+            nextUpcomingCourse: state.nextUpcomingClass ? state.nextUpcomingClass.courseName : null,
+            countdown: state.countdownMs ? Math.floor(state.countdownMs / 1000) + 's' : '0s',
+            completedCount: state.completedCount + ' / ' + state.totalCount
+          }, null, 2);
+        }
+      }
+
+      // Bind Preset Buttons
+      document.querySelectorAll('.preset-action-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          applyPreset(btn.getAttribute('data-preset'));
+        });
+      });
+
+      // Bind Speed Buttons
+      document.querySelectorAll('.btn-speed').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.btn-speed').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          fakeProvider.setSpeedMultiplier(parseFloat(btn.getAttribute('data-speed')));
+        });
+      });
+
+      // Bind Manual Picker
+      const applyManualBtn = document.getElementById('btn-apply-manual');
+      if (applyManualBtn) {
+        applyManualBtn.addEventListener('click', () => {
+          const day = parseInt(document.getElementById('select-day').value, 10);
+          const time = document.getElementById('input-time').value.split(':');
+          const h = parseInt(time[0], 10) || 7;
+          const m = parseInt(time[1], 10) || 0;
+
+          // Compute date for selected day (e.g. 24 Aug 2026 is Senin / Day 1)
+          const baseDate = new Date(2026, 7, 23 + (day === 0 ? 0 : day), h, m, 0);
+          fakeProvider.setTime(baseDate);
+          activePreset = 'custom';
+          document.querySelectorAll('.preset-action-btn').forEach(b => b.classList.remove('active'));
+          updateLoop();
+        });
+      }
+
+      // Start ticker
+      setInterval(updateLoop, 1000);
+      updateLoop();
+    })();
+  </script>
+</body>
+</html>

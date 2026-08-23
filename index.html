@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#FFFFFF">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="description" content="TRJT 3A Reminder - Jadwal Kuliah & Personal Class Assistant Minimalis Modern">
+
+  <title>TRJT 3A — Class Reminder</title>
+
+  <!-- PWA Manifest & App Icon -->
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/svg+xml" href="./assets/icons/favicon.svg">
+  <link rel="alternate icon" href="./favicon.svg">
+  <link rel="apple-touch-icon" href="./assets/icons/app-icon.svg">
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Design System Stylesheet -->
+  <link rel="stylesheet" href="./css/design-system.css">
+</head>
+<body>
+
+  <!-- Instant Skeleton Loading Screen -->
+  <div id="app-skeleton" class="skeleton-screen">
+    <div style="width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="skeleton-box" style="width: 130px; height: 36px;"></div>
+        <div class="skeleton-box" style="width: 44px; height: 44px; border-radius: 50%;"></div>
+      </div>
+      <div class="skeleton-box" style="width: 180px; height: 26px; margin-top: 6px;"></div>
+      <div class="skeleton-box" style="width: 100%; height: 220px; border-radius: 22px; margin-top: 10px;"></div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="skeleton-box" style="height: 72px; border-radius: 16px;"></div>
+        <div class="skeleton-box" style="height: 72px; border-radius: 16px;"></div>
+      </div>
+      <div class="skeleton-box" style="width: 140px; height: 22px; margin-top: 10px;"></div>
+      <div class="skeleton-box" style="width: 100%; height: 88px; border-radius: 18px;"></div>
+    </div>
+  </div>
+
+  <div class="app-viewport">
+    <div class="app-container">
+
+      <!-- App Header -->
+      <header class="app-header">
+        <div class="header-top">
+          <div class="brand-badge">
+            <div class="brand-logo-box">
+              <img src="./assets/icons/trjt-logo.svg" alt="TRJT Logo" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            <div class="brand-text-wrap">
+              <span class="brand-title">TRJT 3A</span>
+              <span class="brand-subtitle">Class Reminder</span>
+            </div>
+          </div>
+
+          <button id="btn-header-bell" class="btn-header-bell" onclick="document.querySelector('[data-tab=notifikasi]').click()" aria-label="Lihat Notifikasi">
+            <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+            <span id="header-unread-dot" class="bell-unread-dot" style="display: none;"></span>
+          </button>
+        </div>
+
+        <div class="header-greeting-wrap">
+          <h1 id="header-greeting" class="greeting-text">Selamat sore 👋</h1>
+          <p id="header-date" class="greeting-date">Senin, 24 Agustus 2026</p>
+        </div>
+      </header>
+
+      <!-- Main App Content -->
+      <main class="main-content">
+
+        <!-- ==========================================
+             VIEW 1: BERANDA (HOME)
+             ========================================== -->
+        <section id="view-beranda" class="view-section active">
+
+          <!-- Hero Next Class Card Container -->
+          <div id="hero-card-container">
+            <!-- Dynamically populated by evaluateScheduleState() -->
+          </div>
+
+          <!-- Quick Information (2-Column Mobile Grid) -->
+          <div class="quick-stats-grid">
+            <div class="quick-stat-card">
+              <div class="stat-icon-circle blue">
+                <i data-lucide="calendar" style="width: 18px; height: 18px;"></i>
+              </div>
+              <div class="stat-info-wrap">
+                <span class="stat-label-text">Hari Ini</span>
+                <span id="quick-stat-total" class="stat-value-text">2 Kelas</span>
+              </div>
+            </div>
+
+            <div class="quick-stat-card">
+              <div class="stat-icon-circle green">
+                <i data-lucide="check-circle-2" style="width: 18px; height: 18px;"></i>
+              </div>
+              <div class="stat-info-wrap">
+                <span class="stat-label-text">Selesai</span>
+                <span id="quick-stat-completed" class="stat-value-text" style="color: var(--color-primary-blue);">0 / 2</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Jadwal Hari Ini (Vertical Timeline) -->
+          <div>
+            <div class="section-header">
+              <h2 class="section-title">Jadwal Hari Ini</h2>
+              <span class="section-action-link" onclick="document.querySelector('[data-tab=jadwal]').click()">
+                Semua Hari <i data-lucide="chevron-right" style="width: 16px; height: 16px;"></i>
+              </span>
+            </div>
+
+            <div id="today-timeline-container" class="timeline-list" style="margin-top: 14px;">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ==========================================
+             VIEW 2: JADWAL (WEEKLY SCHEDULE)
+             ========================================== -->
+        <section id="view-jadwal" class="view-section">
+          
+          <div class="section-header">
+            <h2 class="section-title">Jadwal Mingguan</h2>
+            <span class="soft-badge-info" style="font-size: 12px;">Semester 5</span>
+          </div>
+
+          <!-- Segmented Day Control: Sen, Sel, Rab, Kam, Jum -->
+          <div class="segmented-control">
+            <button class="segmented-btn active" data-day="1">Sen</button>
+            <button class="segmented-btn" data-day="2">Sel</button>
+            <button class="segmented-btn" data-day="3">Rab</button>
+            <button class="segmented-btn" data-day="4">Kam</button>
+            <button class="segmented-btn" data-day="5">Jum</button>
+          </div>
+
+          <!-- Weekly Cards Container -->
+          <div id="weekly-cards-container" class="weekly-cards-list">
+            <!-- Dynamically populated based on selected day -->
+          </div>
+
+        </section>
+
+        <!-- ==========================================
+             VIEW 3: NOTIFIKASI (INBOX)
+             ========================================== -->
+        <section id="view-notifikasi" class="view-section">
+          
+          <div class="notif-inbox-header">
+            <div>
+              <h2 class="section-title">Notifikasi</h2>
+              <p style="font-size: var(--font-size-xs); color: var(--color-secondary-text); margin-top: 2px;">Pengingat jadwal & informasi kelas</p>
+            </div>
+            <div class="notif-actions-group">
+              <span id="notif-unread-count-badge" class="notif-badge-pill">1 Baru</span>
+              <button id="btn-mark-all-read" class="btn-ghost">Tandai Dibaca</button>
+            </div>
+          </div>
+
+          <div id="notif-list-container" class="notif-list">
+            <!-- Dynamically populated -->
+          </div>
+
+        </section>
+
+        <!-- ==========================================
+             VIEW 4: PENGATURAN (SETTINGS)
+             ========================================== -->
+        <section id="view-pengaturan" class="view-section">
+          
+          <div class="section-header">
+            <h2 class="section-title">Pengaturan</h2>
+            <span class="soft-badge-neutral" style="font-size: 11px;">v1.0.0</span>
+          </div>
+
+          <!-- Class Profile Card -->
+          <div class="settings-card" style="display: flex; align-items: center; gap: 14px; padding: 16px;">
+            <div class="brand-logo-box" style="width: 48px; height: 48px; border-radius: 14px; padding: 4px;">
+              <img src="./assets/icons/trjt-logo.svg" alt="TRJT Logo">
+            </div>
+            <div>
+              <h3 style="font-size: var(--font-size-base); font-weight: 700; color: var(--color-deep-blue);">TRJT 3A — Semester 5</h3>
+              <p style="font-size: var(--font-size-xs); color: var(--color-secondary-text); margin-top: 2px; font-weight: 500;">Teknologi Rekayasa Jaringan Telekomunikasi</p>
+              <p style="font-size: 11px; color: var(--color-muted-text); margin-top: 2px;">Jurusan Teknik Elektro · Politeknik Negeri Lhokseumawe</p>
+            </div>
+          </div>
+
+          <!-- Section 1: PEMBERITAHUAN -->
+          <div class="settings-section-block">
+            <h3 class="settings-heading">PEMBERITAHUAN</h3>
+            <div class="settings-card">
+              
+              <div class="settings-row">
+                <div class="settings-icon-box">
+                  <i data-lucide="bell-ring" style="width: 20px; height: 20px;"></i>
+                </div>
+                <div class="settings-text-wrap">
+                  <span class="settings-item-title">Pengingat H-10 Menit</span>
+                  <span class="settings-item-desc">Notifikasi otomatis 10 menit sebelum kuliah</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="switch-h10" checked aria-label="Toggle Pengingat H-10">
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="settings-row">
+                <div class="settings-icon-box">
+                  <i data-lucide="volume-2" style="width: 20px; height: 20px;"></i>
+                </div>
+                <div class="settings-text-wrap">
+                  <span class="settings-item-title">Suara & Getar</span>
+                  <span class="settings-item-desc">Aktifkan efek audio peringatan</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="switch-sound" checked aria-label="Toggle Suara & Getar">
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="settings-row">
+                <div class="settings-icon-box">
+                  <i data-lucide="sparkles" style="width: 20px; height: 20px;"></i>
+                </div>
+                <div class="settings-text-wrap">
+                  <span class="settings-item-title">Uji Notifikasi</span>
+                  <span class="settings-item-desc">Kirim contoh notifikasi langsung</span>
+                </div>
+                <button id="btn-test-notification" class="btn-primary" style="padding: 6px 14px; font-size: 13px;">
+                  Tes
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Section 2: SISTEM -->
+          <div class="settings-section-block">
+            <h3 class="settings-heading">SISTEM</h3>
+            <div class="settings-card">
+              
+              <div class="settings-row">
+                <div class="settings-icon-box">
+                  <i data-lucide="smartphone" style="width: 20px; height: 20px;"></i>
+                </div>
+                <div class="settings-text-wrap">
+                  <span class="settings-item-title">Android Wrapper</span>
+                  <span class="settings-item-desc">Safe-area & WebView viewport optimized</span>
+                </div>
+                <span class="soft-badge-success">Siap APK</span>
+              </div>
+
+              <div class="settings-row">
+                <div class="settings-icon-box">
+                  <i data-lucide="cloud-lightning" style="width: 20px; height: 20px;"></i>
+                </div>
+                <div class="settings-text-wrap">
+                  <span class="settings-item-title">Firebase Cloud Messaging</span>
+                  <span class="settings-item-desc">Sinkronisasi push jadwal otomatis</span>
+                </div>
+                <span class="soft-badge-info">Tersedia</span>
+              </div>
+
+              <div class="settings-row">
+                <div class="settings-icon-box">
+                  <i data-lucide="wifi" style="width: 20px; height: 20px;"></i>
+                </div>
+                <div class="settings-text-wrap">
+                  <span class="settings-item-title">PWA Mode Offline</span>
+                  <span class="settings-item-desc">Service worker aktif untuk cache lokal</span>
+                </div>
+                <span class="soft-badge-info">Aktif</span>
+              </div>
+
+            </div>
+          </div>
+
+        </section>
+
+      </main>
+
+      <!-- Bottom Navigation (Fixed, 4 items, safe-area aware) -->
+      <nav class="bottom-nav">
+        <button class="nav-item active" data-tab="beranda" aria-label="Beranda">
+          <div class="nav-icon-wrap">
+            <i data-lucide="home" style="width: 20px; height: 20px;"></i>
+          </div>
+          <span class="nav-label">Beranda</span>
+        </button>
+
+        <button class="nav-item" data-tab="jadwal" aria-label="Jadwal">
+          <div class="nav-icon-wrap">
+            <i data-lucide="calendar-days" style="width: 20px; height: 20px;"></i>
+          </div>
+          <span class="nav-label">Jadwal</span>
+        </button>
+
+        <button class="nav-item" data-tab="notifikasi" aria-label="Notifikasi">
+          <div class="nav-icon-wrap">
+            <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+            <span id="nav-notif-dot" class="nav-badge-dot"></span>
+          </div>
+          <span class="nav-label">Notifikasi</span>
+        </button>
+
+        <button class="nav-item" data-tab="pengaturan" aria-label="Pengaturan">
+          <div class="nav-icon-wrap">
+            <i data-lucide="settings" style="width: 20px; height: 20px;"></i>
+          </div>
+          <span class="nav-label">Pengaturan</span>
+        </button>
+      </nav>
+
+    </div>
+  </div>
+
+  <!-- Firebase App & Services (v10 compat SDK) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
+  <script src="./js/firebase-config.js"></script>
+
+  <!-- Application Scripts -->
+  <script src="./js/time-provider.js"></script>
+  <script src="./js/data.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>

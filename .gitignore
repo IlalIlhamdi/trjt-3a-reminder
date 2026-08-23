@@ -1,0 +1,28 @@
+# Dependencies & System
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+
+# Sensitive Firebase Keys (Never commit private keys)
+firebase/serviceAccountKey.json
+serviceAccountKey.json
+*-adminsdk-*.json
+
+# Android Build & Local Config
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+android/*.iml
+android/app/*.iml
+android/.cxx/
+android/captures/
+android/.navigation/
+android/default.properties
+
+# Vercel & Output
+.vercel/
+dist/
+build/

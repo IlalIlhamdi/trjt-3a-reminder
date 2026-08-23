@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">
+  <defs>
+    <!-- Smooth drop shadows and gradients if needed -->
+  </defs>
+
+  <!-- Canvas Background (White for crisp standalone rendering) -->
+  <rect width="500" height="500" rx="96" fill="#FFFFFF" />
+
+  <!-- Outer Teal Arc Swoosh -->
+  <path d="M 24 76 C 36 180, 78 304, 172 388 C 242 450, 318 438, 332 308 C 322 380, 260 416, 192 380 C 114 336, 68 220, 48 108 Z" fill="#008080" />
+
+  <!-- Inner Orange Arc Swoosh -->
+  <path d="M 98 148 C 110 240, 150 350, 240 422 C 304 472, 362 432, 350 366 C 338 418, 288 444, 230 404 C 158 354, 126 254, 116 174 Z" fill="#FF7700" />
+
+  <!-- Staggered Typography -->
+  <!-- Line 1: Teknologi -->
+  <text x="24" y="82" font-family="'Arial', 'Inter', system-ui, sans-serif" font-weight="900" font-size="46" fill="#E11D48">T</text>
+  <text x="56" y="82" font-family="'Arial', 'Inter', system-ui, sans-serif" font-weight="700" font-size="44" fill="#0F172A">eknologi</text>
+
+  <!-- Line 2: Rekayasa -->
+  <text x="80" y="156" font-family="'Arial', 'Inter', system-ui, sans-serif" font-weight="900" font-size="46" fill="#E11D48">R</text>
+  <text x="116" y="156" font-family="'Arial', 'Inter', system-ui, sans-serif" font-weight="700" font-size="44" fill="#0F172A">ekayasa</text>
+
+  <!-- Line 3: Jaringan -->
+  <text x="138" y="228" font-family="'Arial', 'Inter', system-ui, sans-serif" font-weight="900" font-size="46" fill="#E11D48">J</text>
+  <text x="168" y="228" font-family="'Arial', 'Inter', system-ui, sans-serif" font-weight="700" font-size="44" fill="#0F172A">aringan</text>
+
+  <!-- Line 4: Telekomunikasi -->
+  <text x="208" y="300" font-family="'Arial', 'Inter', system-ui, sans-serif" font-weight="900" font-size="46" fill="#E11D48">T</text>
+  <text x="240" y="300" font-family="'Arial', 'Inter', system-ui, sans-serif" font-weight="700" font-size="44" fill="#0F172A">elekomunikasi</text>
+</svg>
