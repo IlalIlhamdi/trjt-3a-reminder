@@ -203,7 +203,7 @@ const TRJT_SCHEDULE = {
       dayOfWeek: 5,
       courseName: 'Metodologi Penelitian',
       lecturerCode: 'NEL',
-      lecturerName: lecturerMap.NEL, // null
+      lecturerName: 'Dr. Nelly Safitri, SST., M.Eng.Sc.',
       roomCode: 'R18',
       roomName: roomMap.R18,
       startTime: '10:20',

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'trjt3a-reminder-v2.6';
+const CACHE_NAME = 'trjt3a-reminder-v3.0';
 const ASSETS = [
   './',
   './index.html',
