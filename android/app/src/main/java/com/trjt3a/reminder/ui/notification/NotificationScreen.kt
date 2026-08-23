@@ -58,7 +58,7 @@ fun NotificationScreen(
     Scaffold(
         topBar = {
             Surface(
-                color = SurfaceWhite,
+                color = MaterialTheme.colorScheme.surface,
                 shadowElevation = 2.dp
             ) {
                 TopAppBar(
@@ -69,13 +69,13 @@ fun NotificationScreen(
                                 style = MaterialTheme.typography.titleLarge.copy(
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 20.sp,
-                                    color = TextPrimary
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                             )
                             Text(
                                 text = "Pengingat jadwal & informasi kelas",
                                 fontSize = 12.sp,
-                                color = TextSecondary
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     },
@@ -107,12 +107,12 @@ fun NotificationScreen(
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = SurfaceWhite
+                        containerColor = MaterialTheme.colorScheme.surface
                     )
                 )
             }
         },
-        containerColor = LightBackground
+        containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         if (uiState.notifications.isNotEmpty()) {
             LazyColumn(

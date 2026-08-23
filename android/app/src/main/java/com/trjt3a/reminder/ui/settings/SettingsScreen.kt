@@ -42,6 +42,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -73,7 +74,7 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             Surface(
-                color = SurfaceWhite,
+                color = MaterialTheme.colorScheme.surface,
                 shadowElevation = 2.dp
             ) {
                 TopAppBar(
@@ -88,7 +89,7 @@ fun SettingsScreen(
                                 style = MaterialTheme.typography.titleLarge.copy(
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 20.sp,
-                                    color = TextPrimary
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                             )
                             Box(
@@ -108,12 +109,12 @@ fun SettingsScreen(
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = SurfaceWhite
+                        containerColor = MaterialTheme.colorScheme.surface
                     )
                 )
             }
         },
-        containerColor = LightBackground
+        containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -356,8 +357,8 @@ private fun SettingInfoRow(
     title: String,
     subtitle: String,
     badgeText: String,
-    badgeBg: androidx.compose.ui.graphics.Color,
-    badgeTextCol: androidx.compose.ui.graphics.Color
+    badgeBg: Color,
+    badgeTextCol: Color
 ) {
     Row(
         modifier = Modifier

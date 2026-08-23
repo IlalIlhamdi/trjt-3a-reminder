@@ -57,7 +57,7 @@ fun ScheduleScreen(
     Scaffold(
         topBar = {
             Surface(
-                color = SurfaceWhite,
+                color = MaterialTheme.colorScheme.surface,
                 shadowElevation = 2.dp
             ) {
                 TopAppBar(
@@ -72,7 +72,7 @@ fun ScheduleScreen(
                                 style = MaterialTheme.typography.titleLarge.copy(
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 20.sp,
-                                    color = TextPrimary
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                             )
 
@@ -93,12 +93,12 @@ fun ScheduleScreen(
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = SurfaceWhite
+                        containerColor = MaterialTheme.colorScheme.surface
                     )
                 )
             }
         },
-        containerColor = LightBackground
+        containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         Column(
             modifier = Modifier

@@ -33,5 +33,6 @@ class SettingsViewModel : ViewModel() {
 
     fun toggleDarkMode(enabled: Boolean) {
         _uiState.update { it.copy(isDarkMode = enabled) }
+        com.trjt3a.reminder.ui.theme.ThemeManager.setDarkMode(enabled)
     }
 }

@@ -54,7 +54,7 @@ fun HomeScreen(
                 onNotificationClick = onNavigateToNotification
             )
         },
-        containerColor = LightBackground
+        containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         Column(
             modifier = Modifier

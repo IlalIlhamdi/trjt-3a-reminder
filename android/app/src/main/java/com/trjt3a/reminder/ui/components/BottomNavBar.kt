@@ -82,8 +82,8 @@ fun BottomNavBar(
     NavigationBar(
         modifier = Modifier
             .shadow(12.dp)
-            .border(width = 1.dp, color = BorderColor),
-        containerColor = SurfaceWhite,
+            .border(width = 1.dp, color = MaterialTheme.colorScheme.outlineVariant),
+        containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp
     ) {
         items.forEach { item ->
