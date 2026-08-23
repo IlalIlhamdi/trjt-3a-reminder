@@ -5,7 +5,6 @@
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:navigationBarColor">@color/surface_white</item>
         <item name="android:windowLightNavigationBar">true</item>
-        <!-- Disable splash icon on Android 12+ -->
         <item name="android:windowSplashScreenAnimatedIcon">@android:color/transparent</item>
         <item name="android:windowSplashScreenBackground">@color/surface_white</item>
         <item name="android:windowSplashScreenAnimationDuration">0</item>
