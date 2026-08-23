@@ -603,9 +603,13 @@
     setInterval(tick, 1000);
 
     setTimeout(() => {
-      const skeleton = document.getElementById('app-skeleton');
-      if (skeleton) skeleton.classList.add('hidden');
-    }, 180);
+      const splash = document.getElementById('app-splash');
+      if (splash) {
+        splash.style.opacity = '0';
+        splash.style.visibility = 'hidden';
+        setTimeout(() => splash.remove(), 450);
+      }
+    }, 600);
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js').catch((err) => {

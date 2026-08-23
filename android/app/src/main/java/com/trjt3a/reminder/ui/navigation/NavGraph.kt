@@ -1,6 +1,7 @@
 package com.trjt3a.reminder.ui.navigation
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -15,7 +16,7 @@ import com.trjt3a.reminder.ui.home.HomeScreen
 import com.trjt3a.reminder.ui.notification.NotificationScreen
 import com.trjt3a.reminder.ui.schedule.ScheduleScreen
 import com.trjt3a.reminder.ui.settings.SettingsScreen
-import com.trjt3a.reminder.ui.theme.LightBackground
+import com.trjt3a.reminder.ui.splash.SplashScreen
 
 @Composable
 fun MainAppNavGraph(
@@ -26,28 +27,45 @@ fun MainAppNavGraph(
 
     Scaffold(
         bottomBar = {
-            BottomNavBar(
-                currentRoute = currentRoute,
-                onNavigate = { route ->
-                    if (route != currentRoute) {
-                        navController.navigate(route) {
-                            popUpTo(Screen.Home.route) {
-                                saveState = true
+            // Hide bottom bar on Splash screen
+            if (currentRoute != Screen.Splash.route) {
+                BottomNavBar(
+                    currentRoute = currentRoute,
+                    onNavigate = { route ->
+                        if (route != currentRoute) {
+                            navController.navigate(route) {
+                                popUpTo(Screen.Home.route) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
                             }
-                            launchSingleTop = true
-                            restoreState = true
                         }
                     }
-                }
-            )
+                )
+            }
         },
-        containerColor = LightBackground
+        containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Home.route,
+            startDestination = Screen.Splash.route,
             modifier = Modifier.padding(innerPadding)
         ) {
+            // 1. Initial Animated Splash / Loading Page
+            composable(Screen.Splash.route) {
+                SplashScreen(
+                    onSplashFinished = {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Splash.route) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                )
+            }
+
+            // 2. Main App Screens
             composable(Screen.Home.route) {
                 HomeScreen(
                     onNavigateToSchedule = {
