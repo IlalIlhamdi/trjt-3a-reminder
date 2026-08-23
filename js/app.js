@@ -419,8 +419,9 @@
 
     const unreadCount = state.notifications.filter((n) => !n.read).length;
     if (badgeEl) {
-      badgeEl.innerText = unreadCount > 0 ? `${unreadCount} Baru` : 'Semua terbaca';
-      badgeEl.style.display = unreadCount > 0 ? 'inline-block' : 'none';
+      badgeEl.innerText = unreadCount > 0 ? `${unreadCount} Baru` : 'Semua Terbaca';
+      badgeEl.style.display = 'inline-block';
+      badgeEl.className = unreadCount > 0 ? 'soft-badge-info' : 'soft-badge-neutral';
     }
     if (headerDot) {
       headerDot.style.display = unreadCount > 0 ? 'block' : 'none';
@@ -431,10 +432,12 @@
 
     if (state.notifications.length === 0) {
       container.innerHTML = `
-        <div class="empty-state-card" style="padding: 36px 20px;">
-          <i data-lucide="bell-off" style="width: 32px; height: 32px; color: var(--color-muted-text);"></i>
-          <p style="font-weight: 700; font-size: var(--font-size-base); color: var(--color-primary-text);">Belum ada notifikasi</p>
-          <p style="font-size: var(--font-size-body); color: var(--color-secondary-text);">Pemberitahuan H-10 dan info jadwal akan tampil di sini.</p>
+        <div class="empty-state-card" style="padding: 44px 20px;">
+          <div class="empty-icon-circle">
+            <i data-lucide="bell-off" style="width: 28px; height: 28px; color: var(--color-muted-text);"></i>
+          </div>
+          <p style="font-weight: 700; font-size: var(--font-size-base); color: var(--color-primary-text); margin-top: 12px;">Belum Ada Notifikasi</p>
+          <p style="font-size: var(--font-size-body); color: var(--color-secondary-text); margin-top: 4px;">Pemberitahuan pengingat H-10 dan info jadwal kelas TRJT 3A akan tampil di sini.</p>
         </div>
       `;
       return;
@@ -442,22 +445,40 @@
 
     container.innerHTML = state.notifications
       .map((item, index) => {
+        const isH10 = item.type === 'h10';
+        const isCancel = item.type === 'cancel';
+        const typeClass = isH10 ? 'type-h10' : (isCancel ? 'type-cancel' : 'type-info');
+        const iconName = isH10 ? 'bell' : (isCancel ? 'alert-triangle' : 'map-pin');
+        const tagLabel = isH10 ? '🔔 Pengingat H-10' : (isCancel ? '⚠️ Dibatalkan' : '📍 Info Ruang');
+
         return `
           <div class="notif-card ${item.read ? 'read' : 'unread'}" data-index="${index}">
-            <div class="notif-circle-icon">
-              <i data-lucide="${item.type === 'h10' ? 'bell' : 'info'}" style="width: 20px; height: 20px;"></i>
+            <div class="notif-circle-icon ${typeClass}">
+              <i data-lucide="${iconName}" style="width: 20px; height: 20px;"></i>
             </div>
             <div class="notif-body">
               <div class="notif-top-row">
-                <span class="notif-type-title">
-                  ${!item.read ? '<span class="unread-indicator-dot"></span>' : ''}
-                  ${item.title}
+                <span class="notif-badge-tag ${typeClass}">
+                  ${tagLabel}
                 </span>
-                <span class="notif-time-text">${item.time}</span>
+                <span class="notif-time-text">
+                  ${!item.read ? '<span class="unread-indicator-dot"></span>' : ''}
+                  ${item.time}
+                </span>
               </div>
               <h3 class="notif-course-title">${item.subject}</h3>
-              ${item.lecturer ? `<div style="font-size: var(--font-size-xs); color: var(--color-secondary-text);">${item.lecturer}</div>` : ''}
-              <div class="notif-meta-text">${item.meta}</div>
+              ${item.lecturer ? `
+                <div class="notif-lecturer-row">
+                  <i data-lucide="user-round" style="width: 13px; height: 13px; color: var(--color-primary-blue);"></i>
+                  <span>${item.lecturer}</span>
+                </div>` : ''
+              }
+              <div class="notif-footer-row">
+                <span class="notif-meta-pill">
+                  <i data-lucide="clock" style="width: 12px; height: 12px; color: var(--color-primary-blue);"></i>
+                  ${item.meta}
+                </span>
+              </div>
             </div>
           </div>
         `;
@@ -520,6 +541,11 @@
         view.classList.remove('active');
       }
     });
+
+    const greetingWrap = document.querySelector('.header-greeting-wrap');
+    if (greetingWrap) {
+      greetingWrap.style.display = (tabId === 'beranda') ? 'flex' : 'none';
+    }
 
     if (tabId === 'jadwal') {
       renderWeeklySchedule();

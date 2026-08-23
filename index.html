@@ -140,15 +140,17 @@
              ========================================== -->
         <section id="view-notifikasi" class="view-section">
           
-          <div class="notif-inbox-header">
+          <div class="section-header" style="align-items: flex-start; justify-content: space-between; gap: 12px;">
             <div>
-              <h2 class="section-title">Notifikasi</h2>
-              <p style="font-size: var(--font-size-xs); color: var(--color-secondary-text); margin-top: 2px;">Pengingat jadwal & informasi kelas</p>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <h2 class="section-title">Notifikasi</h2>
+                <span id="notif-unread-count-badge" class="soft-badge-info" style="font-size: 11px;">2 Baru</span>
+              </div>
+              <p style="font-size: var(--font-size-xs); color: var(--color-secondary-text); margin-top: 3px;">Pengingat jadwal & informasi perkuliahan TRJT 3A</p>
             </div>
-            <div class="notif-actions-group">
-              <span id="notif-unread-count-badge" class="notif-badge-pill">1 Baru</span>
-              <button id="btn-mark-all-read" class="btn-ghost">Tandai Dibaca</button>
-            </div>
+            <button id="btn-mark-all-read" class="btn-ghost" style="padding: 6px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0;">
+              <i data-lucide="check-check" style="width: 14px; height: 14px;"></i> Tandai Dibaca
+            </button>
           </div>
 
           <div id="notif-list-container" class="notif-list">
