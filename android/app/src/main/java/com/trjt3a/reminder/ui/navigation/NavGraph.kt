@@ -16,6 +16,7 @@ import com.trjt3a.reminder.ui.home.HomeScreen
 import com.trjt3a.reminder.ui.notification.NotificationScreen
 import com.trjt3a.reminder.ui.schedule.ScheduleScreen
 import com.trjt3a.reminder.ui.settings.SettingsScreen
+import com.trjt3a.reminder.ui.splash.SplashScreen
 
 @Composable
 fun MainAppNavGraph(
@@ -26,28 +27,44 @@ fun MainAppNavGraph(
 
     Scaffold(
         bottomBar = {
-            BottomNavBar(
-                currentRoute = currentRoute,
-                onNavigate = { route ->
-                    if (route != currentRoute) {
-                        navController.navigate(route) {
-                            popUpTo(Screen.Home.route) {
-                                saveState = true
+            if (currentRoute != Screen.Splash.route) {
+                BottomNavBar(
+                    currentRoute = currentRoute,
+                    onNavigate = { route ->
+                        if (route != currentRoute) {
+                            navController.navigate(route) {
+                                popUpTo(Screen.Home.route) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
                             }
-                            launchSingleTop = true
-                            restoreState = true
                         }
                     }
-                }
-            )
+                )
+            }
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Home.route,
+            startDestination = Screen.Splash.route,
             modifier = Modifier.padding(innerPadding)
         ) {
+            // 1. Splash Screen
+            composable(Screen.Splash.route) {
+                SplashScreen(
+                    onSplashFinished = {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Splash.route) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                )
+            }
+
+            // 2. Main App Screens
             composable(Screen.Home.route) {
                 HomeScreen(
                     onNavigateToSchedule = {
