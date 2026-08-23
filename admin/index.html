@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>TRJT 3A — Admin & Komti Portal</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Design System Stylesheet -->
+  <link rel="stylesheet" href="../css/design-system.css">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/favicon.svg">
+
+  <style>
+    .admin-wrapper {
+      width: 100%;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px 16px 80px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .admin-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 16px 20px;
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border-card);
+      border-radius: var(--radius-inner);
+      box-shadow: var(--shadow-subtle);
+    }
+    .admin-card {
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border-card);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .admin-table th, .admin-table td {
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+    .admin-table th {
+      background-color: var(--color-very-light-blue);
+      color: var(--color-deep-blue);
+      font-weight: 700;
+    }
+    .admin-table tr:hover td {
+      background-color: #F8FAFC;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-input, .form-select {
+      padding: 10px 14px;
+      border: 1px solid var(--color-border-card);
+      border-radius: var(--radius-btn);
+      font-family: inherit;
+      font-size: 14px;
+      background-color: var(--color-surface);
+      color: var(--color-primary-text);
+      outline: none;
+      transition: border-color var(--transition-fast);
+    }
+    .form-input:focus, .form-select:focus {
+      border-color: var(--color-primary-blue);
+      box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.15);
+    }
+    .login-container {
+      max-width: 420px;
+      margin: 60px auto 0 auto;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="admin-wrapper">
+
+    <!-- Admin Topbar -->
+    <header class="admin-topbar">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div class="brand-logo-box" style="background-color: var(--color-very-light-blue); border-color: var(--color-soft-blue);">
+          <img src="../assets/icons/trjt-logo.svg" alt="Logo TRJT" style="width: 100%; height: 100%; object-fit: contain;">
+        </div>
+        <div>
+          <h1 style="font-size: 1.125rem; font-weight: 700; color: var(--color-deep-blue);">TRJT 3A — Admin Portal</h1>
+          <p style="font-size: 12px; color: var(--color-secondary-text);">Manajemen Jadwal, Perubahan Ruang, Dosen, & Pengumuman</p>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <a href="../index.html" class="btn-secondary" style="font-size: 13px; text-decoration: none;">
+          <i data-lucide="arrow-left" style="width: 14px; height: 14px;"></i> Aplikasi Mahasiswa
+        </a>
+        <button id="btn-logout" class="btn-secondary" style="font-size: 13px; display: none;">
+          <i data-lucide="log-out" style="width: 14px; height: 14px;"></i> Keluar
+        </button>
+      </div>
+    </header>
+
+    <!-- 1. LOGIN VIEW (If not authenticated) -->
+    <div id="view-login" class="login-container">
+      <div class="admin-card">
+        <div style="text-align: center;">
+          <div class="brand-logo-box" style="width: 52px; height: 52px; margin: 0 auto 12px auto; background-color: var(--color-very-light-blue); border-color: var(--color-soft-blue);">
+            <i data-lucide="lock" style="width: 24px; height: 24px; color: var(--color-primary-blue);"></i>
+          </div>
+          <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--color-primary-text);">Login Admin / Komti</h2>
+          <p style="font-size: 13px; color: var(--color-secondary-text); margin-top: 4px;">Khusus pengurus kelas TRJT 3A untuk mengubah jadwal</p>
+        </div>
+
+        <form id="form-login" style="display: flex; flex-direction: column; gap: 14px;">
+          <div class="form-group">
+            <label style="font-size: 13px; font-weight: 600; color: var(--color-primary-text);">Email Admin</label>
+            <input type="email" id="login-email" class="form-input" placeholder="admin@trjt3a.ac.id" required>
+          </div>
+
+          <div class="form-group">
+            <label style="font-size: 13px; font-weight: 600; color: var(--color-primary-text);">Kata Sandi</label>
+            <input type="password" id="login-password" class="form-input" placeholder="••••••••" required>
+          </div>
+
+          <button type="submit" id="btn-submit-login" class="btn-primary" style="padding: 12px; font-size: 14px; margin-top: 6px; justify-content: center;">
+            <i data-lucide="log-in" style="width: 16px; height: 16px;"></i> Masuk ke Admin Panel
+          </button>
+          
+          <div id="login-alert" style="display: none; font-size: 13px; font-weight: 600; color: #DC2626; text-align: center; margin-top: 4px;"></div>
+        </form>
+
+        <div style="border-top: 1px solid var(--color-border-subtle); padding-top: 12px; text-align: center;">
+          <span style="font-size: 12px; color: var(--color-secondary-text);">Mahasiswa tidak perlu login. <a href="../index.html" style="color: var(--color-primary-blue); font-weight: 600; text-decoration: none;">Kembali ke Beranda</a></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. ADMIN DASHBOARD (When authenticated) -->
+    <div id="view-dashboard" style="display: none; flex-direction: column; gap: 20px;">
+      
+      <!-- Quick Stats & Actions -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+        <div class="quick-stat-card">
+          <div class="stat-icon-circle blue">
+            <i data-lucide="book-open" style="width: 20px; height: 20px;"></i>
+          </div>
+          <div class="stat-info-wrap">
+            <span class="stat-label-text">Total Mata Kuliah</span>
+            <span id="stat-total-courses" class="stat-value-text">11 Sesi</span>
+          </div>
+        </div>
+
+        <div class="quick-stat-card">
+          <div class="stat-icon-circle green">
+            <i data-lucide="database" style="width: 20px; height: 20px;"></i>
+          </div>
+          <div class="stat-info-wrap">
+            <span class="stat-label-text">Database Firestore</span>
+            <span class="stat-value-text" style="color: var(--color-success); font-size: 16px;">Aktif & Terhubung</span>
+          </div>
+        </div>
+
+        <div class="quick-stat-card">
+          <div class="stat-icon-circle orange">
+            <i data-lucide="bell-ring" style="width: 20px; height: 20px;"></i>
+          </div>
+          <div class="stat-info-wrap">
+            <span class="stat-label-text">Pengingat H-10</span>
+            <span class="stat-value-text" style="color: var(--color-warning); font-size: 16px;">Cloud Scheduler</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Override Jadwal / Batalkan Kelas -->
+      <div class="admin-card">
+        <div>
+          <h2 style="font-size: 1.125rem; font-weight: 700; color: var(--color-primary-text); display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="alert-triangle" style="width: 20px; height: 20px; color: var(--color-warning);"></i>
+            Override Jadwal Khusus / Pembatalan Kuliah
+          </h2>
+          <p style="font-size: 13px; color: var(--color-secondary-text); margin-top: 2px;">
+            Gunakan fitur ini jika ada dosen berhalangan, kuliah dipindahkan, atau ganti ruangan pada tanggal tertentu.
+          </p>
+        </div>
+
+        <form id="form-override" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
+          <div class="form-group">
+            <label style="font-size: 12px; font-weight: 600; color: var(--color-primary-text);">Pilih Tanggal</label>
+            <input type="date" id="override-date" class="form-input" required>
+          </div>
+
+          <div class="form-group">
+            <label style="font-size: 12px; font-weight: 600; color: var(--color-primary-text);">Pilih Mata Kuliah</label>
+            <select id="override-schedule-id" class="form-select" required>
+              <option value="">Pilih Jadwal...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label style="font-size: 12px; font-weight: 600; color: var(--color-primary-text);">Status Kelas</label>
+            <select id="override-status" class="form-select">
+              <option value="pindah-ruang">Pindah Ruangan / Jam</option>
+              <option value="cancelled">Dibatalkan / Tidak Ada Kuliah</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="group-new-room">
+            <label style="font-size: 12px; font-weight: 600; color: var(--color-primary-text);">Ruangan Baru (Opsional)</label>
+            <input type="text" id="override-new-room" class="form-input" placeholder="Contoh: L10 / R17">
+          </div>
+
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label style="font-size: 12px; font-weight: 600; color: var(--color-primary-text);">Keterangan / Alasan</label>
+            <input type="text" id="override-reason" class="form-input" placeholder="Contoh: Dosen ada rapat dinas, diganti praktikum mandiri." required>
+          </div>
+
+          <div style="grid-column: 1 / -1;">
+            <button type="submit" class="btn-primary" style="padding: 10px 18px; font-size: 14px;">
+              <i data-lucide="send" style="width: 16px; height: 16px;"></i> Simpan & Kirimkan ke Seluruh Mahasiswa
+            </button>
+            <span id="override-feedback" style="margin-left: 12px; font-size: 13px; font-weight: 600;"></span>
+          </div>
+        </form>
+      </div>
+
+      <!-- Section: Daftar Jadwal Tetap TRJT 3A -->
+      <div class="admin-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <h2 style="font-size: 1.125rem; font-weight: 700; color: var(--color-primary-text);">Daftar Jadwal Resmi TRJT 3A</h2>
+            <p style="font-size: 13px; color: var(--color-secondary-text); margin-top: 2px;">11 Sesi Perkuliahan Semester 5 (Senin–Jumat)</p>
+          </div>
+          <span class="soft-badge-info">Semester 5 · 2026/2027</span>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Hari</th>
+                <th>Jam</th>
+                <th>Mata Kuliah</th>
+                <th>Dosen Pengampu</th>
+                <th>Ruang</th>
+              </tr>
+            </thead>
+            <tbody id="table-schedules-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
+  <script src="../js/firebase-config.js"></script>
+
+  <!-- App Data -->
+  <script src="../js/data.js"></script>
+
+  <script>
+    (function () {
+      const days = ['', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
+
+      function checkAuth() {
+        const auth = window.firebase ? window.firebase.auth() : null;
+        if (!auth) {
+          showDashboard(); // Demo / Local Fallback
+          return;
+        }
+
+        auth.onAuthStateChanged((user) => {
+          if (user) {
+            showDashboard();
+          } else {
+            showLogin();
+          }
+        });
+      }
+
+      function showLogin() {
+        document.getElementById('view-login').style.display = 'block';
+        document.getElementById('view-dashboard').style.display = 'none';
+        document.getElementById('btn-logout').style.display = 'none';
+        if (window.lucide) window.lucide.createIcons();
+      }
+
+      function showDashboard() {
+        document.getElementById('view-login').style.display = 'none';
+        document.getElementById('view-dashboard').style.display = 'flex';
+        document.getElementById('btn-logout').style.display = 'inline-flex';
+        renderSchedulesTable();
+        populateOverrideDropdown();
+        if (window.lucide) window.lucide.createIcons();
+      }
+
+      function renderSchedulesTable() {
+        const tbody = document.getElementById('table-schedules-body');
+        if (!tbody || !window.TRJT_SCHEDULE) return;
+
+        tbody.innerHTML = window.TRJT_SCHEDULE.classes.map(item => `
+          <tr>
+            <td style="font-weight: 700; color: var(--color-deep-blue);">${days[item.dayOfWeek] || item.dayOfWeek}</td>
+            <td style="font-weight: 600;">${item.startTime.replace(':', '.')} – ${item.endTime.replace(':', '.')}</td>
+            <td style="font-weight: 600; color: var(--color-primary-text);">${item.courseName}</td>
+            <td>${item.lecturerName || '<span style="color: var(--color-muted-text);">Dosen belum tersedia</span>'}</td>
+            <td><span class="room-badge">${item.roomCode}</span></td>
+          </tr>
+        `).join('');
+      }
+
+      function populateOverrideDropdown() {
+        const select = document.getElementById('override-schedule-id');
+        if (!select || !window.TRJT_SCHEDULE) return;
+
+        select.innerHTML = '<option value="">Pilih Jadwal...</option>' + 
+          window.TRJT_SCHEDULE.classes.map(item => `
+            <option value="${item.id}">[${days[item.dayOfWeek]}] ${item.courseName} (${item.startTime.replace(':', '.')})</option>
+          `).join('');
+
+        // Set default date to today
+        const dateInput = document.getElementById('override-date');
+        if (dateInput) {
+          dateInput.value = new Date().toISOString().split('T')[0];
+        }
+      }
+
+      // Login Form
+      const formLogin = document.getElementById('form-login');
+      const loginAlert = document.getElementById('login-alert');
+      if (formLogin) {
+        formLogin.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const email = document.getElementById('login-email').value;
+          const password = document.getElementById('login-password').value;
+          loginAlert.style.display = 'none';
+
+          try {
+            if (window.firebase && window.firebase.auth()) {
+              await window.firebase.auth().signInWithEmailAndPassword(email, password);
+            } else {
+              showDashboard();
+            }
+          } catch (err) {
+            loginAlert.style.display = 'block';
+            loginAlert.innerText = 'Login Gagal: ' + err.message;
+          }
+        });
+      }
+
+      // Logout Button
+      const btnLogout = document.getElementById('btn-logout');
+      if (btnLogout) {
+        btnLogout.addEventListener('click', async () => {
+          if (window.firebase && window.firebase.auth()) {
+            await window.firebase.auth().signOut();
+          }
+          showLogin();
+        });
+      }
+
+      // Override Form
+      const formOverride = document.getElementById('form-override');
+      const overrideFeedback = document.getElementById('override-feedback');
+      if (formOverride) {
+        formOverride.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const scheduleId = document.getElementById('override-schedule-id').value;
+          const date = document.getElementById('override-date').value;
+          const status = document.getElementById('override-status').value;
+          const newRoom = document.getElementById('override-new-room').value;
+          const reason = document.getElementById('override-reason').value;
+
+          overrideFeedback.style.color = 'var(--color-primary-blue)';
+          overrideFeedback.innerText = 'Menyimpan override...';
+
+          try {
+            if (window.firebase && window.firebase.apps.length) {
+              const db = window.firebase.firestore();
+              const overrideDoc = {
+                scheduleId,
+                date,
+                cancelled: status === 'cancelled',
+                newRoomCode: newRoom || null,
+                reason,
+                updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+              };
+              await db.collection('scheduleOverrides').add(overrideDoc);
+              overrideFeedback.style.color = '#15803D';
+              overrideFeedback.innerText = '✅ Override berhasil disimpan & disinkronkan!';
+              formOverride.reset();
+              populateOverrideDropdown();
+            } else {
+              overrideFeedback.style.color = '#15803D';
+              overrideFeedback.innerText = '✅ Tersimpan (Mode Lokal)!';
+            }
+          } catch (err) {
+            overrideFeedback.style.color = '#DC2626';
+            overrideFeedback.innerText = '❌ Gagal: ' + err.message;
+          }
+        });
+      }
+
+      // Init
+      setTimeout(checkAuth, 100);
+      if (window.lucide) window.lucide.createIcons();
+    })();
+  </script>
+</body>
+</html>

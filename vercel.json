@@ -3,6 +3,10 @@
   "cleanUrls": true,
   "routes": [
     {
+      "src": "/admin",
+      "dest": "/admin/index.html"
+    },
+    {
       "src": "/dev/simulation",
       "dest": "/dev/simulation.html"
     },
