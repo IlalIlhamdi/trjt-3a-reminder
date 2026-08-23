@@ -60,8 +60,17 @@
     return `${pad(hours)} : ${pad(minutes)} : ${pad(seconds)}`;
   }
 
-  function getLecturerDisplay(lecturerName) {
-    return lecturerName ? lecturerName : 'Dosen belum tersedia';
+  function getLecturerDisplay(lecturerName, lecturerCode, courseName) {
+    if (lecturerName && lecturerName.trim() !== '' && lecturerName !== 'null') {
+      return lecturerName;
+    }
+    if (lecturerCode === 'NEL' || (courseName && courseName.toLowerCase().includes('metodologi'))) {
+      return 'Dr. Nelly Safitri, SST., M.Eng.Sc.';
+    }
+    if (lecturerCode && window.lecturerMap && window.lecturerMap[lecturerCode]) {
+      return window.lecturerMap[lecturerCode];
+    }
+    return 'Dosen belum tersedia';
   }
 
   function getRoomDisplay(roomCode, roomName) {
@@ -236,7 +245,7 @@
             <h2 class="hero-subject-name">${item.courseName}</h2>
             <div class="hero-lecturer-name">
               <i data-lucide="user-round" style="width: 16px; height: 16px;"></i>
-              ${getLecturerDisplay(item.lecturerName)}
+              ${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}
             </div>
           </div>
 
@@ -344,7 +353,7 @@
               <div class="timeline-subject">${item.courseName}</div>
               <div class="timeline-lecturer">
                 <i data-lucide="user-round" style="width: 14px; height: 14px;"></i>
-                ${getLecturerDisplay(item.lecturerName)}
+                ${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}
               </div>
               <div class="timeline-footer">
                 <span class="room-badge">
@@ -398,7 +407,7 @@
             
             <div class="schedule-lecturer-name">
               <i data-lucide="user-round" style="width: 14px; height: 14px;"></i>
-              ${getLecturerDisplay(item.lecturerName)}
+              ${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}
             </div>
 
             <div class="schedule-card-bottom">

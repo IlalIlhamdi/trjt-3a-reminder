@@ -58,7 +58,11 @@
         if (snapshot && !snapshot.empty) {
           const remoteClasses = [];
           snapshot.forEach((doc) => {
-            remoteClasses.push({ id: doc.id, ...doc.data() });
+            const data = doc.data();
+            if (data.lecturerCode === 'NEL' || doc.id.includes('metodologi-penelitian')) {
+              data.lecturerName = 'Dr. Nelly Safitri, SST., M.Eng.Sc.';
+            }
+            remoteClasses.push({ id: doc.id, ...data });
           });
           if (window.TRJT_SCHEDULE) {
             window.TRJT_SCHEDULE.classes = remoteClasses;
