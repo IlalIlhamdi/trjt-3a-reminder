@@ -177,7 +177,7 @@ const officialSchedules = [
     dayOfWeek: 5,
     courseName: "Metodologi Penelitian",
     lecturerCode: "NEL",
-    lecturerName: null, // Dosen belum tersedia
+    lecturerName: "Dr. Nelly Safitri, SST., M.Eng.Sc.",
     roomCode: "R18",
     roomName: "Gedung III Teknik Elektro Lt. 2",
     startTime: "10:20",

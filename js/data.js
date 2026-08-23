@@ -17,14 +17,13 @@ const roomMap = {
   R18: 'Gedung III Teknik Elektro Lt. 2'
 };
 
-// Centralized Official Lecturer Mapping
 const lecturerMap = {
   ISD: 'Ipan Suandi, S.T., M.T.',
   MSY: 'Muhammad Syahroni, S.T., M.T.',
   RCM: 'Rachmawati, S.T., M.Eng.',
   ANF: 'Anita Fauziah, S.ST., M.T.',
   YS: 'Yassir, S.T., M.Eng.Sc.',
-  NEL: null // Belum terverifikasi dari legenda roster -> Tampilkan "Dosen belum tersedia"
+  NEL: 'Dr. Nelly Safitri, SST., M.Eng.Sc.'
 };
 
 const TRJT_SCHEDULE = {

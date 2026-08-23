@@ -24,7 +24,7 @@ object ScheduleSeedData {
         "RCM" to "Rachmawati, S.T., M.Eng.",
         "ANF" to "Anita Fauziah, S.ST., M.T.",
         "YS" to "Yassir, S.T., M.Eng.Sc.",
-        "NEL" to null // Dosen belum tersedia
+        "NEL" to "Dr. Nelly Safitri, SST., M.Eng.Sc."
     )
 
     val days = listOf(
