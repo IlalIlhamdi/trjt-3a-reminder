@@ -1102,9 +1102,9 @@
               </td>
               <td>
                 <div style="display: flex; align-items: center; gap: 6px;">
-                  <a href="${m.webViewLink || '#'}" target="_blank" rel="noopener noreferrer" class="btn-secondary" style="font-size: 11px; padding: 4px 8px;" title="Buka di Drive">
+                  <button type="button" class="btn-secondary" style="font-size: 11px; padding: 4px 8px;" onclick="window.TRJT_MATERIALS.openOrDownloadMaterial('${m.id}')" title="Buka / Unduh File">
                     <i data-lucide="external-link" style="width: 12px; height: 12px;"></i> Buka
-                  </a>
+                  </button>
                   <button class="btn-secondary" style="font-size: 11px; padding: 4px 8px; color: #DC2626; border-color: #FECACA;" onclick="window.adminDeleteMaterial('${m.id}')" title="Hapus File">
                     <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
                   </button>

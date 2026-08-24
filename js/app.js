@@ -1122,9 +1122,9 @@
             </div>
             ${m.description ? `<div class="material-note">${m.description}</div>` : ''}
             <div class="material-actions-row">
-              <a href="${m.webViewLink || '#'}" target="_blank" rel="noopener noreferrer" class="btn-mat-action btn-mat-open">
-                <i data-lucide="external-link" style="width: 12px; height: 12px;"></i> Buka di Drive
-              </a>
+              <button type="button" class="btn-mat-action btn-mat-open" onclick="window.TRJT_MATERIALS.openOrDownloadMaterial('${m.id}')">
+                <i data-lucide="external-link" style="width: 12px; height: 12px;"></i> Buka File
+              </button>
               <button class="btn-mat-action btn-mat-delete" onclick="window.confirmDeleteMaterial('${m.id}')" title="Hapus materi">
                 <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
               </button>

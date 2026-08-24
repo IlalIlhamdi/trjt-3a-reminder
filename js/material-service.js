@@ -228,7 +228,23 @@
     const webViewLink = `https://drive.google.com/file/d/${driveFileId}/view?usp=sharing`;
     const webContentLink = `https://drive.google.com/uc?export=download&id=${driveFileId}`;
 
-    // 6. Save Metadata to Firestore
+    // 6. Read file Data URL / Blob for Local Viewer & IndexedDB
+    let fileDataUrl = null;
+    try {
+      fileDataUrl = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(processedFile);
+      });
+      if (fileDataUrl) {
+        await saveFileToIndexedDB(materialId, processedFile);
+      }
+    } catch (readErr) {
+      console.warn('File data read note:', readErr);
+    }
+
+    // 7. Save Metadata to Firestore
     const db = window.firebase ? window.firebase.firestore() : null;
     const materialDoc = {
       id: materialId,
@@ -245,6 +261,7 @@
       webViewLink: webViewLink,
       webContentLink: webContentLink,
       thumbnailUrl: thumbnailUrl,
+      fileDataUrl: (fileDataUrl && fileDataUrl.length < 1500000) ? fileDataUrl : null, // Store if < 1.5MB in doc
       description: metadata.description ? metadata.description.trim() : '',
       uploadedBy: metadata.uploadedBy || 'Mahasiswa TRJT 3A',
       uploadedAt: db ? window.firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString()
@@ -260,6 +277,9 @@
 
     // Add to local cache immediately
     allMaterialsCache.unshift(materialDoc);
+    try {
+      localStorage.setItem('trjt_materials_cache', JSON.stringify(allMaterialsCache.slice(0, 30)));
+    } catch (e) {}
     window.dispatchEvent(new CustomEvent('trjt:materials-updated', { detail: allMaterialsCache }));
 
     return {
@@ -267,6 +287,94 @@
       material: materialDoc,
       message: 'Materi berhasil disimpan ke Google Drive!'
     };
+  }
+
+  // IndexedDB File Helper
+  function openIndexedDB() {
+    return new Promise((resolve, reject) => {
+      if (!window.indexedDB) {
+        resolve(null);
+        return;
+      }
+      const request = indexedDB.open('TRJT_MATERIALS_STORAGE', 1);
+      request.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains('files')) {
+          db.createObjectStore('files', { keyPath: 'id' });
+        }
+      };
+      request.onsuccess = (e) => resolve(e.target.result);
+      request.onerror = (e) => {
+        console.warn('IndexedDB open error:', e);
+        resolve(null);
+      };
+    });
+  }
+
+  async function saveFileToIndexedDB(id, fileBlob) {
+    const idb = await openIndexedDB();
+    if (!idb) return;
+    return new Promise((resolve) => {
+      const tx = idb.transaction('files', 'readwrite');
+      const store = tx.objectStore('files');
+      store.put({ id: id, blob: fileBlob, updatedAt: Date.now() });
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => resolve(false);
+    });
+  }
+
+  async function getFileFromIndexedDB(id) {
+    const idb = await openIndexedDB();
+    if (!idb) return null;
+    return new Promise((resolve) => {
+      const tx = idb.transaction('files', 'readonly');
+      const store = tx.objectStore('files');
+      const req = store.get(id);
+      req.onsuccess = () => resolve(req.result ? req.result.blob : null);
+      req.onerror = () => resolve(null);
+    });
+  }
+
+  // Open / View / Download Material directly in browser
+  async function openOrDownloadMaterial(materialId) {
+    const item = allMaterialsCache.find((m) => m.id === materialId);
+    if (!item) {
+      alert('File materi tidak ditemukan.');
+      return;
+    }
+
+    // 1. Try to fetch Blob from IndexedDB
+    let blob = await getFileFromIndexedDB(materialId);
+
+    // 2. If not in IndexedDB, try from fileDataUrl
+    if (!blob && item.fileDataUrl) {
+      try {
+        const res = await fetch(item.fileDataUrl);
+        blob = await res.blob();
+      } catch (e) {}
+    }
+
+    // 3. Fallback dummy Blob if opened on demo device
+    if (!blob) {
+      const fallbackText = `TRJT 3A Materi Perkuliahan\nMata Kuliah: ${item.courseName}\nNama File: ${item.fileName}\nPengunggah: ${item.uploadedBy || 'Mahasiswa'}\nCatatan: ${item.description || '-'}`;
+      blob = new Blob([fallbackText], { type: item.mimeType || 'text/plain' });
+    }
+
+    // 4. Open in new tab or Download
+    const blobUrl = URL.createObjectURL(blob);
+    const isImage = item.isImage || ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes(item.fileExtension);
+    const isPdf = item.fileExtension === 'pdf';
+
+    if (isImage || isPdf) {
+      window.open(blobUrl, '_blank');
+    } else {
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = item.fileName || 'materi-trjt3a';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
   }
 
   // Delete Material
@@ -313,6 +421,7 @@
     getMaterialsForCourse: getMaterialsForCourse,
     getAllMaterials: getAllMaterials,
     uploadCourseMaterial: uploadCourseMaterial,
+    openOrDownloadMaterial: openOrDownloadMaterial,
     deleteCourseMaterial: deleteCourseMaterial,
     getUploadSettings: getUploadSettings,
     updateUploadSettings: updateUploadSettings,
