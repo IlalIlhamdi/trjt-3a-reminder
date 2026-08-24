@@ -1,6 +1,6 @@
 /**
  * TRJT 3A Reminder — Firebase Cloud Functions
- * Server-Side H-10 Cron Scheduler Engine
+ * Server-Side H-10 Cron Scheduler Engine & Notification Dispatcher
  */
 
 const functions = require('firebase-functions');
@@ -69,7 +69,7 @@ exports.checkH10ClassReminder = functions.pubsub
         // Calculate time difference
         const minutesUntilClass = classStartMinutes - currentTotalMinutes;
 
-        // Check if exactly 10 minutes before class (or in window 9..10)
+        // Check if in 9..10 minutes window before class
         if (minutesUntilClass === 10 || minutesUntilClass === 9) {
           const deduplicationKey = `${doc.id}_${todayDateStr}_reminder10`;
 
@@ -88,45 +88,93 @@ exports.checkH10ClassReminder = functions.pubsub
             .where('date', '==', todayDateStr)
             .get();
 
+          let roomCode = schedule.roomCode;
           if (!overrideDoc.empty) {
             const overrideData = overrideDoc.docs[0].data();
             if (overrideData.cancelled) {
               console.log(`[H-10 Scheduler] Class cancelled: ${schedule.courseName}`);
               continue;
             }
+            if (overrideData.newRoomCode) {
+              roomCode = overrideData.newRoomCode;
+            }
           }
 
-          // Send FCM Message to topic 'trjt-3a'
-          const lecturer = schedule.lecturerName || 'Dosen pengampu';
-          const payload = {
-            notification: {
-              title: '🔔 Kelas 10 Menit Lagi',
-              body: `${schedule.courseName} · ${schedule.startTime.replace(':', '.')} · ${schedule.roomCode}`
-            },
-            data: {
-              type: 'REMINDER_H10',
-              scheduleId: doc.id,
-              courseName: schedule.courseName,
-              lecturer: lecturer,
-              room: schedule.roomCode,
-              startTime: schedule.startTime,
-              target: 'schedule_detail'
-            },
-            topic: 'trjt-3a'
-          };
+          const lecturer = schedule.lecturerName || 'Dosen Pengampu';
+          const notificationTitle = '🔔 Kelas 10 Menit Lagi';
+          const notificationBody = `${schedule.courseName} · ${schedule.startTime.replace(':', '.')} · ${roomCode}`;
 
-          await admin.messaging().send(payload);
+          // 1. Query registered devices that have reminderEnabled == true
+          const devicesSnapshot = await db.collection('devices')
+            .where('classId', '==', 'trjt-3a')
+            .where('active', '==', true)
+            .where('reminderEnabled', '==', true)
+            .get();
 
-          // Record deduplication log
+          const targetTokens = [];
+          devicesSnapshot.forEach((deviceDoc) => {
+            const data = deviceDoc.data();
+            if (data.token && !data.token.startsWith('web-local-') && !data.token.startsWith('web-dev-')) {
+              targetTokens.push(data.token);
+            }
+          });
+
+          // 2. Multicast FCM to all active tokens with reminderEnabled == true
+          if (targetTokens.length > 0) {
+            const multicastPayload = {
+              notification: {
+                title: notificationTitle,
+                body: notificationBody
+              },
+              data: {
+                type: 'REMINDER_H10',
+                scheduleId: doc.id,
+                courseName: schedule.courseName,
+                lecturer: lecturer,
+                room: roomCode,
+                startTime: schedule.startTime,
+                target: 'schedule_detail'
+              },
+              tokens: targetTokens
+            };
+
+            const sendResult = await admin.messaging().sendEachForMulticast(multicastPayload);
+            console.log(`[H-10 Scheduler] Multicast dispatched: ${sendResult.successCount} success, ${sendResult.failureCount} failed.`);
+          }
+
+          // 3. Also send to topic 'trjt-3a' as fallback for subscribed clients
+          try {
+            await admin.messaging().send({
+              notification: {
+                title: notificationTitle,
+                body: notificationBody
+              },
+              data: {
+                type: 'REMINDER_H10',
+                scheduleId: doc.id,
+                courseName: schedule.courseName,
+                lecturer: lecturer,
+                room: roomCode,
+                startTime: schedule.startTime,
+                target: 'schedule_detail'
+              },
+              topic: 'trjt-3a'
+            });
+          } catch (topicErr) {
+            console.warn('[H-10 Scheduler] Topic send note:', topicErr.message);
+          }
+
+          // 4. Record deduplication log
           await logRef.set({
             scheduleId: doc.id,
             courseName: schedule.courseName,
             sentAt: admin.firestore.FieldValue.serverTimestamp(),
             targetDate: todayDateStr,
+            recipientCount: targetTokens.length,
             success: true
           });
 
-          console.log(`✅ [H-10 Scheduler] Successfully pushed H-10 reminder for ${schedule.courseName}`);
+          console.log(`✅ [H-10 Scheduler] Successfully processed H-10 reminder for ${schedule.courseName}`);
         }
       }
     } catch (error) {
@@ -135,3 +183,30 @@ exports.checkH10ClassReminder = functions.pubsub
 
     return null;
   });
+
+// 2. Direct Test Notification Endpoint for Devices
+exports.sendTestNotificationToDevice = functions.https.onCall(async (data, context) => {
+  const token = data.token;
+  if (!token) {
+    throw new functions.https.HttpsError('invalid-argument', 'Device token is required.');
+  }
+
+  const payload = {
+    notification: {
+      title: '🔔 Uji Notifikasi Berhasil',
+      body: 'TRJT 3A Reminder siap mengingatkan jadwal kuliahmu.'
+    },
+    data: {
+      type: 'TEST_NOTIFICATION',
+      time: new Date().toISOString()
+    },
+    token: token
+  };
+
+  try {
+    const response = await admin.messaging().send(payload);
+    return { success: true, messageId: response };
+  } catch (error) {
+    throw new functions.https.HttpsError('internal', error.message);
+  }
+});

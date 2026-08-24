@@ -1,4 +1,4 @@
-const CACHE_NAME = 'trjt3a-reminder-v3.1';
+const CACHE_NAME = 'trjt3a-reminder-v3.2';
 const ASSETS = [
   './',
   './index.html',
@@ -64,34 +64,41 @@ self.addEventListener('fetch', (event) => {
 });
 
 self.addEventListener('push', (event) => {
-  let data = { title: 'TRJT 3A Reminder', body: 'Jadwal kuliah akan segera dimulai!' };
+  let title = 'TRJT 3A Reminder';
+  let body = 'Jadwal kuliah akan segera dimulai!';
+  let dataPayload = { url: './index.html' };
+
   if (event.data) {
     try {
-      data = event.data.json();
+      const data = event.data.json();
+      title = data.notification?.title || data.data?.title || data.title || title;
+      body = data.notification?.body || data.data?.body || data.body || body;
+      dataPayload = data.data || dataPayload;
     } catch (e) {
-      data.body = event.data.text();
+      body = event.data.text();
     }
   }
 
   const options = {
-    body: data.body,
+    body: body,
     icon: './assets/icons/app-icon.svg',
     badge: './assets/icons/app-icon.svg',
     vibrate: [200, 100, 200],
-    data: {
-      url: './index.html'
-    }
+    tag: dataPayload.type || 'trjt-reminder',
+    renotify: true,
+    requireInteraction: true,
+    data: dataPayload
   };
 
   event.waitUntil(
-    self.registration.showNotification(data.title, options)
+    self.registration.showNotification(title, options)
   );
 });
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   event.waitUntil(
-    clients.matchAll({ type: 'window' }).then((clientList) => {
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       for (const client of clientList) {
         if (client.url.includes('index.html') && 'focus' in client) {
           return client.focus();

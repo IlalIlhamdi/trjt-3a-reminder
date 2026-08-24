@@ -186,6 +186,18 @@
             <h3 class="settings-heading">PEMBERITAHUAN</h3>
             <div class="settings-card">
               
+              <!-- Status Notifikasi Jujur -->
+              <div class="settings-row" id="row-notif-status">
+                <div class="settings-icon-box">
+                  <i data-lucide="shield-check" style="width: 20px; height: 20px;"></i>
+                </div>
+                <div class="settings-text-wrap">
+                  <span class="settings-item-title">Status Notifikasi</span>
+                  <span id="desc-notif-status" class="settings-item-desc">Memeriksa kesiapan push notification...</span>
+                </div>
+                <span id="badge-notif-status" class="soft-badge-neutral">Memeriksa</span>
+              </div>
+
               <div class="settings-row">
                 <div class="settings-icon-box">
                   <i data-lucide="bell-ring" style="width: 20px; height: 20px;"></i>
@@ -195,7 +207,7 @@
                   <span class="settings-item-desc">Notifikasi otomatis 10 menit sebelum kuliah</span>
                 </div>
                 <label class="switch">
-                  <input type="checkbox" id="switch-h10" checked aria-label="Toggle Pengingat H-10">
+                  <input type="checkbox" id="switch-h10" aria-label="Toggle Pengingat H-10">
                   <span class="slider"></span>
                 </label>
               </div>
@@ -206,7 +218,7 @@
                 </div>
                 <div class="settings-text-wrap">
                   <span class="settings-item-title">Suara & Getar</span>
-                  <span class="settings-item-desc">Aktifkan efek audio peringatan</span>
+                  <span class="settings-item-desc">Chime audio web & getaran (didukung browser & Android)</span>
                 </div>
                 <label class="switch">
                   <input type="checkbox" id="switch-sound" checked aria-label="Toggle Suara & Getar">
@@ -220,20 +232,26 @@
                 </div>
                 <div class="settings-text-wrap">
                   <span class="settings-item-title">Uji Notifikasi</span>
-                  <span class="settings-item-desc">Kirim contoh notifikasi langsung</span>
+                  <span class="settings-item-desc">Kirim contoh notifikasi langsung ke perangkat ini</span>
                 </div>
                 <button id="btn-test-notification" class="btn-primary" style="padding: 6px 14px; font-size: 13px;">
-                  Tes
+                  <i data-lucide="send" style="width: 14px; height: 14px;"></i> Tes
                 </button>
               </div>
 
             </div>
           </div>
 
-          <!-- Section 2: SISTEM -->
+          <!-- Section 2: DIAGNOSTIK & SISTEM -->
           <div class="settings-section-block">
-            <h3 class="settings-heading">SISTEM</h3>
-            <div class="settings-card">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <h3 class="settings-heading" style="margin-bottom: 0;">SISTEM & DIAGNOSTIK</h3>
+              <button id="btn-toggle-diagnostics" class="btn-ghost" style="font-size: 12px; padding: 4px 8px; color: var(--color-primary-blue); font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                <i data-lucide="info" style="width: 13px; height: 13px;"></i> Diagnostik
+              </button>
+            </div>
+            
+            <div class="settings-card" style="margin-top: 10px;">
               
               <div class="settings-row">
                 <div class="settings-icon-box">
@@ -254,7 +272,7 @@
                   <span class="settings-item-title">Firebase Cloud Messaging</span>
                   <span class="settings-item-desc">Sinkronisasi push jadwal otomatis</span>
                 </div>
-                <span class="soft-badge-info">Tersedia</span>
+                <span id="badge-fcm-status" class="soft-badge-neutral">Memeriksa</span>
               </div>
 
               <div class="settings-row">
@@ -262,14 +280,41 @@
                   <i data-lucide="wifi" style="width: 20px; height: 20px;"></i>
                 </div>
                 <div class="settings-text-wrap">
-                  <span class="settings-item-title">PWA Mode Offline</span>
-                  <span class="settings-item-desc">Service worker aktif untuk cache lokal</span>
+                  <span class="settings-item-title">PWA Service Worker</span>
+                  <span class="settings-item-desc">Cache lokal offline & background messaging</span>
                 </div>
-                <span class="soft-badge-info">Aktif</span>
+                <span id="badge-sw-status" class="soft-badge-neutral">Memeriksa</span>
+              </div>
+
+              <!-- Collapsible Diagnostics Detail -->
+              <div id="panel-diagnostics" style="display: none; padding-top: 12px; border-top: 1px dashed var(--color-border-card); flex-direction: column; gap: 8px;">
+                <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                  <span style="color: var(--color-secondary-text);">Permission:</span>
+                  <span id="diag-permission" style="font-weight: 600;">-</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                  <span style="color: var(--color-secondary-text);">Service Worker:</span>
+                  <span id="diag-sw" style="font-weight: 600;">-</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                  <span style="color: var(--color-secondary-text);">FCM Token:</span>
+                  <span id="diag-token" style="font-weight: 600; font-family: monospace; font-size: 11px;">-</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                  <span style="color: var(--color-secondary-text);">Platform:</span>
+                  <span id="diag-platform" style="font-weight: 600;">-</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                  <span style="color: var(--color-secondary-text);">Notifikasi Terakhir:</span>
+                  <span id="diag-last-notif" style="font-weight: 600;">-</span>
+                </div>
               </div>
 
             </div>
           </div>
+
+          <!-- Toast Container for Real-time Feedback -->
+          <div id="toast-container" class="toast-container"></div>
 
         </section>
 

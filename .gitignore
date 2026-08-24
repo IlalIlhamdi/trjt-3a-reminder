@@ -26,3 +26,12 @@ android/default.properties
 .vercel/
 dist/
 build/
+
+# Environment Variables & Google OAuth Secrets
+.env
+.env.local
+.env.*.local
+credentials.json
+token.json
+client_secret*.json
+google-credentials.json

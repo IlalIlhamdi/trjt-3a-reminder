@@ -193,6 +193,55 @@
         </div>
       </div>
 
+      <!-- Section: Notification Diagnostics -->
+      <div class="admin-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <h2 style="font-size: 1.125rem; font-weight: 700; color: var(--color-primary-text); display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="activity" style="width: 20px; height: 20px; color: var(--color-primary-blue);"></i>
+              Notification Diagnostics
+            </h2>
+            <p style="font-size: 13px; color: var(--color-secondary-text); margin-top: 2px;">
+              Status push notification & integritas Firebase Cloud Messaging (FCM) pada perangkat ini
+            </p>
+          </div>
+          <button id="btn-admin-test-notif" class="btn-primary" style="font-size: 13px; padding: 6px 14px;">
+            <i data-lucide="send" style="width: 14px; height: 14px;"></i> Uji Notifikasi Admin
+          </button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; background-color: var(--color-panel-bg); padding: 16px; border-radius: var(--radius-inner); border: 1px solid var(--color-border-subtle);">
+          <div>
+            <span style="font-size: 11px; font-weight: 600; color: var(--color-secondary-text); text-transform: uppercase;">Permission</span>
+            <div id="admin-diag-permission" style="font-size: 14px; font-weight: 700; color: var(--color-primary-text); margin-top: 2px;">Memeriksa...</div>
+          </div>
+          <div>
+            <span style="font-size: 11px; font-weight: 600; color: var(--color-secondary-text); text-transform: uppercase;">Service Worker</span>
+            <div id="admin-diag-sw" style="font-size: 14px; font-weight: 700; color: var(--color-primary-text); margin-top: 2px;">Memeriksa...</div>
+          </div>
+          <div>
+            <span style="font-size: 11px; font-weight: 600; color: var(--color-secondary-text); text-transform: uppercase;">FCM Token</span>
+            <div id="admin-diag-token" style="font-size: 13px; font-weight: 700; font-family: monospace; color: var(--color-deep-blue); margin-top: 2px;">-</div>
+          </div>
+          <div>
+            <span style="font-size: 11px; font-weight: 600; color: var(--color-secondary-text); text-transform: uppercase;">Token Registered</span>
+            <div id="admin-diag-registered" style="font-size: 14px; font-weight: 700; color: #15803D; margin-top: 2px;">Terdaftar</div>
+          </div>
+          <div>
+            <span style="font-size: 11px; font-weight: 600; color: var(--color-secondary-text); text-transform: uppercase;">Reminder Enabled</span>
+            <div id="admin-diag-reminder" style="font-size: 14px; font-weight: 700; color: var(--color-primary-text); margin-top: 2px;">Aktif</div>
+          </div>
+          <div>
+            <span style="font-size: 11px; font-weight: 600; color: var(--color-secondary-text); text-transform: uppercase;">Platform</span>
+            <div id="admin-diag-platform" style="font-size: 14px; font-weight: 700; color: var(--color-primary-text); margin-top: 2px;">-</div>
+          </div>
+          <div style="grid-column: 1 / -1;">
+            <span style="font-size: 11px; font-weight: 600; color: var(--color-secondary-text); text-transform: uppercase;">Last Notification</span>
+            <div id="admin-diag-last" style="font-size: 13px; font-weight: 600; color: var(--color-secondary-text); margin-top: 2px;">Belum Ada</div>
+          </div>
+        </div>
+      </div>
+
       <!-- Section: Override Jadwal / Batalkan Kelas -->
       <div class="admin-card">
         <div>
@@ -320,7 +369,87 @@
         document.getElementById('btn-logout').style.display = 'inline-flex';
         renderSchedulesTable();
         populateOverrideDropdown();
+        renderAdminDiagnostics();
         if (window.lucide) window.lucide.createIcons();
+      }
+
+      function renderAdminDiagnostics() {
+        if (!window.TRJT_FIREBASE) return;
+        const status = window.TRJT_FIREBASE.getNotificationStatus();
+
+        const elPerm = document.getElementById('admin-diag-permission');
+        const elSw = document.getElementById('admin-diag-sw');
+        const elToken = document.getElementById('admin-diag-token');
+        const elReg = document.getElementById('admin-diag-registered');
+        const elReminder = document.getElementById('admin-diag-reminder');
+        const elPlatform = document.getElementById('admin-diag-platform');
+        const elLast = document.getElementById('admin-diag-last');
+
+        if (elPerm) {
+          const p = status.permission;
+          elPerm.innerText = p === 'granted' ? 'Granted (Disetujui)' : (p === 'denied' ? 'Denied (Diblokir)' : 'Default (Belum Diminta)');
+          elPerm.style.color = p === 'granted' ? '#15803D' : (p === 'denied' ? '#DC2626' : '#64748B');
+        }
+        if (elSw) {
+          elSw.innerText = ('serviceWorker' in navigator) ? 'Active Scope Ready' : 'Tidak Didukung';
+          elSw.style.color = ('serviceWorker' in navigator) ? '#15803D' : '#DC2626';
+        }
+        if (elToken) {
+          elToken.innerText = status.tokenMasked || 'Belum Terdaftar';
+        }
+        if (elReg) {
+          elReg.innerText = status.tokenFull ? 'Terdaftar di Firestore' : 'Belum Ada Token';
+          elReg.style.color = status.tokenFull ? '#15803D' : '#D97706';
+        }
+        if (elReminder) {
+          elReminder.innerText = status.reminderEnabled ? 'Aktif (ON)' : 'Nonaktif (OFF)';
+          elReminder.style.color = status.reminderEnabled ? '#15803D' : '#64748B';
+        }
+        if (elPlatform) {
+          elPlatform.innerText = status.platform || 'Web';
+        }
+        if (elLast) {
+          if (status.lastNotification) {
+            const d = new Date(status.lastNotification);
+            elLast.innerText = d.toLocaleTimeString('id-ID') + ' — ' + d.toLocaleDateString('id-ID');
+          } else {
+            elLast.innerText = 'Belum Ada Pengiriman';
+          }
+        }
+      }
+
+      // Test Notification on Admin
+      const btnAdminTest = document.getElementById('btn-admin-test-notif');
+      if (btnAdminTest) {
+        btnAdminTest.addEventListener('click', async () => {
+          btnAdminTest.disabled = true;
+          const origText = btnAdminTest.innerHTML;
+          btnAdminTest.innerHTML = 'Mengirim…';
+
+          try {
+            if (window.TRJT_FIREBASE) {
+              await window.TRJT_FIREBASE.sendTestNotification();
+              alert('✅ Uji Notifikasi Berhasil terkirim ke browser ini.');
+            } else {
+              if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('🔔 Uji Notifikasi Admin', {
+                  body: 'TRJT 3A Reminder siap mengingatkan jadwal kuliahmu.',
+                  icon: '../assets/icons/app-icon.svg'
+                });
+                alert('✅ Notifikasi terkirim (Mode Standar).');
+              } else {
+                alert('⚠️ Izin notifikasi belum aktif pada peramban.');
+              }
+            }
+          } catch (e) {
+            alert('❌ Gagal: ' + e.message);
+          } finally {
+            btnAdminTest.disabled = false;
+            btnAdminTest.innerHTML = origText;
+            renderAdminDiagnostics();
+            if (window.lucide) window.lucide.createIcons();
+          }
+        });
       }
 
       function renderSchedulesTable() {

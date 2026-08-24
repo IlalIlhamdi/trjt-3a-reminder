@@ -18,9 +18,9 @@
     selectedWeeklyDayId: 1, // Default Senin (1)
     notifications: [...(window.TRJT_SCHEDULE?.initialNotifications || [])],
     settings: {
-      h10Alert: true,
-      soundEnabled: true,
-      vibrationEnabled: true
+      h10Alert: localStorage.getItem('trjt_h10_enabled') === 'true',
+      soundEnabled: localStorage.getItem('trjt_sound_enabled') !== 'false',
+      vibrationEnabled: localStorage.getItem('trjt_vibration_enabled') !== 'false'
     }
   };
 
@@ -532,6 +532,124 @@
     if (window.lucide) window.lucide.createIcons();
   }
 
+  // --- Toast Notification Feedback Utility ---
+  function showToast(message, type = 'info') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast-item ${type}`;
+
+    let iconHtml = '<i data-lucide="info" style="width: 18px; height: 18px; flex-shrink: 0;"></i>';
+    if (type === 'success') {
+      iconHtml = '<i data-lucide="check-circle" style="width: 18px; height: 18px; flex-shrink: 0; color: #4ADE80;"></i>';
+    } else if (type === 'error') {
+      iconHtml = '<i data-lucide="alert-circle" style="width: 18px; height: 18px; flex-shrink: 0; color: #F87171;"></i>';
+    }
+
+    toast.innerHTML = `${iconHtml}<span>${message}</span>`;
+    container.appendChild(toast);
+
+    if (window.lucide) window.lucide.createIcons();
+
+    setTimeout(() => {
+      toast.style.transition = 'opacity 300ms ease, transform 300ms ease';
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(12px)';
+      setTimeout(() => toast.remove(), 320);
+    }, 4000);
+  }
+
+  // --- Dynamic Honest Settings & Diagnostics Renderer ---
+  function renderSettingsUI() {
+    if (!window.TRJT_FIREBASE) return;
+    const notifStatus = window.TRJT_FIREBASE.getNotificationStatus();
+
+    // 1. Honest Notification Status Badge & Text
+    const badgeEl = document.getElementById('badge-notif-status');
+    const descEl = document.getElementById('desc-notif-status');
+    if (badgeEl) {
+      badgeEl.className = notifStatus.badgeClass || 'soft-badge-neutral';
+      badgeEl.innerText = notifStatus.status;
+    }
+    if (descEl) {
+      descEl.innerText = notifStatus.desc;
+    }
+
+    // 2. Switches synchronization
+    const switchH10 = document.getElementById('switch-h10');
+    if (switchH10) {
+      switchH10.checked = notifStatus.reminderEnabled && notifStatus.code === 'active';
+      if (notifStatus.code === 'blocked') {
+        switchH10.checked = false;
+        switchH10.disabled = true;
+      } else {
+        switchH10.disabled = false;
+      }
+    }
+
+    const switchSound = document.getElementById('switch-sound');
+    if (switchSound) {
+      switchSound.checked = localStorage.getItem('trjt_sound_enabled') !== 'false';
+    }
+
+    // 3. System Status Badges
+    const fcmBadge = document.getElementById('badge-fcm-status');
+    if (fcmBadge) {
+      if (notifStatus.code === 'active') {
+        fcmBadge.className = 'soft-badge-success';
+        fcmBadge.innerText = 'Aktif & Siap';
+      } else if (notifStatus.code === 'blocked') {
+        fcmBadge.className = 'soft-badge-danger';
+        fcmBadge.innerText = 'Izin Ditolak';
+      } else {
+        fcmBadge.className = 'soft-badge-neutral';
+        fcmBadge.innerText = 'Siap Digunakan';
+      }
+    }
+
+    const swBadge = document.getElementById('badge-sw-status');
+    if (swBadge) {
+      if ('serviceWorker' in navigator) {
+        swBadge.className = 'soft-badge-success';
+        swBadge.innerText = 'Aktif';
+      } else {
+        swBadge.className = 'soft-badge-neutral';
+        swBadge.innerText = 'Tidak Didukung';
+      }
+    }
+
+    // 4. Diagnostics Table
+    const diagPerm = document.getElementById('diag-permission');
+    const diagSw = document.getElementById('diag-sw');
+    const diagToken = document.getElementById('diag-token');
+    const diagPlatform = document.getElementById('diag-platform');
+    const diagLast = document.getElementById('diag-last-notif');
+
+    if (diagPerm) {
+      const perm = notifStatus.permission;
+      diagPerm.innerText = perm === 'granted' ? 'Disetujui (Granted)' : (perm === 'denied' ? 'Diblokir (Denied)' : 'Belum Ditentukan (Default)');
+      diagPerm.style.color = perm === 'granted' ? '#15803D' : (perm === 'denied' ? '#DC2626' : '#64748B');
+    }
+    if (diagSw) {
+      diagSw.innerText = 'serviceWorker' in navigator ? 'Terdaftar (Active Scope)' : 'Tidak Didukung';
+    }
+    if (diagToken) {
+      diagToken.innerText = notifStatus.tokenMasked || 'Belum Dibuat';
+    }
+    if (diagPlatform) {
+      diagPlatform.innerText = notifStatus.platform || 'Web';
+    }
+    if (diagLast) {
+      if (notifStatus.lastNotification) {
+        const d = new Date(notifStatus.lastNotification);
+        diagLast.innerText = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' (' + d.toLocaleDateString('id-ID') + ')';
+      } else {
+        diagLast.innerText = 'Belum Ada';
+      }
+    }
+  }
+
   function switchTab(tabId) {
     state.currentTab = tabId;
 
@@ -560,6 +678,8 @@
       renderWeeklySchedule();
     } else if (tabId === 'notifikasi') {
       renderNotifications();
+    } else if (tabId === 'pengaturan') {
+      renderSettingsUI();
     }
 
     if (window.lucide) window.lucide.createIcons();
@@ -596,16 +716,128 @@
       });
     }
 
-    // Switches
-    const notifSwitch = document.getElementById('switch-h10');
-    if (notifSwitch) {
-      notifSwitch.addEventListener('change', (e) => {
-        state.settings.h10Alert = e.target.checked;
-        if (e.target.checked && 'Notification' in window && Notification.permission !== 'granted') {
-          Notification.requestPermission();
+    // Toggle: Pengingat H-10 Menit
+    const switchH10 = document.getElementById('switch-h10');
+    if (switchH10) {
+      switchH10.addEventListener('change', async (e) => {
+        const isChecked = e.target.checked;
+        state.settings.h10Alert = isChecked;
+
+        if (isChecked) {
+          try {
+            if (window.TRJT_FIREBASE) {
+              await window.TRJT_FIREBASE.requestNotificationPermission(true);
+              showToast('✅ Pengingat H-10 berhasil diaktifkan', 'success');
+            } else {
+              if ('Notification' in window) await Notification.requestPermission();
+              localStorage.setItem('trjt_h10_enabled', 'true');
+              showToast('✅ Pengingat H-10 diaktifkan (Mode Lokal)', 'success');
+            }
+          } catch (err) {
+            e.target.checked = false;
+            state.settings.h10Alert = false;
+            showToast('⚠️ ' + err.message, 'error');
+          }
+        } else {
+          if (window.TRJT_FIREBASE) {
+            await window.TRJT_FIREBASE.updateDeviceSetting('reminderEnabled', false);
+          } else {
+            localStorage.setItem('trjt_h10_enabled', 'false');
+          }
+          showToast('ℹ️ Pengingat H-10 dinonaktifkan', 'info');
+        }
+
+        renderSettingsUI();
+        if (window.lucide) window.lucide.createIcons();
+      });
+    }
+
+    // Toggle: Suara & Getar
+    const switchSound = document.getElementById('switch-sound');
+    if (switchSound) {
+      switchSound.addEventListener('change', (e) => {
+        const isChecked = e.target.checked;
+        state.settings.soundEnabled = isChecked;
+        state.settings.vibrationEnabled = isChecked;
+        localStorage.setItem('trjt_sound_enabled', isChecked ? 'true' : 'false');
+        localStorage.setItem('trjt_vibration_enabled', isChecked ? 'true' : 'false');
+
+        if (window.TRJT_FIREBASE) {
+          window.TRJT_FIREBASE.updateDeviceSetting('soundEnabled', isChecked);
+          window.TRJT_FIREBASE.updateDeviceSetting('vibrationEnabled', isChecked);
+          if (isChecked) {
+            window.TRJT_FIREBASE.playNotificationChime();
+          }
+        }
+        showToast(isChecked ? '🔊 Efek suara & getar diaktifkan' : '🔇 Efek suara & getar dimatikan', 'info');
+      });
+    }
+
+    // Button: Uji Notifikasi (Tes)
+    const btnTest = document.getElementById('btn-test-notification');
+    if (btnTest) {
+      btnTest.addEventListener('click', async () => {
+        btnTest.disabled = true;
+        const originalHtml = btnTest.innerHTML;
+        btnTest.innerHTML = `<i data-lucide="loader-2" class="spin-animate" style="width: 14px; height: 14px;"></i> Mengirim…`;
+        if (window.lucide) window.lucide.createIcons();
+
+        try {
+          if (window.TRJT_FIREBASE) {
+            const res = await window.TRJT_FIREBASE.sendTestNotification();
+            showToast('✅ ' + (res.message || 'Notifikasi berhasil dikirim'), 'success');
+          } else {
+            if ('Notification' in window && Notification.permission === 'granted') {
+              new Notification('🔔 Uji Notifikasi Berhasil', {
+                body: 'TRJT 3A Reminder siap mengingatkan jadwal kuliahmu.',
+                icon: './assets/icons/app-icon.svg'
+              });
+              showToast('✅ Notifikasi berhasil dikirim', 'success');
+            } else {
+              throw new Error('Izin notifikasi belum diaktifkan.');
+            }
+          }
+        } catch (err) {
+          showToast('❌ Gagal: ' + err.message, 'error');
+        } finally {
+          btnTest.disabled = false;
+          btnTest.innerHTML = originalHtml;
+          renderSettingsUI();
+          if (window.lucide) window.lucide.createIcons();
         }
       });
     }
+
+    // Diagnostics Toggle
+    const btnToggleDiag = document.getElementById('btn-toggle-diagnostics');
+    const panelDiag = document.getElementById('panel-diagnostics');
+    if (btnToggleDiag && panelDiag) {
+      btnToggleDiag.addEventListener('click', () => {
+        const isHidden = panelDiag.style.display === 'none' || panelDiag.style.display === '';
+        panelDiag.style.display = isHidden ? 'flex' : 'none';
+        renderSettingsUI();
+        if (window.lucide) window.lucide.createIcons();
+      });
+    }
+
+    // Listen to Push Notification event (Foreground & Test Dispatch)
+    window.addEventListener('trjt:push-notification', (event) => {
+      const detail = event.detail || {};
+      const newNotif = {
+        id: `notif-${Date.now()}`,
+        type: 'h10',
+        title: detail.title || '🔔 Pengingat Kuliah',
+        subject: detail.courseName || 'TRJT 3A Notification',
+        lecturer: detail.lecturer || 'Dosen Pengampu',
+        meta: `${detail.startTime || ''} · ${detail.room || ''}`,
+        time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.'),
+        read: false
+      };
+      state.notifications.unshift(newNotif);
+      renderNotifications();
+      renderSettingsUI();
+      if (window.lucide) window.lucide.createIcons();
+    });
   }
 
   function tick() {
@@ -633,6 +865,7 @@
 
     renderWeeklySchedule();
     renderNotifications();
+    renderSettingsUI();
     tick();
 
     setInterval(tick, 1000);
@@ -647,8 +880,10 @@
     }, 600);
 
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').catch((err) => {
-        console.log('SW registration error:', err);
+      navigator.serviceWorker.register('./firebase-messaging-sw.js').catch(() => {
+        navigator.serviceWorker.register('./sw.js').catch((err) => {
+          console.log('SW registration error:', err);
+        });
       });
     }
   }
@@ -656,6 +891,8 @@
   // Export engine for developer testing
   window.evaluateScheduleState = evaluateScheduleState;
   window.triggerH10Notification = triggerH10Notification;
+  window.showToast = showToast;
+  window.renderSettingsUI = renderSettingsUI;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
