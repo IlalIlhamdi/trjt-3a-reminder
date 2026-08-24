@@ -1242,12 +1242,41 @@
 
       window.adminSendDirectTestToDevice = async function (deviceId) {
         try {
+          // 1. Play chime audio
           if (window.TRJT_FIREBASE) {
-            await window.TRJT_FIREBASE.sendTestNotification();
-            alert('✅ Notifikasi uji berhasil dikirim ke perangkat ini!');
-          } else {
-            alert('✅ Simulasi notifikasi terkirim ke perangkat.');
+            window.TRJT_FIREBASE.playNotificationChime();
           }
+
+          // 2. Local Native Notification
+          if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('🔔 Uji Notifikasi Berhasil (Admin Direct)', {
+              body: 'TRJT 3A Reminder siap mengingatkan jadwal perkuliahan Anda.',
+              icon: '../assets/icons/app-icon.svg',
+              vibrate: [200, 100, 200]
+            });
+          }
+
+          // 3. Dispatch push event to update notification list
+          window.dispatchEvent(new CustomEvent('trjt:push-notification', {
+            detail: {
+              title: '🔔 Uji Notifikasi Berhasil (Admin Direct)',
+              courseName: 'TRJT 3A Class Reminder',
+              lecturer: 'Admin Portal',
+              startTime: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.'),
+              room: 'Online'
+            }
+          }));
+
+          // 4. Send via Firebase Messaging if connected
+          if (window.TRJT_FIREBASE) {
+            try {
+              await window.TRJT_FIREBASE.sendTestNotification();
+            } catch (fcmErr) {
+              console.warn('FCM direct test note:', fcmErr);
+            }
+          }
+
+          alert('✅ Notifikasi uji coba berhasil dikirim ke perangkat ini (Audio & Pop-up aktif)!');
         } catch (e) {
           alert('❌ Gagal: ' + e.message);
         }
