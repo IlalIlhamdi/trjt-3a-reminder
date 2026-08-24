@@ -12,17 +12,34 @@
     this.isSimulated = function () { return false; };
   })();
 
+  // --- Helper to load persisted notifications ---
+  function loadInitialNotifications() {
+    try {
+      const saved = localStorage.getItem('trjt_notifications_v3');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch (e) {}
+    return (window.TRJT_SCHEDULE?.initialNotifications || []).map((n) => ({ ...n, read: true }));
+  }
+
   // --- Application State ---
   const state = {
     currentTab: 'beranda',
     selectedWeeklyDayId: 1, // Default Senin (1)
-    notifications: [...(window.TRJT_SCHEDULE?.initialNotifications || [])],
+    notifications: loadInitialNotifications(),
     settings: {
       h10Alert: localStorage.getItem('trjt_h10_enabled') === 'true',
       soundEnabled: localStorage.getItem('trjt_sound_enabled') !== 'false',
       vibrationEnabled: localStorage.getItem('trjt_vibration_enabled') !== 'false'
     }
   };
+
+  function saveNotificationsState() {
+    try {
+      localStorage.setItem('trjt_notifications_v3', JSON.stringify(state.notifications));
+    } catch (e) {}
+  }
 
   const daysMap = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
   const monthsMap = [
@@ -506,9 +523,26 @@
       card.addEventListener('click', () => {
         const idx = card.getAttribute('data-index');
         if (idx !== null && state.notifications[idx]) {
-          state.notifications[idx].read = true;
+          const notif = state.notifications[idx];
+          notif.read = true;
+          saveNotificationsState();
           renderNotifications();
           if (window.lucide) window.lucide.createIcons();
+
+          // Quick open course materials if course matches
+          if (notif.subject && window.TRJT_SCHEDULE) {
+            const matchedClass = window.TRJT_SCHEDULE.classes.find(
+              (c) => c.courseName.toLowerCase() === notif.subject.toLowerCase()
+            );
+            if (matchedClass) {
+              window.openCourseMaterialsModal(
+                matchedClass.id,
+                matchedClass.courseName,
+                getLecturerDisplay(matchedClass.lecturerName, matchedClass.lecturerCode, matchedClass.courseName),
+                matchedClass.roomCode
+              );
+            }
+          }
         }
       });
     });
@@ -527,6 +561,7 @@
       read: false
     };
     state.notifications.unshift(newNotif);
+    saveNotificationsState();
     renderNotifications();
 
     if (!timeProvider.isSimulated() && 'Notification' in window && Notification.permission === 'granted' && state.settings.h10Alert) {
@@ -719,7 +754,9 @@
     if (markAllReadBtn) {
       markAllReadBtn.addEventListener('click', () => {
         state.notifications.forEach((n) => (n.read = true));
+        saveNotificationsState();
         renderNotifications();
+        showToast('✅ Semua notifikasi telah ditandai dibaca', 'success');
         if (window.lucide) window.lucide.createIcons();
       });
     }
@@ -842,6 +879,7 @@
         read: false
       };
       state.notifications.unshift(newNotif);
+      saveNotificationsState();
       renderNotifications();
       renderSettingsUI();
       if (window.lucide) window.lucide.createIcons();

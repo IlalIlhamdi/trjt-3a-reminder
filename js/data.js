@@ -222,7 +222,7 @@ const TRJT_SCHEDULE = {
       lecturer: 'Muhammad Syahroni, S.T., M.T.',
       meta: '10.20 – 12.00 · R16',
       time: '10.10',
-      read: false
+      read: true
     },
     {
       id: 'notif-2',
