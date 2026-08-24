@@ -143,24 +143,28 @@
     }
   }
 
+  // Persistent Device ID generator
+  function getStableDeviceId() {
+    let id = localStorage.getItem('trjt_device_uuid');
+    if (!id) {
+      id = 'dev_' + Math.random().toString(36).substring(2, 10);
+      localStorage.setItem('trjt_device_uuid', id);
+    }
+    return id;
+  }
+
   // Auto Register Client Device on Startup (Mobile / Desktop)
   async function autoRegisterClientDevice() {
-    let deviceId = localStorage.getItem('trjt_device_uuid');
-    if (!deviceId) {
-      deviceId = 'dev_' + Math.random().toString(36).substring(2, 10) + '_' + Date.now().toString(36);
-      localStorage.setItem('trjt_device_uuid', deviceId);
-    }
-
+    const deviceId = getStableDeviceId();
     const platform = detectPlatform();
     const isReminderOn = localStorage.getItem('trjt_h10_enabled') !== 'false';
     const isSoundOn = localStorage.getItem('trjt_sound_enabled') !== 'false';
     const token = currentFcmToken || localStorage.getItem('trjt_fcm_token') || deviceId;
-    const docId = (token && token.length > 20) ? token.substring(0, 45) : deviceId;
 
     if (db) {
       try {
-        await db.collection('devices').doc(docId).set({
-          id: docId,
+        await db.collection('devices').doc(deviceId).set({
+          id: deviceId,
           token: token,
           tokenMasked: maskToken(token),
           platform: platform,
@@ -171,7 +175,7 @@
           lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
-        console.log("📱 Registered device in Firestore:", platform, docId);
+        console.log("📱 Registered device in Firestore:", platform, deviceId);
       } catch (e) {
         console.warn("Auto register device note:", e.message);
       }
@@ -488,7 +492,7 @@
       // Save to Firestore 'devices' collection
       if (db) {
         try {
-          const docId = (token && token.length > 20) ? token.substring(0, 45) : token;
+          const docId = getStableDeviceId();
           await db.collection('devices').doc(docId).set({
             id: docId,
             token: token,
@@ -524,10 +528,10 @@
       localStorage.setItem('trjt_vibration_enabled', value ? 'true' : 'false');
     }
 
-    if (!currentFcmToken || !db) return;
+    if (!db) return;
 
     try {
-      const docId = (currentFcmToken && currentFcmToken.length > 20) ? currentFcmToken.substring(0, 45) : currentFcmToken;
+      const docId = getStableDeviceId();
       const updateData = {
         [field]: value,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),

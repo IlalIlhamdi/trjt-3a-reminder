@@ -1196,14 +1196,17 @@
               });
             }
 
-            // Deduplicate devices by masked token or token
-            const seenKeys = new Set();
+            // Deduplicate devices strictly by computed masked token
+            const seenMasked = new Set();
             const uniqueDevices = [];
             devices.forEach((d) => {
-              const key = d.tokenMasked || d.token || d.id;
-              if (key && !seenKeys.has(key)) {
-                seenKeys.add(key);
-                uniqueDevices.push(d);
+              const masked = d.token ? (d.token.length > 14 ? d.token.substring(0, 6) + '...' + d.token.slice(-6) : d.token) : (d.tokenMasked || d.id);
+              if (masked && !seenMasked.has(masked)) {
+                seenMasked.add(masked);
+                uniqueDevices.push({
+                  ...d,
+                  computedMasked: masked
+                });
               }
             });
 
@@ -1213,9 +1216,9 @@
               uniqueDevices.push({
                 id: 'device-local',
                 token: st.tokenFull || 'fcm-device-browser-local-test',
-                tokenMasked: st.tokenMasked || 'abc123...xyz789',
-                platform: st.platform || 'Windows Desktop',
-                reminderEnabled: st.reminderEnabled,
+                computedMasked: st.tokenMasked || 'abc123...xyz789',
+                platform: st.platform || 'Windows Desktop / Laptop',
+                reminderEnabled: true,
                 soundEnabled: true,
                 lastSeen: new Date().toISOString()
               });
@@ -1226,8 +1229,8 @@
             }
 
             tableBody.innerHTML = uniqueDevices.map((d, idx) => {
-              const masked = d.token ? (d.token.length > 14 ? d.token.substring(0, 6) + '...' + d.token.slice(-6) : d.token) : (d.tokenMasked || 'abc...xyz');
-              const isRemActive = d.reminderEnabled !== false;
+              const masked = d.computedMasked || (d.token ? (d.token.length > 14 ? d.token.substring(0, 6) + '...' + d.token.slice(-6) : d.token) : 'abc...xyz');
+              const isRemActive = d.reminderEnabled !== false && d.reminderEnabled !== 'false';
               let dateStr = 'Baru saja';
               if (d.lastSeen) {
                 if (d.lastSeen.toDate) {
