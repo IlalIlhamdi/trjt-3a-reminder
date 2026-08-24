@@ -753,28 +753,14 @@ body {
 
 .timeline-item {
   display: grid;
-  grid-template-columns: 52px 1fr;
+  grid-template-columns: 50px 1fr;
   gap: 12px;
   position: relative;
-  padding-bottom: 12px;
+  padding-bottom: 10px;
 }
 
 .timeline-item:last-child {
   padding-bottom: 0;
-}
-
-.timeline-item::after {
-  content: '';
-  position: absolute;
-  left: 51px;
-  top: 22px;
-  bottom: 0;
-  width: 1.5px;
-  background-color: var(--color-border);
-}
-
-.timeline-item:last-child::after {
-  display: none;
 }
 
 .timeline-time-block {
