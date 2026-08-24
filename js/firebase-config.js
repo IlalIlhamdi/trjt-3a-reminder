@@ -147,19 +147,20 @@
   async function autoRegisterClientDevice() {
     let deviceId = localStorage.getItem('trjt_device_uuid');
     if (!deviceId) {
-      deviceId = 'dev-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 9);
+      deviceId = 'dev_' + Math.random().toString(36).substring(2, 10) + '_' + Date.now().toString(36);
       localStorage.setItem('trjt_device_uuid', deviceId);
     }
 
     const platform = detectPlatform();
     const isReminderOn = localStorage.getItem('trjt_h10_enabled') !== 'false';
     const isSoundOn = localStorage.getItem('trjt_sound_enabled') !== 'false';
+    const token = currentFcmToken || localStorage.getItem('trjt_fcm_token') || deviceId;
+    const docId = (token && token.length > 20) ? token.substring(0, 45) : deviceId;
 
     if (db) {
       try {
-        const token = currentFcmToken || localStorage.getItem('trjt_fcm_token') || deviceId;
-        await db.collection('devices').doc(deviceId).set({
-          id: deviceId,
+        await db.collection('devices').doc(docId).set({
+          id: docId,
           token: token,
           tokenMasked: maskToken(token),
           platform: platform,
@@ -170,7 +171,7 @@
           lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
-        console.log("📱 Auto-registered client device in Firestore:", platform, deviceId);
+        console.log("📱 Registered device in Firestore:", platform, docId);
       } catch (e) {
         console.warn("Auto register device note:", e.message);
       }
@@ -216,17 +217,17 @@
   function setupFirestoreListeners() {
     if (!db) return;
 
-    // Listen to official schedules
     db.collection('schedules')
-      .where('classId', '==', 'trjt-3a')
-      .where('active', '==', true)
       .onSnapshot((snapshot) => {
         if (snapshot && !snapshot.empty) {
           const remoteClasses = [];
           snapshot.forEach((doc) => {
             const data = doc.data();
-            if (data.lecturerCode === 'NEL' || doc.id.includes('metodologi-penelitian')) {
-              data.lecturerName = 'Dr. Nelly Safitri, SST., M.Eng.Sc.';
+            if (data.startTime && !data.formattedStartTime) {
+              data.formattedStartTime = data.startTime.replace(':', '.');
+            }
+            if (data.endTime && !data.formattedEndTime) {
+              data.formattedEndTime = data.endTime.replace(':', '.');
             }
             remoteClasses.push({ id: doc.id, ...data });
           });
@@ -259,15 +260,20 @@
       });
   }
 
-  // Platform Detection Helper
+  // Smart Platform & Device Detector
   function detectPlatform() {
-    const ua = navigator.userAgent || '';
-    if (/android/i.test(ua)) return 'Android Smartphone';
-    if (/iphone|ipad|ipod/i.test(ua)) return 'iPhone / iPad';
-    if (/windows nt/i.test(ua)) return 'Windows Desktop';
-    if (/macintosh|mac os x/i.test(ua)) return 'macOS Laptop';
-    if (/linux/i.test(ua)) return 'Linux Device';
-    return 'Mobile / Web Browser';
+    const ua = (navigator.userAgent || '').toLowerCase();
+    const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 1);
+    const isMobileWidth = window.innerWidth <= 800;
+
+    if (ua.includes('android')) return 'Android Smartphone';
+    if (ua.includes('iphone') || ua.includes('ipod')) return 'iPhone';
+    if (ua.includes('ipad') || (ua.includes('macintosh') && isTouch)) return 'iPad Tablet';
+    if (isTouch && isMobileWidth && !ua.includes('windows nt')) return 'Mobile Smartphone';
+    if (ua.includes('windows nt')) return 'Windows Desktop / Laptop';
+    if (ua.includes('macintosh') || ua.includes('mac os x')) return 'macOS Laptop';
+    if (ua.includes('linux')) return 'Linux Device';
+    return isTouch ? 'Mobile Device' : 'Desktop Browser';
   }
 
   // Honest Notification Status Evaluator

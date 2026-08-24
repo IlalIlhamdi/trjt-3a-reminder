@@ -332,11 +332,16 @@
 
         <!-- Live Registered Devices Table (Mahasiswa terdaftar) -->
         <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 4px;">
-          <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
             <span style="font-size: 12px; font-weight: 700; color: var(--color-primary-text); text-transform: uppercase; letter-spacing: 0.04em;">
               📱 Perangkat Mahasiswa Terhubung (Firestore Devices)
             </span>
-            <span id="admin-devices-count-badge" class="soft-badge-info" style="font-size: 11px;">Memeriksa Perangkat...</span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <button class="btn-ghost" style="font-size: 11px; padding: 2px 8px; color: #DC2626; display: inline-flex; align-items: center; gap: 4px;" onclick="window.adminClearAllDeviceSessions()" title="Bersihkan riwayat perangkat duplikat / lama">
+                <i data-lucide="trash" style="width: 12px; height: 12px;"></i> Bersihkan Duplikat
+              </button>
+              <span id="admin-devices-count-badge" class="soft-badge-info" style="font-size: 11px;">Memeriksa Perangkat...</span>
+            </div>
           </div>
 
           <div style="max-height: 180px; overflow-y: auto; border: 1px solid var(--color-border-card); border-radius: var(--radius-inner);">
@@ -1191,10 +1196,21 @@
               });
             }
 
+            // Deduplicate devices by masked token or token
+            const seenKeys = new Set();
+            const uniqueDevices = [];
+            devices.forEach((d) => {
+              const key = d.tokenMasked || d.token || d.id;
+              if (key && !seenKeys.has(key)) {
+                seenKeys.add(key);
+                uniqueDevices.push(d);
+              }
+            });
+
             // Fallback device if empty
-            if (devices.length === 0 && window.TRJT_FIREBASE) {
+            if (uniqueDevices.length === 0 && window.TRJT_FIREBASE) {
               const st = window.TRJT_FIREBASE.getNotificationStatus();
-              devices.push({
+              uniqueDevices.push({
                 id: 'device-local',
                 token: st.tokenFull || 'fcm-device-browser-local-test',
                 tokenMasked: st.tokenMasked || 'abc123...xyz789',
@@ -1206,10 +1222,10 @@
             }
 
             if (badge) {
-              badge.innerText = `${devices.length} Perangkat Terdaftar`;
+              badge.innerText = `${uniqueDevices.length} Perangkat Terdaftar`;
             }
 
-            tableBody.innerHTML = devices.map((d, idx) => {
+            tableBody.innerHTML = uniqueDevices.map((d, idx) => {
               const masked = d.token ? (d.token.length > 14 ? d.token.substring(0, 6) + '...' + d.token.slice(-6) : d.token) : (d.tokenMasked || 'abc...xyz');
               const isRemActive = d.reminderEnabled !== false;
               let dateStr = 'Baru saja';
@@ -1242,6 +1258,26 @@
             console.warn('Devices realtime error:', err.message);
           });
       }
+
+      window.adminClearAllDeviceSessions = async function () {
+        if (!confirm('Apakah Anda ingin membersihkan riwayat perangkat lama dan menyinkronkan ulang perangkat aktif?')) return;
+        const db = window.firebase ? window.firebase.firestore() : null;
+        if (!db) return;
+        try {
+          const snap = await db.collection('devices').get();
+          const batch = db.batch();
+          snap.forEach((doc) => batch.delete(doc.ref));
+          await batch.commit();
+
+          // Re-register current client device
+          if (window.TRJT_FIREBASE && typeof window.TRJT_FIREBASE.requestNotificationPermission === 'function') {
+            await window.TRJT_FIREBASE.requestNotificationPermission(false);
+          }
+          alert('✅ Riwayat perangkat lama berhasil dibersihkan. Buka kembali aplikasi di HP untuk mendaftarkan HP Anda secara bersih.');
+        } catch (e) {
+          alert('❌ Gagal: ' + e.message);
+        }
+      };
 
       window.adminSendDirectTestToDevice = async function (deviceId) {
         try {
