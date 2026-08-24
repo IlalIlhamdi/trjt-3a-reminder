@@ -388,8 +388,12 @@
           statusClass = 'is-finished';
           statusBadge = `<span class="timeline-status-tag finished">Selesai</span>`;
         } else {
-          statusBadge = `<span class="timeline-status-tag upcoming">Akan Datang</span>`;
+          statusBadge = `<span class="timeline-status-tag upcoming">Akan datang</span>`;
         }
+
+        const cleanRoomName = item.roomName 
+          ? item.roomName.split('(')[0].replace('Gedung III Teknik Elektro Lt. 2', 'Gd. III Lt. 2').trim()
+          : '';
 
         return `
           <div class="timeline-item">
@@ -398,21 +402,21 @@
               <span class="timeline-time-end">${item.endTime.replace(':', '.')}</span>
             </div>
             <div class="timeline-card ${statusClass}">
-              <div class="timeline-subject">${item.courseName}</div>
-              <div class="timeline-lecturer">
-                <i data-lucide="user-round" style="width: 14px; height: 14px;"></i>
-                ${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}
+              <div class="timeline-card-header">
+                <h3 class="timeline-subject">${item.courseName}</h3>
+                ${statusBadge}
               </div>
-              <div class="timeline-footer" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-                <div style="display: flex; align-items: center; gap: 6px;">
-                  <span class="room-badge">
-                    <i data-lucide="map-pin" style="width: 11px; height: 11px;"></i>
-                    ${getRoomDisplay(item.roomCode, item.roomName)}
-                  </span>
-                  ${statusBadge}
-                </div>
-                <button class="btn-course-material" style="padding: 6px 12px; font-size: 12px; min-height: 44px; min-width: 44px;" onclick="window.openCourseMaterialsModal('${item.id}', '${item.courseName.replace(/'/g, "\\'")}', '${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName).replace(/'/g, "\\'")}', '${item.roomCode}')">
-                  <i data-lucide="folder" style="width: 13px; height: 13px;"></i> Materi
+              <div class="timeline-lecturer">
+                <i data-lucide="user-round" style="width: 13px; height: 13px;"></i>
+                <span>${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}</span>
+              </div>
+              <div class="timeline-card-bottom">
+                <span class="room-badge" title="${item.roomName ? item.roomName : item.roomCode}">
+                  <i data-lucide="map-pin" style="width: 11px; height: 11px;"></i>
+                  ${item.roomCode}${cleanRoomName ? ` · ${cleanRoomName}` : ''}
+                </span>
+                <button class="btn-course-material" onclick="window.openCourseMaterialsModal('${item.id}', '${item.courseName.replace(/'/g, "\\'")}', '${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName).replace(/'/g, "\\'")}', '${item.roomCode}')">
+                  <i data-lucide="folder" style="width: 12px; height: 12px;"></i> Materi
                 </button>
               </div>
             </div>
@@ -447,7 +451,7 @@
           <div class="schedule-card">
             <div class="schedule-card-top">
               <span class="schedule-time-label">
-                <i data-lucide="clock" style="width: 14px; height: 14px;"></i>
+                <i data-lucide="clock" style="width: 13px; height: 13px;"></i>
                 ${item.startTime.replace(':', '.')} – ${item.endTime.replace(':', '.')}
               </span>
               <span class="room-badge">
@@ -459,14 +463,14 @@
             <h3 class="schedule-course-title" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${item.courseName}</h3>
             
             <div class="schedule-lecturer-name">
-              <i data-lucide="user-round" style="width: 14px; height: 14px;"></i>
-              ${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}
+              <i data-lucide="user-round" style="width: 13px; height: 13px;"></i>
+              <span>${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}</span>
             </div>
 
-            <div class="schedule-card-bottom" style="display: flex; align-items: center; justify-content: space-between;">
-              <span>${item.roomName ? item.roomName : 'Gedung III Teknik Elektro Lt. 2'}</span>
-              <button class="btn-course-material" style="padding: 6px 12px; font-size: 12px; min-height: 44px;" onclick="window.openCourseMaterialsModal('${item.id}', '${item.courseName.replace(/'/g, "\\'")}', '${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName).replace(/'/g, "\\'")}', '${item.roomCode}')">
-                <i data-lucide="folder" style="width: 13px; height: 13px;"></i> Materi
+            <div class="schedule-card-bottom" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px;">
+              <span style="font-size: 11px; color: #475569; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: calc(100% - 80px);">${item.roomName ? item.roomName.replace('Gedung III Teknik Elektro Lt. 2', 'Gd. III Teknik Elektro Lt. 2') : 'Gedung III Teknik Elektro Lt. 2'}</span>
+              <button class="btn-course-material" onclick="window.openCourseMaterialsModal('${item.id}', '${item.courseName.replace(/'/g, "\\'")}', '${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName).replace(/'/g, "\\'")}', '${item.roomCode}')">
+                <i data-lucide="folder" style="width: 12px; height: 12px;"></i> Materi
               </button>
             </div>
           </div>
