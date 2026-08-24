@@ -1196,16 +1196,29 @@
               });
             }
 
-            // Deduplicate devices strictly by computed masked token
+            // Smart Deduplication: Keep only the latest active device per physical platform
+            devices.sort((a, b) => {
+              const timeA = a.lastSeen?.toDate ? a.lastSeen.toDate().getTime() : (new Date(a.lastSeen || 0).getTime());
+              const timeB = b.lastSeen?.toDate ? b.lastSeen.toDate().getTime() : (new Date(b.lastSeen || 0).getTime());
+              return timeB - timeA;
+            });
+
             const seenMasked = new Set();
+            const seenPlatforms = new Set();
             const uniqueDevices = [];
+
             devices.forEach((d) => {
               const masked = d.token ? (d.token.length > 14 ? d.token.substring(0, 6) + '...' + d.token.slice(-6) : d.token) : (d.tokenMasked || d.id);
-              if (masked && !seenMasked.has(masked)) {
+              const platKey = (d.platform || 'Device').trim().toLowerCase();
+
+              // Keep only the newest instance per platform and per token
+              if (!seenMasked.has(masked) && !seenPlatforms.has(platKey)) {
                 seenMasked.add(masked);
+                seenPlatforms.add(platKey);
                 uniqueDevices.push({
                   ...d,
-                  computedMasked: masked
+                  computedMasked: masked,
+                  reminderEnabled: true
                 });
               }
             });
