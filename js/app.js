@@ -1202,6 +1202,17 @@
     if (metaEl) metaEl.innerText = `${lecturer || 'Dosen Pengampu'} · Ruang ${room || '-'}`;
     if (searchInput) searchInput.value = '';
 
+    // Update Drive button link to open this specific course's Google Drive folder
+    const btnDriveFolder = document.getElementById('btn-open-course-drive-folder');
+    if (btnDriveFolder && window.TRJT_DRIVE) {
+      const folderInfo = await window.TRJT_DRIVE.getFolderForCourse(courseName || scheduleId);
+      if (folderInfo && folderInfo.driveFolderId) {
+        btnDriveFolder.href = `https://drive.google.com/drive/folders/${folderInfo.driveFolderId}?usp=drive_link`;
+      } else {
+        btnDriveFolder.href = `https://drive.google.com/drive/folders/1W7F5rWsNNq-nsLUF1emnOj4eJsYSShzW?usp=drive_link`;
+      }
+    }
+
     document.querySelectorAll('#modal-course-materials .filter-pill').forEach((pill) => {
       if (pill.getAttribute('data-filter') === 'all') pill.classList.add('active');
       else pill.classList.remove('active');

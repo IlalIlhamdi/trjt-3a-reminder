@@ -34,16 +34,33 @@
     connectedAt: new Date().toISOString()
   };
 
-  const DEFAULT_COURSE_FOLDERS = OFFICIAL_COURSES.map((c) => ({
-    id: c.slug,
-    scheduleId: c.id,
-    courseName: c.name,
-    driveFolderId: '1W7F5rWsNNq-nsLUF1emnOj4eJsYSShzW',
-    driveFolderLink: 'https://drive.google.com/drive/folders/1W7F5rWsNNq-nsLUF1emnOj4eJsYSShzW?usp=drive_link',
-    rootFolderId: '1W7F5rWsNNq-nsLUF1emnOj4eJsYSShzW',
-    rootFolderName: 'TRJT 3A — Semester 5',
-    updatedAt: new Date().toISOString()
-  }));
+  const COURSE_FOLDER_MAP = {
+    'praktikum-antena-dan-propagasi': '12hBWioSC03r6wVLqlYTyQCWjNnwb20ht',
+    'jaringan-komputer-lanjut': '1-K_w0rZHHfrNn1fOArSsKtFs6pu3y2ra',
+    'praktikum-jaringan-komputer-lanjut': '1TUC0lg5mpXNVQ0x5bMoN2MkEO3AUCAro',
+    'praktikum-sistem-komunikasi-satelit-dan-radar': '1qKbw5l_k53anuLUyNPBcqgP7RbIWtwTG',
+    'teknik-instalasi-fiber-optik': '1gXp6BS045zl5eCtns9cibKUpuE2VAK9A',
+    'praktikum-teknik-instalasi-fiber-optik': '1wtWIVAC_p4Nm2u7CQFMHryFUkflPIqdB',
+    'antena-dan-propagasi': '1cLFDspm40hCNfnM68oYs6CCM0joHPJlh',
+    'praktikum-sistem-komunikasi-seluler': '1gweMgyVYzTlO3VNGyOIXEFkyaOjU94iv',
+    'sistem-komunikasi-satelit-dan-radar': '1v-fSzrelFqmNz-y9o4kF_bGFOIITYCbw',
+    'sistem-komunikasi-seluler': '1O87z-_WzaHcklL9jLjQo-uOe3jsGl3Z5',
+    'metodologi-penelitian': '1VFOrBrKkSrMR2kb0D3vWWIcZRL1D1pqO'
+  };
+
+  const DEFAULT_COURSE_FOLDERS = OFFICIAL_COURSES.map((c) => {
+    const fId = COURSE_FOLDER_MAP[c.slug] || '1W7F5rWsNNq-nsLUF1emnOj4eJsYSShzW';
+    return {
+      id: c.slug,
+      scheduleId: c.id,
+      courseName: c.name,
+      driveFolderId: fId,
+      driveFolderLink: `https://drive.google.com/drive/folders/${fId}?usp=drive_link`,
+      rootFolderId: '1W7F5rWsNNq-nsLUF1emnOj4eJsYSShzW',
+      rootFolderName: 'TRJT 3A — Semester 5',
+      updatedAt: new Date().toISOString()
+    };
+  });
 
   let cachedFolders = DEFAULT_COURSE_FOLDERS;
   let cachedConnectionStatus = DEFAULT_DRIVE_CONFIG;
