@@ -155,26 +155,26 @@
           </div>
 
           <!-- Class Profile Card -->
-          <div class="settings-card" style="display: flex; align-items: center; gap: 14px; padding: 16px;">
-            <div class="brand-logo-box" style="width: 48px; height: 48px; border-radius: 14px; padding: 4px;">
+          <div class="settings-card" style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; margin-top: 8px;">
+            <div class="brand-logo-box" style="width: 44px; height: 44px; border-radius: 12px; padding: 4px; flex-shrink: 0;">
               <img src="./assets/icons/trjt-logo.svg" alt="TRJT Logo">
             </div>
-            <div>
-              <h3 style="font-size: var(--font-size-base); font-weight: 700; color: var(--color-deep-blue);">TRJT 3A — Semester 5</h3>
-              <p style="font-size: var(--font-size-xs); color: var(--color-secondary-text); margin-top: 2px; font-weight: 500;">Teknologi Rekayasa Jaringan Telekomunikasi</p>
+            <div style="min-width: 0;">
+              <h3 style="font-size: 14.5px; font-weight: 700; color: #0F172A; line-height: 1.25;">TRJT 3A — Semester 5</h3>
+              <p style="font-size: 12px; color: var(--color-secondary-text); margin-top: 2px; font-weight: 500;">Teknologi Rekayasa Jaringan Telekomunikasi</p>
               <p style="font-size: 11px; color: var(--color-muted-text); margin-top: 2px;">Jurusan Teknik Elektro · Politeknik Negeri Lhokseumawe</p>
             </div>
           </div>
 
-          <!-- Section 1: PEMBERITAHUAN -->
+          <!-- Section 1: Pemberitahuan -->
           <div class="settings-section-block">
-            <h3 class="settings-heading">PEMBERITAHUAN</h3>
+            <h3 class="settings-heading">Pemberitahuan</h3>
             <div class="settings-card">
               
-              <!-- Status Notifikasi Jujur -->
+              <!-- Status Notifikasi -->
               <div class="settings-row" id="row-notif-status">
                 <div class="settings-icon-box">
-                  <i data-lucide="shield-check" style="width: 20px; height: 20px;"></i>
+                  <i data-lucide="shield-check" style="width: 18px; height: 18px;"></i>
                 </div>
                 <div class="settings-text-wrap">
                   <span class="settings-item-title">Status Notifikasi</span>
@@ -185,7 +185,7 @@
 
               <div class="settings-row">
                 <div class="settings-icon-box">
-                  <i data-lucide="bell-ring" style="width: 20px; height: 20px;"></i>
+                  <i data-lucide="bell-ring" style="width: 18px; height: 18px;"></i>
                 </div>
                 <div class="settings-text-wrap">
                   <span class="settings-item-title">Pengingat H-10 Menit</span>
@@ -199,7 +199,7 @@
 
               <div class="settings-row">
                 <div class="settings-icon-box">
-                  <i data-lucide="volume-2" style="width: 20px; height: 20px;"></i>
+                  <i data-lucide="volume-2" style="width: 18px; height: 18px;"></i>
                 </div>
                 <div class="settings-text-wrap">
                   <span class="settings-item-title">Suara & Getar</span>
@@ -213,21 +213,21 @@
 
               <div class="settings-row">
                 <div class="settings-icon-box">
-                  <i data-lucide="sparkles" style="width: 20px; height: 20px;"></i>
+                  <i data-lucide="sparkles" style="width: 18px; height: 18px;"></i>
                 </div>
                 <div class="settings-text-wrap">
                   <span class="settings-item-title">Uji Notifikasi</span>
                   <span class="settings-item-desc">Kirim contoh notifikasi langsung ke perangkat ini</span>
                 </div>
-                <button id="btn-test-notification" class="btn-primary" style="padding: 6px 14px; font-size: 13px;">
-                  <i data-lucide="send" style="width: 14px; height: 14px;"></i> Tes
+                <button id="btn-test-notification" class="btn-primary" style="padding: 6px 14px; font-size: 12px; border-radius: 8px; flex-shrink: 0; min-height: 32px;">
+                  <i data-lucide="send" style="width: 13px; height: 13px;"></i> Tes
                 </button>
               </div>
 
               <!-- iOS Safari Web Push Notification Tip Banner -->
               <div id="ios-pwa-tip" class="settings-row" style="display: none; background-color: #EFF6FF; border: 1px solid #BFDBFE; border-radius: var(--radius-inner); padding: 12px; margin-top: 6px;">
                 <div class="settings-icon-box" style="background-color: #DBEAFE;">
-                  <i data-lucide="smartphone" style="width: 20px; height: 20px; color: var(--color-primary-blue);"></i>
+                  <i data-lucide="smartphone" style="width: 18px; height: 18px; color: var(--color-primary-blue);"></i>
                 </div>
                 <div class="settings-text-wrap">
                   <span class="settings-item-title" style="color: var(--color-deep-blue); font-size: 13px;">Pengguna iPhone / iOS</span>
@@ -240,20 +240,20 @@
             </div>
           </div>
 
-          <!-- Section 2: DIAGNOSTIK & SISTEM -->
+          <!-- Section 2: Sistem & Diagnostik -->
           <div class="settings-section-block">
             <div style="display: flex; align-items: center; justify-content: space-between;">
-              <h3 class="settings-heading" style="margin-bottom: 0;">SISTEM & DIAGNOSTIK</h3>
+              <h3 class="settings-heading" style="margin-bottom: 0;">Sistem & Diagnostik</h3>
               <button id="btn-toggle-diagnostics" class="btn-ghost" style="font-size: 12px; padding: 4px 8px; color: var(--color-primary-blue); font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
                 <i data-lucide="info" style="width: 13px; height: 13px;"></i> Diagnostik
               </button>
             </div>
             
-            <div class="settings-card" style="margin-top: 10px;">
+            <div class="settings-card" style="margin-top: 8px;">
               
               <div class="settings-row">
                 <div class="settings-icon-box">
-                  <i data-lucide="smartphone" style="width: 20px; height: 20px;"></i>
+                  <i data-lucide="smartphone" style="width: 18px; height: 18px;"></i>
                 </div>
                 <div class="settings-text-wrap">
                   <span class="settings-item-title">Android Wrapper</span>
@@ -264,7 +264,7 @@
 
               <div class="settings-row">
                 <div class="settings-icon-box">
-                  <i data-lucide="cloud-lightning" style="width: 20px; height: 20px;"></i>
+                  <i data-lucide="cloud-lightning" style="width: 18px; height: 18px;"></i>
                 </div>
                 <div class="settings-text-wrap">
                   <span class="settings-item-title">Firebase Cloud Messaging</span>
@@ -275,7 +275,7 @@
 
               <div class="settings-row">
                 <div class="settings-icon-box">
-                  <i data-lucide="wifi" style="width: 20px; height: 20px;"></i>
+                  <i data-lucide="wifi" style="width: 18px; height: 18px;"></i>
                 </div>
                 <div class="settings-text-wrap">
                   <span class="settings-item-title">PWA Service Worker</span>
