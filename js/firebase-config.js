@@ -178,6 +178,59 @@
     }
   }
 
+  // Web Audio Chime Generator (Works on iOS, Android, and Desktop without external audio files)
+  let audioCtx = null;
+  function getAudioContext() {
+    if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) {
+      const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AudioCtxClass();
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    return audioCtx;
+  }
+
+  // Unlock Audio on first user interaction (critical for iOS Safari)
+  ['click', 'touchstart', 'touchend'].forEach((evt) => {
+    document.addEventListener(evt, () => {
+      try {
+        const ctx = getAudioContext();
+        if (ctx && ctx.state === 'suspended') ctx.resume();
+      } catch (e) {}
+    }, { once: true, passive: true });
+  });
+
+  function playNotificationChime() {
+    if (localStorage.getItem('trjt_sound_enabled') === 'false') return;
+    try {
+      const ctx = getAudioContext();
+      if (!ctx) return;
+
+      const now = ctx.currentTime;
+      // High-pitch friendly bell chime (F5 -> A5 -> C6)
+      const notes = [698.46, 880.00, 1046.50];
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now + i * 0.1);
+
+        gain.gain.setValueAtTime(0, now + i * 0.1);
+        gain.gain.linearRampToValueAtTime(0.18, now + i * 0.1 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.5);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(now + i * 0.1);
+        osc.stop(now + i * 0.1 + 0.55);
+      });
+    } catch (e) {
+      console.warn("Audio chime error:", e);
+    }
+  }
+
   // Handle Foreground Messages seamlessly
   function handleIncomingForegroundNotification(payload) {
     const title = payload.notification?.title || payload.data?.title || 'TRJT 3A Reminder';

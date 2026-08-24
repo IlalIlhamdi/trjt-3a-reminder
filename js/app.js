@@ -662,6 +662,14 @@
       }
     }
 
+    // iOS Safari PWA helper tip
+    const iosTip = document.getElementById('ios-pwa-tip');
+    if (iosTip) {
+      const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+      iosTip.style.display = (isIos && !isStandalone) ? 'flex' : 'none';
+    }
+
     // 4. Diagnostics Table
     const diagPerm = document.getElementById('diag-permission');
     const diagSw = document.getElementById('diag-sw');
