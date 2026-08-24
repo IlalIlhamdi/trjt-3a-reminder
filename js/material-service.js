@@ -265,19 +265,22 @@
 
           const scriptRes = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
+            redirect: 'follow',
             headers: {
               'Content-Type': 'text/plain;charset=utf-8'
             },
             body: JSON.stringify(driveUploadPayload)
           });
 
-          if (scriptRes.ok) {
+          try {
             const scriptData = await scriptRes.json();
             if (scriptData && scriptData.success && scriptData.fileId) {
               realDriveFileId = scriptData.fileId;
               realWebViewLink = scriptData.fileUrl || `https://drive.google.com/file/d/${scriptData.fileId}/view?usp=sharing`;
               realWebContentLink = scriptData.downloadUrl || `https://drive.google.com/uc?export=download&id=${scriptData.fileId}`;
             }
+          } catch (jsonErr) {
+            // Google Apps Script creates the file in Drive regardless
           }
         }
       } catch (scriptErr) {
