@@ -1203,22 +1203,21 @@
               return timeB - timeA;
             });
 
-            const seenMasked = new Set();
-            const seenPlatforms = new Set();
+            // Deduplicate strictly by Unique Device ID & Token (Each student device appears individually)
+            const seenDevices = new Set();
             const uniqueDevices = [];
 
             devices.forEach((d) => {
               const masked = d.token ? (d.token.length > 14 ? d.token.substring(0, 6) + '...' + d.token.slice(-6) : d.token) : (d.tokenMasked || d.id);
-              const platKey = (d.platform || 'Device').trim().toLowerCase();
+              const deviceKey = (d.id || masked).trim();
 
-              // Keep only the newest instance per platform and per token
-              if (!seenMasked.has(masked) && !seenPlatforms.has(platKey)) {
-                seenMasked.add(masked);
-                seenPlatforms.add(platKey);
+              if (!seenDevices.has(deviceKey) && !seenDevices.has(masked)) {
+                seenDevices.add(deviceKey);
+                seenDevices.add(masked);
                 uniqueDevices.push({
                   ...d,
                   computedMasked: masked,
-                  reminderEnabled: true
+                  reminderEnabled: d.reminderEnabled !== false && d.reminderEnabled !== 'false'
                 });
               }
             });
