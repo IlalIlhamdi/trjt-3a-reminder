@@ -144,12 +144,12 @@
             <div>
               <div style="display: flex; align-items: center; gap: 8px;">
                 <h2 class="section-title">Notifikasi</h2>
-                <span id="notif-unread-count-badge" class="soft-badge-info" style="font-size: 11px;">2 Baru</span>
+                <span id="notif-unread-count-badge" class="soft-badge-info" style="font-size: 11px;">0 belum dibaca</span>
               </div>
-              <p style="font-size: var(--font-size-xs); color: var(--color-secondary-text); margin-top: 3px;">Pengingat jadwal & informasi perkuliahan TRJT 3A</p>
+              <p style="font-size: var(--font-size-xs); color: var(--color-secondary-text); margin-top: 3px;">Pengingat jadwal dan informasi perkuliahan TRJT 3A</p>
             </div>
             <button id="btn-mark-all-read" class="btn-ghost" style="padding: 6px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0;">
-              <i data-lucide="check-check" style="width: 14px; height: 14px;"></i> Tandai Dibaca
+              <i data-lucide="check-check" style="width: 14px; height: 14px;"></i> Tandai semua dibaca
             </button>
           </div>
 
@@ -373,6 +373,7 @@
        ========================================== -->
   <div id="modal-course-materials" class="modal-backdrop" role="dialog" aria-modal="true">
     <div class="modal-sheet">
+      <div class="modal-drag-handle"></div>
       <!-- Modal Header -->
       <div class="modal-header">
         <div style="display: flex; align-items: center; gap: 12px;">
@@ -405,7 +406,7 @@
             </button>
             <div style="position: relative; flex: 1;">
               <i data-lucide="search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: var(--color-secondary-text);"></i>
-              <input type="text" id="mat-search-input" class="form-input" placeholder="Cari materi..." style="width: 100%; padding-left: 32px; font-size: 13px; padding-top: 7px; padding-bottom: 7px; border-radius: 9999px;">
+              <input type="text" id="mat-search-input" class="form-input" placeholder="Cari materi..." style="width: 100%; padding-left: 32px; font-size: 13px; padding-top: 7px; padding-bottom: 7px; border-radius: 9999px; min-height: 38px;">
             </div>
           </div>
 
@@ -443,10 +444,11 @@
        ========================================== -->
   <div id="modal-upload-material" class="modal-backdrop" role="dialog" aria-modal="true">
     <div class="modal-sheet">
+      <div class="modal-drag-handle"></div>
       <!-- Modal Header -->
       <div class="modal-header">
         <div>
-          <h2 style="font-size: 15px; font-weight: 700; color: var(--color-primary-text);">Unggah Materi Perkuliahan</h2>
+          <h2 style="font-size: 15px; font-weight: 700; color: var(--color-primary-text);">Unggah Materi</h2>
           <p id="upload-modal-course-sub" style="font-size: 12px; color: var(--color-secondary-text); margin-top: 2px;">Tersimpan otomatis di Google Drive Admin</p>
         </div>
         <button id="btn-close-upload-modal" class="btn-close-modal" aria-label="Tutup">
@@ -459,22 +461,22 @@
         
         <!-- Picker Actions Row (Camera, Gallery, Files) -->
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
-          <label style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 6px; background-color: #EFF6FF; border: 1px dashed #93C5FD; border-radius: 14px; cursor: pointer; text-align: center; transition: all var(--transition-fast);">
+          <label style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 6px; background-color: #EFF6FF; border: 1px dashed #93C5FD; border-radius: 14px; cursor: pointer; text-align: center; transition: all var(--transition-fast); min-height: 70px;">
             <input type="file" id="file-input-camera" accept="image/*" capture="environment" style="display: none;">
             <i data-lucide="camera" style="width: 22px; height: 22px; color: var(--color-primary-blue);"></i>
-            <span style="font-size: 11px; font-weight: 600; color: var(--color-deep-blue);">Ambil Foto</span>
+            <span style="font-size: 11px; font-weight: 600; color: var(--color-deep-blue); line-height: 1.2;">Ambil Foto</span>
           </label>
 
-          <label style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 6px; background-color: #EFF6FF; border: 1px dashed #93C5FD; border-radius: 14px; cursor: pointer; text-align: center; transition: all var(--transition-fast);">
+          <label style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 6px; background-color: #EFF6FF; border: 1px dashed #93C5FD; border-radius: 14px; cursor: pointer; text-align: center; transition: all var(--transition-fast); min-height: 70px;">
             <input type="file" id="file-input-gallery" accept="image/*" style="display: none;">
             <i data-lucide="image" style="width: 22px; height: 22px; color: var(--color-primary-blue);"></i>
-            <span style="font-size: 11px; font-weight: 600; color: var(--color-deep-blue);">Galeri Foto</span>
+            <span style="font-size: 11px; font-weight: 600; color: var(--color-deep-blue); line-height: 1.2;">Galeri Foto</span>
           </label>
 
-          <label style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 6px; background-color: #F8FAFC; border: 1px dashed var(--color-border-card); border-radius: 14px; cursor: pointer; text-align: center; transition: all var(--transition-fast);">
+          <label style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 6px; background-color: #F8FAFC; border: 1px dashed var(--color-border-card); border-radius: 14px; cursor: pointer; text-align: center; transition: all var(--transition-fast); min-height: 70px;">
             <input type="file" id="file-input-document" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.rar" style="display: none;">
             <i data-lucide="file-text" style="width: 22px; height: 22px; color: var(--color-secondary-text);"></i>
-            <span style="font-size: 11px; font-weight: 600; color: var(--color-primary-text);">Pilih Dokumen</span>
+            <span style="font-size: 11px; font-weight: 600; color: var(--color-primary-text); line-height: 1.2;">Pilih Dokumen</span>
           </label>
         </div>
 
@@ -487,31 +489,32 @@
             <p id="upload-file-name" style="font-size: 13px; font-weight: 700; color: var(--color-primary-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">file-name.pdf</p>
             <p id="upload-file-size" style="font-size: 11px; color: var(--color-secondary-text); margin-top: 2px;">2.4 MB</p>
           </div>
-          <button type="button" id="btn-remove-selected-file" style="background: none; border: none; cursor: pointer; color: var(--color-muted-text); padding: 4px;">
-            <i data-lucide="trash-2" style="width: 16px; height: 16px; color: #DC2626;"></i>
+          <button type="button" id="btn-remove-selected-file" style="background: none; border: none; cursor: pointer; color: var(--color-muted-text); padding: 6px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Hapus File">
+            <i data-lucide="trash-2" style="width: 18px; height: 18px; color: #DC2626;"></i>
           </button>
         </div>
 
-        <!-- Description / Note Input -->
+        <!-- Description / Note Input (Strictly Vertical) -->
         <div class="form-group">
-          <label style="font-size: 12px; font-weight: 600; color: var(--color-primary-text);">Catatan / Keterangan (Opsional)</label>
-          <input type="text" id="upload-material-desc" class="form-input" placeholder="Contoh: Modul Praktikum Bab 3, Slide Presentasi..." style="font-size: 13px;">
+          <label for="upload-material-desc" class="form-label">Catatan / Keterangan (Opsional)</label>
+          <input type="text" id="upload-material-desc" class="form-input" placeholder="Contoh: Modul Praktikum Bab 1">
         </div>
 
-        <!-- Uploader Name Input -->
+        <!-- Uploader Name Input (Strictly Vertical) -->
         <div class="form-group">
-          <label style="font-size: 12px; font-weight: 600; color: var(--color-primary-text);">Nama Pengunggah (Opsional)</label>
-          <input type="text" id="upload-material-author" class="form-input" placeholder="Contoh: Komti / Nama Mahasiswa" style="font-size: 13px;">
+          <label for="upload-material-author" class="form-label">Nama Pengunggah (Opsional)</label>
+          <input type="text" id="upload-material-author" class="form-input" placeholder="Contoh: Komti / Nama Mahasiswa">
         </div>
 
-        <!-- Submit Button -->
-        <button type="submit" id="btn-submit-upload-mat" class="btn-primary" style="padding: 12px; font-size: 14px; justify-content: center; margin-top: 6px;">
-          <i data-lucide="cloud-upload" style="width: 18px; height: 18px;"></i> Simpan ke Google Drive
+        <!-- Submit Button (Min height 52px, full width) -->
+        <button type="submit" id="btn-submit-upload-mat" class="btn-submit-upload" disabled>
+          <i data-lucide="cloud-upload" style="width: 20px; height: 20px;"></i>
+          <span id="btn-submit-upload-text">Simpan ke Google Drive</span>
         </button>
 
         <!-- Upload Status Feedback -->
         <div id="upload-status-text" style="display: none; text-align: center; font-size: 13px; font-weight: 600; color: var(--color-primary-blue);">
-          <i data-lucide="loader-2" class="spin-animate" style="width: 14px; height: 14px; vertical-align: middle;"></i> Mengunggah ke Google Drive…
+          <i data-lucide="loader-2" class="spin-animate" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 4px;"></i> Mengunggah ke Google Drive…
         </div>
 
       </form>

@@ -215,19 +215,19 @@
           <div>
             <h2 class="hero-subject-name">${item.courseName}</h2>
             <div class="hero-lecturer-name">
-              <i data-lucide="user-round" style="width: 16px; height: 16px;"></i>
-              ${getLecturerDisplay(item.lecturerName)}
+              <i data-lucide="user-round" style="width: 15px; height: 15px;"></i>
+              ${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}
             </div>
           </div>
 
           <div class="hero-pill-bar">
             <div class="pill-item">
-              <i data-lucide="clock" style="width: 15px; height: 15px;"></i>
+              <i data-lucide="clock" style="width: 14px; height: 14px;"></i>
               ${item.startTime.replace(':', '.')} – ${item.endTime.replace(':', '.')}
             </div>
             <span class="pill-divider"></span>
             <div class="pill-item">
-              <i data-lucide="map-pin" style="width: 15px; height: 15px;"></i>
+              <i data-lucide="map-pin" style="width: 14px; height: 14px;"></i>
               ${getRoomDisplay(item.roomCode, item.roomName)}
             </div>
           </div>
@@ -253,7 +253,7 @@
         <div class="hero-class-card ${isH10 ? 'state-h10' : ''}">
           <div class="hero-card-header">
             <div class="hero-label-badge ${isH10 ? 'h10' : ''}">
-              ${isH10 ? '<i data-lucide="bell" style="width: 14px; height: 14px;"></i> 10 MENIT LAGI' : 'KELAS BERIKUTNYA'}
+              ${isH10 ? '<i data-lucide="bell" style="width: 13px; height: 13px;"></i> 10 Menit Lagi' : 'Kelas Berikutnya'}
             </div>
             <span class="room-badge">${item.roomCode}</span>
           </div>
@@ -261,19 +261,19 @@
           <div>
             <h2 class="hero-subject-name">${item.courseName}</h2>
             <div class="hero-lecturer-name">
-              <i data-lucide="user-round" style="width: 16px; height: 16px;"></i>
+              <i data-lucide="user-round" style="width: 15px; height: 15px;"></i>
               ${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}
             </div>
           </div>
 
           <div class="hero-pill-bar">
             <div class="pill-item">
-              <i data-lucide="clock" style="width: 15px; height: 15px;"></i>
+              <i data-lucide="clock" style="width: 14px; height: 14px;"></i>
               ${item.startTime.replace(':', '.')} – ${item.endTime.replace(':', '.')}
             </div>
             <span class="pill-divider"></span>
             <div class="pill-item">
-              <i data-lucide="map-pin" style="width: 15px; height: 15px;"></i>
+              <i data-lucide="map-pin" style="width: 14px; height: 14px;"></i>
               ${getRoomDisplay(item.roomCode, item.roomName)}
             </div>
           </div>
@@ -287,13 +287,44 @@
       return;
     }
 
-    // Case 3: Empty State (Weekend or Finished Today)
+    // Case 3 (B): All Classes Finished Today (e.g. 2 of 2 Completed)
+    if (data.totalCount > 0 && data.completedCount === data.totalCount) {
+      heroContainer.innerHTML = `
+        <div class="empty-state-card">
+          <div class="empty-icon-circle success">
+            <i data-lucide="check-circle-2" style="width: 26px; height: 26px;"></i>
+          </div>
+          <h2 class="empty-title">Semua kelas hari ini selesai</h2>
+          <p class="empty-desc">
+            Kerja bagus! Kamu sudah menyelesaikan ${data.completedCount} dari ${data.totalCount} kelas hari ini.
+          </p>
+          ${
+            data.nextDayUpcomingClass
+              ? `
+            <div class="nested-highlight-card" onclick="document.querySelector('[data-tab=jadwal]').click()">
+              <div class="nested-content">
+                <span class="nested-badge">KELAS BERIKUTNYA</span>
+                <span class="nested-time">${data.nextDayName} · ${data.nextDayUpcomingClass.startTime.replace(':', '.')}</span>
+                <span class="nested-subject">${data.nextDayUpcomingClass.courseName}</span>
+                <span class="nested-meta">${data.nextDayUpcomingClass.roomCode} · ${getLecturerDisplay(data.nextDayUpcomingClass.lecturerName, data.nextDayUpcomingClass.lecturerCode, data.nextDayUpcomingClass.courseName)}</span>
+              </div>
+              <i data-lucide="chevron-right" style="width: 18px; height: 18px; color: var(--color-primary-blue);"></i>
+            </div>
+          `
+              : ''
+          }
+        </div>
+      `;
+      return;
+    }
+
+    // Case 4 (A): No Classes Today (Weekend or Academic Holiday)
     heroContainer.innerHTML = `
       <div class="empty-state-card">
         <div class="empty-icon-circle">
-          <i data-lucide="calendar" style="width: 30px; height: 30px;"></i>
+          <i data-lucide="calendar" style="width: 26px; height: 26px;"></i>
         </div>
-        <h2 class="empty-title">Tidak Ada Kelas Hari Ini</h2>
+        <h2 class="empty-title">Tidak ada kelas hari ini</h2>
         <p class="empty-desc">
           Nikmati waktu luangmu. Jadwal berikutnya sudah kami siapkan.
         </p>
@@ -305,9 +336,9 @@
               <span class="nested-badge">KELAS BERIKUTNYA</span>
               <span class="nested-time">${data.nextDayName} · ${data.nextDayUpcomingClass.startTime.replace(':', '.')}</span>
               <span class="nested-subject">${data.nextDayUpcomingClass.courseName}</span>
-              <span class="nested-meta">${data.nextDayUpcomingClass.roomCode} · ${getLecturerDisplay(data.nextDayUpcomingClass.lecturerName)}</span>
+              <span class="nested-meta">${data.nextDayUpcomingClass.roomCode} · ${getLecturerDisplay(data.nextDayUpcomingClass.lecturerName, data.nextDayUpcomingClass.lecturerCode, data.nextDayUpcomingClass.courseName)}</span>
             </div>
-            <i data-lucide="chevron-right" style="width: 20px; height: 20px; color: var(--color-primary-blue);"></i>
+            <i data-lucide="chevron-right" style="width: 18px; height: 18px; color: var(--color-primary-blue);"></i>
           </div>
         `
             : ''
@@ -321,7 +352,12 @@
     const totalEl = document.getElementById('quick-stat-total');
     const completedEl = document.getElementById('quick-stat-completed');
     if (totalEl) totalEl.innerText = `${data.totalCount} Kelas`;
-    if (completedEl) completedEl.innerText = `${data.completedCount} / ${data.totalCount}`;
+    if (completedEl) {
+      completedEl.innerText = `${data.completedCount} / ${data.totalCount}`;
+      completedEl.style.color = (data.completedCount > 0 && data.completedCount === data.totalCount) 
+        ? 'var(--color-status-in-progress)' 
+        : 'var(--color-primary-blue)';
+    }
   }
 
   function renderTodayTimeline(data) {
@@ -331,7 +367,7 @@
     if (data.todayClasses.length === 0) {
       timelineContainer.innerHTML = `
         <div class="empty-state-card" style="padding: 24px; box-shadow: var(--shadow-subtle);">
-          <i data-lucide="coffee" style="width: 28px; height: 28px; color: var(--color-secondary-text);"></i>
+          <i data-lucide="coffee" style="width: 26px; height: 26px; color: var(--color-secondary-text);"></i>
           <p style="font-size: var(--font-size-body); color: var(--color-secondary-text); margin-top: 4px;">Tidak ada agenda perkuliahan hari ini.</p>
         </div>
       `;
@@ -352,12 +388,12 @@
 
         if (isActive) {
           statusClass = 'is-ongoing';
-          statusBadge = `<span class="soft-badge-success">● Sedang Berlangsung</span>`;
+          statusBadge = `<span class="timeline-status-tag ongoing">● Berlangsung</span>`;
         } else if (isPast) {
           statusClass = 'is-finished';
-          statusBadge = `<span class="soft-badge-neutral">Selesai</span>`;
+          statusBadge = `<span class="timeline-status-tag finished">Selesai</span>`;
         } else {
-          statusBadge = `<span class="soft-badge-info">Akan Datang</span>`;
+          statusBadge = `<span class="timeline-status-tag upcoming">Akan Datang</span>`;
         }
 
         return `
@@ -375,13 +411,13 @@
               <div class="timeline-footer" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
                 <div style="display: flex; align-items: center; gap: 6px;">
                   <span class="room-badge">
-                    <i data-lucide="map-pin" style="width: 12px; height: 12px;"></i>
+                    <i data-lucide="map-pin" style="width: 11px; height: 11px;"></i>
                     ${getRoomDisplay(item.roomCode, item.roomName)}
                   </span>
                   ${statusBadge}
                 </div>
-                <button class="btn-course-material" style="padding: 4px 10px; font-size: 11px;" onclick="window.openCourseMaterialsModal('${item.id}', '${item.courseName.replace(/'/g, "\\'")}', '${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName).replace(/'/g, "\\'")}', '${item.roomCode}')">
-                  <i data-lucide="folder" style="width: 12px; height: 12px;"></i> Materi
+                <button class="btn-course-material" style="padding: 6px 12px; font-size: 12px; min-height: 44px; min-width: 44px;" onclick="window.openCourseMaterialsModal('${item.id}', '${item.courseName.replace(/'/g, "\\'")}', '${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName).replace(/'/g, "\\'")}', '${item.roomCode}')">
+                  <i data-lucide="folder" style="width: 13px; height: 13px;"></i> Materi
                 </button>
               </div>
             </div>
@@ -401,10 +437,10 @@
 
     if (dayClasses.length === 0) {
       listContainer.innerHTML = `
-        <div class="empty-state-card" style="padding: 32px 20px;">
-          <i data-lucide="sun" style="width: 32px; height: 32px; color: var(--color-primary-blue);"></i>
-          <p style="font-weight: 700; font-size: var(--font-size-base); color: var(--color-primary-text);">Tidak ada jadwal kuliah</p>
-          <p style="font-size: var(--font-size-body); color: var(--color-secondary-text);">Hari ini libur / tidak ada perkuliahan.</p>
+        <div class="empty-state-card" style="padding: 24px 16px;">
+          <i data-lucide="sun" style="width: 28px; height: 28px; color: var(--color-primary-blue);"></i>
+          <p style="font-weight: 700; font-size: 14px; color: var(--color-primary-text);">Tidak ada jadwal kuliah</p>
+          <p style="font-size: 12px; color: var(--color-secondary-text);">Hari ini libur / tidak ada agenda perkuliahan.</p>
         </div>
       `;
       return;
@@ -416,16 +452,16 @@
           <div class="schedule-card">
             <div class="schedule-card-top">
               <span class="schedule-time-label">
-                <i data-lucide="clock" style="width: 15px; height: 15px;"></i>
+                <i data-lucide="clock" style="width: 14px; height: 14px;"></i>
                 ${item.startTime.replace(':', '.')} – ${item.endTime.replace(':', '.')}
               </span>
               <span class="room-badge">
-                <i data-lucide="map-pin" style="width: 12px; height: 12px;"></i>
+                <i data-lucide="map-pin" style="width: 11px; height: 11px;"></i>
                 ${item.roomCode}
               </span>
             </div>
             
-            <h3 class="schedule-course-title">${item.courseName}</h3>
+            <h3 class="schedule-course-title" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${item.courseName}</h3>
             
             <div class="schedule-lecturer-name">
               <i data-lucide="user-round" style="width: 14px; height: 14px;"></i>
@@ -434,7 +470,7 @@
 
             <div class="schedule-card-bottom" style="display: flex; align-items: center; justify-content: space-between;">
               <span>${item.roomName ? item.roomName : 'Gedung III Teknik Elektro Lt. 2'}</span>
-              <button class="btn-course-material" onclick="window.openCourseMaterialsModal('${item.id}', '${item.courseName.replace(/'/g, "\\'")}', '${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName).replace(/'/g, "\\'")}', '${item.roomCode}')">
+              <button class="btn-course-material" style="padding: 6px 12px; font-size: 12px; min-height: 44px;" onclick="window.openCourseMaterialsModal('${item.id}', '${item.courseName.replace(/'/g, "\\'")}', '${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName).replace(/'/g, "\\'")}', '${item.roomCode}')">
                 <i data-lucide="folder" style="width: 13px; height: 13px;"></i> Materi
               </button>
             </div>
@@ -449,13 +485,22 @@
     const badgeEl = document.getElementById('notif-unread-count-badge');
     const headerDot = document.getElementById('header-unread-dot');
     const navDot = document.getElementById('nav-notif-dot');
+    const markAllReadBtn = document.getElementById('btn-mark-all-read');
     if (!container) return;
 
     const unreadCount = state.notifications.filter((n) => !n.read).length;
     if (badgeEl) {
-      badgeEl.innerText = unreadCount > 0 ? `${unreadCount} Baru` : 'Semua Terbaca';
-      badgeEl.style.display = 'inline-block';
-      badgeEl.className = unreadCount > 0 ? 'soft-badge-info' : 'soft-badge-neutral';
+      badgeEl.innerText = unreadCount > 0 ? `${unreadCount} belum dibaca` : 'Semua dibaca';
+      badgeEl.style.display = unreadCount > 0 ? 'inline-block' : 'none';
+    }
+    if (markAllReadBtn) {
+      if (unreadCount === 0) {
+        markAllReadBtn.style.opacity = '0.4';
+        markAllReadBtn.style.pointerEvents = 'none';
+      } else {
+        markAllReadBtn.style.opacity = '1';
+        markAllReadBtn.style.pointerEvents = 'auto';
+      }
     }
     if (headerDot) {
       headerDot.style.display = unreadCount > 0 ? 'block' : 'none';
@@ -466,12 +511,12 @@
 
     if (state.notifications.length === 0) {
       container.innerHTML = `
-        <div class="empty-state-card" style="padding: 44px 20px;">
+        <div class="empty-state-card" style="padding: 36px 20px;">
           <div class="empty-icon-circle">
-            <i data-lucide="bell-off" style="width: 28px; height: 28px; color: var(--color-muted-text);"></i>
+            <i data-lucide="bell-off" style="width: 26px; height: 26px; color: var(--color-muted-text);"></i>
           </div>
-          <p style="font-weight: 700; font-size: var(--font-size-base); color: var(--color-primary-text); margin-top: 12px;">Belum Ada Notifikasi</p>
-          <p style="font-size: var(--font-size-body); color: var(--color-secondary-text); margin-top: 4px;">Pemberitahuan pengingat H-10 dan info jadwal kelas TRJT 3A akan tampil di sini.</p>
+          <p style="font-weight: 700; font-size: 14px; color: var(--color-primary-text); margin-top: 10px;">Belum Ada Notifikasi</p>
+          <p style="font-size: 12px; color: var(--color-secondary-text); margin-top: 2px;">Pemberitahuan pengingat kelas dan info perkuliahan TRJT 3A akan tampil di sini.</p>
         </div>
       `;
       return;
@@ -481,19 +526,36 @@
       .map((item, index) => {
         const isH10 = item.type === 'h10';
         const isCancel = item.type === 'cancel';
-        const typeClass = isH10 ? 'type-h10' : (isCancel ? 'type-cancel' : 'type-info');
-        const iconName = isH10 ? 'bell' : (isCancel ? 'alert-triangle' : 'map-pin');
-        const tagLabel = isH10 ? '🔔 Pengingat H-10' : (isCancel ? '⚠️ Dibatalkan' : '📍 Info Ruang');
+        const isRoom = item.type === 'room' || item.type === 'info';
+        const isMat = item.type === 'material';
+
+        let typeClass = 'type-h10';
+        let iconName = 'bell';
+        let categoryLabel = 'Pengingat kelas';
+
+        if (isCancel) {
+          typeClass = 'type-cancel';
+          iconName = 'alert-triangle';
+          categoryLabel = 'Dibatalkan';
+        } else if (isRoom) {
+          typeClass = 'type-info';
+          iconName = 'map-pin';
+          categoryLabel = 'Perubahan ruangan';
+        } else if (isMat) {
+          typeClass = 'type-info';
+          iconName = 'folder';
+          categoryLabel = 'Materi baru';
+        }
 
         return `
           <div class="notif-card ${item.read ? 'read' : 'unread'}" data-index="${index}">
             <div class="notif-circle-icon ${typeClass}">
-              <i data-lucide="${iconName}" style="width: 20px; height: 20px;"></i>
+              <i data-lucide="${iconName}" style="width: 18px; height: 18px;"></i>
             </div>
             <div class="notif-body">
               <div class="notif-top-row">
                 <span class="notif-badge-tag ${typeClass}">
-                  ${tagLabel}
+                  ${categoryLabel}
                 </span>
                 <span class="notif-time-text">
                   ${!item.read ? '<span class="unread-indicator-dot"></span>' : ''}
@@ -608,15 +670,22 @@
     if (!window.TRJT_FIREBASE) return;
     const notifStatus = window.TRJT_FIREBASE.getNotificationStatus();
 
-    // 1. Honest Notification Status Badge & Text
+    // 1. Honest Notification Status Badge & Text (User-Friendly)
     const badgeEl = document.getElementById('badge-notif-status');
     const descEl = document.getElementById('desc-notif-status');
     if (badgeEl) {
-      badgeEl.className = notifStatus.badgeClass || 'soft-badge-neutral';
-      badgeEl.innerText = notifStatus.status;
+      if (notifStatus.code === 'active') {
+        badgeEl.className = 'soft-badge-success';
+        badgeEl.innerText = 'Aktif & Siap';
+      } else {
+        badgeEl.className = 'soft-badge-warning';
+        badgeEl.innerHTML = '<span style="cursor: pointer;">Coba perbaiki</span>';
+      }
     }
     if (descEl) {
-      descEl.innerText = notifStatus.desc;
+      descEl.innerText = (notifStatus.code === 'active')
+        ? 'Perangkat terhubung dan siap menerima pengingat perkuliahan.'
+        : 'Aplikasi belum dapat menerima pengingat di perangkat ini.';
     }
 
     // 2. Switches synchronization
@@ -720,6 +789,12 @@
       }
     });
 
+    // Auto-hide bell button on Notifikasi view to avoid redundancy
+    const headerBell = document.getElementById('btn-header-bell');
+    if (headerBell) {
+      headerBell.style.display = (tabId === 'notifikasi') ? 'none' : 'inline-flex';
+    }
+
     const greetingWrap = document.querySelector('.header-greeting-wrap');
     if (greetingWrap) {
       greetingWrap.style.display = (tabId === 'beranda') ? 'flex' : 'none';
@@ -766,6 +841,25 @@
         renderNotifications();
         showToast('✅ Semua notifikasi telah ditandai dibaca', 'success');
         if (window.lucide) window.lucide.createIcons();
+      });
+    }
+
+    // Row Notification Status click to request/fix
+    const rowNotifStatus = document.getElementById('row-notif-status');
+    if (rowNotifStatus) {
+      rowNotifStatus.addEventListener('click', async () => {
+        if (window.TRJT_FIREBASE) {
+          const status = window.TRJT_FIREBASE.getNotificationStatus();
+          if (status.code !== 'active') {
+            try {
+              await window.TRJT_FIREBASE.requestNotificationPermission(true);
+              showToast('✅ Notifikasi berhasil diaktifkan!', 'success');
+              renderSettingsUI();
+            } catch (err) {
+              showToast('⚠️ ' + err.message, 'error');
+            }
+          }
+        }
       });
     }
 
@@ -964,6 +1058,8 @@
         selectedUploadFile = null;
         const previewBox = document.getElementById('upload-preview-box');
         if (previewBox) previewBox.style.display = 'none';
+        const submitBtn = document.getElementById('btn-submit-upload-mat');
+        if (submitBtn) submitBtn.disabled = true;
         ['file-input-camera', 'file-input-gallery', 'file-input-document'].forEach((id) => {
           const input = document.getElementById(id);
           if (input) input.value = '';
@@ -1010,7 +1106,7 @@
         } finally {
           if (submitBtn) {
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i data-lucide="cloud-upload" style="width: 18px; height: 18px;"></i> Simpan ke Google Drive';
+            submitBtn.innerHTML = '<i data-lucide="cloud-upload" style="width: 18px; height: 18px;"></i> <span>Simpan ke Google Drive</span>';
           }
           if (statusText) statusText.style.display = 'none';
           if (window.lucide) window.lucide.createIcons();
@@ -1174,8 +1270,8 @@
     if (previewBox) previewBox.style.display = 'none';
     if (statusText) statusText.style.display = 'none';
     if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = '<i data-lucide="cloud-upload" style="width: 18px; height: 18px;"></i> Simpan ke Google Drive';
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i data-lucide="cloud-upload" style="width: 18px; height: 18px;"></i> <span>Simpan ke Google Drive</span>';
     }
 
     if (modal) modal.classList.add('is-open');
@@ -1195,6 +1291,7 @@
     const previewIcon = document.getElementById('upload-preview-icon');
     const fileNameEl = document.getElementById('upload-file-name');
     const fileSizeEl = document.getElementById('upload-file-size');
+    const submitBtn = document.getElementById('btn-submit-upload-mat');
 
     if (fileNameEl) fileNameEl.innerText = file.name;
     if (fileSizeEl && window.TRJT_MATERIALS) fileSizeEl.innerText = window.TRJT_MATERIALS.formatFileSize(file.size);
@@ -1209,6 +1306,7 @@
     }
 
     if (previewBox) previewBox.style.display = 'flex';
+    if (submitBtn) submitBtn.disabled = false;
     if (window.lucide) window.lucide.createIcons();
   }
 
