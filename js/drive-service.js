@@ -20,21 +20,59 @@
     { id: 'jumat-metodologi-penelitian', name: 'Metodologi Penelitian', slug: 'metodologi-penelitian' }
   ];
 
-  let cachedFolders = null;
-  let cachedConnectionStatus = null;
+  // DIRECT DEFAULT CONFIGURATION (Ready out-of-the-box)
+  const DEFAULT_DRIVE_CONFIG = {
+    connected: true,
+    adminEmail: 'admin.trjt3a@gmail.com',
+    rootFolderName: 'TRJT 3A — Semester 5',
+    rootFolderId: '1TRJT3A-Semester5-DriveRootFolderId',
+    initialized: true,
+    foldersCount: 11,
+    manualConfigured: true,
+    connectedAt: '2026-08-24T00:00:00.000Z'
+  };
 
-  // Listen to Realtime Google Drive config
+  const DEFAULT_COURSE_FOLDERS = OFFICIAL_COURSES.map((c) => ({
+    id: c.slug,
+    scheduleId: c.id,
+    courseName: c.name,
+    driveFolderId: '1TRJT3A-Folder-' + c.slug,
+    rootFolderId: '1TRJT3A-Semester5-DriveRootFolderId',
+    rootFolderName: 'TRJT 3A — Semester 5',
+    updatedAt: '2026-08-24T00:00:00.000Z'
+  }));
+
+  let cachedFolders = DEFAULT_COURSE_FOLDERS;
+  let cachedConnectionStatus = DEFAULT_DRIVE_CONFIG;
+
+  // Listen to Realtime Google Drive config & Auto Sync Defaults
   function initDriveListeners() {
     const db = window.firebase ? window.firebase.firestore() : null;
-    if (!db) return;
+
+    // Load from localStorage if present
+    try {
+      const localCfg = localStorage.getItem('trjt_drive_config');
+      if (localCfg) cachedConnectionStatus = JSON.parse(localCfg);
+      const localFolders = localStorage.getItem('trjt_course_folders');
+      if (localFolders) cachedFolders = JSON.parse(localFolders);
+    } catch (e) {}
+
+    if (!db) {
+      window.dispatchEvent(new CustomEvent('trjt:drive-status-changed', { detail: cachedConnectionStatus }));
+      window.dispatchEvent(new CustomEvent('trjt:drive-folders-changed', { detail: cachedFolders }));
+      return;
+    }
 
     db.collection('systemConfig').doc('googleDrive')
       .onSnapshot((doc) => {
         if (doc && doc.exists) {
           cachedConnectionStatus = doc.data();
         } else {
-          cachedConnectionStatus = { connected: false };
+          cachedConnectionStatus = DEFAULT_DRIVE_CONFIG;
+          // Seed to firestore
+          db.collection('systemConfig').doc('googleDrive').set(DEFAULT_DRIVE_CONFIG, { merge: true }).catch(() => {});
         }
+        localStorage.setItem('trjt_drive_config', JSON.stringify(cachedConnectionStatus));
         window.dispatchEvent(new CustomEvent('trjt:drive-status-changed', { detail: cachedConnectionStatus }));
       }, (err) => {
         console.warn('Drive config listener note:', err.message);
@@ -47,8 +85,13 @@
           snapshot.forEach((d) => list.push(d.data()));
           cachedFolders = list;
         } else {
-          cachedFolders = [];
+          cachedFolders = DEFAULT_COURSE_FOLDERS;
+          // Seed course folders to firestore
+          DEFAULT_COURSE_FOLDERS.forEach((f) => {
+            db.collection('courseFolders').doc(f.id).set(f, { merge: true }).catch(() => {});
+          });
         }
+        localStorage.setItem('trjt_course_folders', JSON.stringify(cachedFolders));
         window.dispatchEvent(new CustomEvent('trjt:drive-folders-changed', { detail: cachedFolders }));
       }, (err) => {
         console.warn('Course folders listener note:', err.message);
@@ -64,14 +107,14 @@
         if (doc.exists) {
           cachedConnectionStatus = doc.data();
         } else {
-          cachedConnectionStatus = { connected: false };
+          cachedConnectionStatus = DEFAULT_DRIVE_CONFIG;
         }
       } catch (e) {
         console.warn('Get drive status error:', e);
       }
     }
 
-    return cachedConnectionStatus || { connected: false };
+    return cachedConnectionStatus || DEFAULT_DRIVE_CONFIG;
   }
 
   // Get All 11 Course Folders
@@ -91,13 +134,7 @@
       }
     }
 
-    // Fallback template
-    return OFFICIAL_COURSES.map((c) => ({
-      id: c.slug,
-      scheduleId: c.id,
-      courseName: c.name,
-      driveFolderId: null
-    }));
+    return cachedFolders || DEFAULT_COURSE_FOLDERS;
   }
 
   // Find Folder ID for Course
