@@ -32,7 +32,7 @@
   <div class="app-viewport">
     <div class="app-container">
 
-      <!-- App Header -->
+      <!-- App Header (Ultra-compact sticky topbar) -->
       <header class="app-header">
         <div class="header-top">
           <a href="./admin/index.html" class="brand-badge" style="text-decoration: none;" title="Masuk ke Portal Admin TRJT 3A">
@@ -50,11 +50,6 @@
             <span id="header-unread-dot" class="bell-unread-dot" style="display: none;"></span>
           </button>
         </div>
-
-        <div class="header-greeting-wrap">
-          <h1 id="header-greeting" class="greeting-text">Selamat sore 👋</h1>
-          <p id="header-date" class="greeting-date">Senin, 24 Agustus 2026</p>
-        </div>
       </header>
 
       <!-- Main App Content -->
@@ -65,44 +60,27 @@
              ========================================== -->
         <section id="view-beranda" class="view-section active">
 
-          <!-- Hero Next Class Card Container -->
+          <!-- Greeting Section (Inside normal scrollable flow, no emoji) -->
+          <div class="beranda-greeting-wrap">
+            <h1 id="header-greeting" class="greeting-text">Selamat malam</h1>
+            <p id="header-date" class="greeting-date">Senin, 24 Agustus 2026</p>
+          </div>
+
+          <!-- Hero Next Class / Status Card Container -->
           <div id="hero-card-container">
             <!-- Dynamically populated by evaluateScheduleState() -->
           </div>
 
-          <!-- Quick Information (2-Column Mobile Grid) -->
-          <div class="quick-stats-grid">
-            <div class="quick-stat-card">
-              <div class="stat-icon-circle blue">
-                <i data-lucide="calendar" style="width: 18px; height: 18px;"></i>
-              </div>
-              <div class="stat-info-wrap">
-                <span class="stat-label-text">Hari Ini</span>
-                <span id="quick-stat-total" class="stat-value-text">2 Kelas</span>
-              </div>
-            </div>
-
-            <div class="quick-stat-card">
-              <div class="stat-icon-circle green">
-                <i data-lucide="check-circle-2" style="width: 18px; height: 18px;"></i>
-              </div>
-              <div class="stat-info-wrap">
-                <span class="stat-label-text">Selesai</span>
-                <span id="quick-stat-completed" class="stat-value-text" style="color: var(--color-primary-blue);">0 / 2</span>
-              </div>
-            </div>
-          </div>
-
           <!-- Section: Jadwal Hari Ini (Vertical Timeline) -->
-          <div>
+          <div style="margin-top: 4px;">
             <div class="section-header">
-              <h2 class="section-title">Jadwal Hari Ini</h2>
+              <h2 class="section-title">Jadwal hari ini</h2>
               <span class="section-action-link" onclick="document.querySelector('[data-tab=jadwal]').click()">
-                Semua Hari <i data-lucide="chevron-right" style="width: 16px; height: 16px;"></i>
+                Lihat jadwal <i data-lucide="chevron-right" style="width: 15px; height: 15px;"></i>
               </span>
             </div>
 
-            <div id="today-timeline-container" class="timeline-list" style="margin-top: 14px;">
+            <div id="today-timeline-container" class="timeline-list" style="margin-top: 12px;">
               <!-- Dynamically populated -->
             </div>
           </div>
@@ -115,8 +93,8 @@
         <section id="view-jadwal" class="view-section">
           
           <div class="section-header">
-            <h2 class="section-title">Jadwal Mingguan</h2>
-            <span class="soft-badge-info" style="font-size: 12px;">Semester 5</span>
+            <h2 class="section-title">Jadwal mingguan</h2>
+            <span class="soft-badge-info" style="font-size: 11px;">Semester 5</span>
           </div>
 
           <!-- Segmented Day Control: Sen, Sel, Rab, Kam, Jum -->
@@ -140,20 +118,20 @@
              ========================================== -->
         <section id="view-notifikasi" class="view-section">
           
-          <div class="section-header" style="align-items: flex-start; justify-content: space-between; gap: 12px;">
-            <div>
-              <div style="display: flex; align-items: center; gap: 8px;">
+          <div class="notif-header-wrap">
+            <div class="notif-header-top">
+              <div class="notif-title-group">
                 <h2 class="section-title">Notifikasi</h2>
-                <span id="notif-unread-count-badge" class="soft-badge-info" style="font-size: 11px;">0 belum dibaca</span>
+                <span id="notif-unread-count-badge" class="notif-count-badge" style="display: none;">0 belum dibaca</span>
               </div>
-              <p style="font-size: var(--font-size-xs); color: var(--color-secondary-text); margin-top: 3px;">Pengingat jadwal dan informasi perkuliahan TRJT 3A</p>
+              <button id="btn-mark-all-read" class="btn-mark-all">
+                Tandai semua
+              </button>
             </div>
-            <button id="btn-mark-all-read" class="btn-ghost" style="padding: 6px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0;">
-              <i data-lucide="check-check" style="width: 14px; height: 14px;"></i> Tandai semua dibaca
-            </button>
+            <p class="notif-subtitle">Pengingat jadwal dan informasi perkuliahan TRJT 3A</p>
           </div>
 
-          <div id="notif-list-container" class="notif-list">
+          <div id="notif-list-container" class="notif-list" style="margin-top: 8px;">
             <!-- Dynamically populated -->
           </div>
 

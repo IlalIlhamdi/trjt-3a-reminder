@@ -48,10 +48,10 @@
   ];
 
   function getGreeting(hour) {
-    if (hour >= 4 && hour < 11) return 'Selamat pagi 👋';
-    if (hour >= 11 && hour < 15) return 'Selamat siang 👋';
-    if (hour >= 15 && hour < 18) return 'Selamat sore 👋';
-    return 'Selamat malam 👋';
+    if (hour >= 4 && hour < 11) return 'Selamat pagi';
+    if (hour >= 11 && hour < 15) return 'Selamat siang';
+    if (hour >= 15 && hour < 18) return 'Selamat sore';
+    return 'Selamat malam';
   }
 
   function formatFormattedDate(date) {
@@ -207,7 +207,7 @@
           <div class="hero-card-header">
             <div class="hero-label-badge in-progress">
               <span class="pulse-indicator"></span>
-              Sedang Berlangsung
+              Sedang berlangsung
             </div>
             <span class="room-badge">${item.roomCode}</span>
           </div>
@@ -215,19 +215,19 @@
           <div>
             <h2 class="hero-subject-name">${item.courseName}</h2>
             <div class="hero-lecturer-name">
-              <i data-lucide="user-round" style="width: 15px; height: 15px;"></i>
+              <i data-lucide="user-round" style="width: 14px; height: 14px;"></i>
               ${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}
             </div>
           </div>
 
           <div class="hero-pill-bar">
             <div class="pill-item">
-              <i data-lucide="clock" style="width: 14px; height: 14px;"></i>
+              <i data-lucide="clock" style="width: 13px; height: 13px;"></i>
               ${item.startTime.replace(':', '.')} – ${item.endTime.replace(':', '.')}
             </div>
             <span class="pill-divider"></span>
             <div class="pill-item">
-              <i data-lucide="map-pin" style="width: 14px; height: 14px;"></i>
+              <i data-lucide="map-pin" style="width: 13px; height: 13px;"></i>
               ${getRoomDisplay(item.roomCode, item.roomName)}
             </div>
           </div>
@@ -253,7 +253,7 @@
         <div class="hero-class-card ${isH10 ? 'state-h10' : ''}">
           <div class="hero-card-header">
             <div class="hero-label-badge ${isH10 ? 'h10' : ''}">
-              ${isH10 ? '<i data-lucide="bell" style="width: 13px; height: 13px;"></i> 10 Menit Lagi' : 'Kelas Berikutnya'}
+              ${isH10 ? '<i data-lucide="bell" style="width: 13px; height: 13px;"></i> 10 menit lagi' : 'Kelas berikutnya'}
             </div>
             <span class="room-badge">${item.roomCode}</span>
           </div>
@@ -261,19 +261,19 @@
           <div>
             <h2 class="hero-subject-name">${item.courseName}</h2>
             <div class="hero-lecturer-name">
-              <i data-lucide="user-round" style="width: 15px; height: 15px;"></i>
+              <i data-lucide="user-round" style="width: 14px; height: 14px;"></i>
               ${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}
             </div>
           </div>
 
           <div class="hero-pill-bar">
             <div class="pill-item">
-              <i data-lucide="clock" style="width: 14px; height: 14px;"></i>
+              <i data-lucide="clock" style="width: 13px; height: 13px;"></i>
               ${item.startTime.replace(':', '.')} – ${item.endTime.replace(':', '.')}
             </div>
             <span class="pill-divider"></span>
             <div class="pill-item">
-              <i data-lucide="map-pin" style="width: 14px; height: 14px;"></i>
+              <i data-lucide="map-pin" style="width: 13px; height: 13px;"></i>
               ${getRoomDisplay(item.roomCode, item.roomName)}
             </div>
           </div>
@@ -290,25 +290,25 @@
     // Case 3 (B): All Classes Finished Today (e.g. 2 of 2 Completed)
     if (data.totalCount > 0 && data.completedCount === data.totalCount) {
       heroContainer.innerHTML = `
-        <div class="empty-state-card">
-          <div class="empty-icon-circle success">
-            <i data-lucide="check-circle-2" style="width: 26px; height: 26px;"></i>
+        <div class="empty-state-card" style="padding: 16px 14px; gap: 8px;">
+          <div class="empty-icon-circle success" style="width: 44px; height: 44px; margin-bottom: 0;">
+            <i data-lucide="check-circle-2" style="width: 24px; height: 24px; color: var(--color-status-in-progress);"></i>
           </div>
-          <h2 class="empty-title">Semua kelas hari ini selesai</h2>
-          <p class="empty-desc">
-            Kerja bagus! Kamu sudah menyelesaikan ${data.completedCount} dari ${data.totalCount} kelas hari ini.
+          <h2 class="empty-title" style="font-size: 16px; margin: 0;">Semua kelas hari ini selesai</h2>
+          <span class="soft-badge-success" style="font-size: 11px; padding: 2px 10px; font-weight: 600;">${data.completedCount} dari ${data.totalCount} kelas selesai</span>
+          <p class="empty-desc" style="font-size: 12px; margin: 0; color: var(--color-secondary-text);">
+            ${data.completedCount} dari ${data.totalCount} kelas telah selesai.
           </p>
           ${
             data.nextDayUpcomingClass
               ? `
-            <div class="nested-highlight-card" onclick="document.querySelector('[data-tab=jadwal]').click()">
+            <div class="nested-highlight-card" style="margin-top: 4px; padding: 10px 12px;" onclick="document.querySelector('[data-tab=jadwal]').click()">
               <div class="nested-content">
-                <span class="nested-badge">KELAS BERIKUTNYA</span>
+                <span class="nested-badge">Kelas berikutnya</span>
                 <span class="nested-time">${data.nextDayName} · ${data.nextDayUpcomingClass.startTime.replace(':', '.')}</span>
                 <span class="nested-subject">${data.nextDayUpcomingClass.courseName}</span>
                 <span class="nested-meta">${data.nextDayUpcomingClass.roomCode} · ${getLecturerDisplay(data.nextDayUpcomingClass.lecturerName, data.nextDayUpcomingClass.lecturerCode, data.nextDayUpcomingClass.courseName)}</span>
               </div>
-              <i data-lucide="chevron-right" style="width: 18px; height: 18px; color: var(--color-primary-blue);"></i>
             </div>
           `
               : ''
@@ -320,25 +320,24 @@
 
     // Case 4 (A): No Classes Today (Weekend or Academic Holiday)
     heroContainer.innerHTML = `
-      <div class="empty-state-card">
-        <div class="empty-icon-circle">
-          <i data-lucide="calendar" style="width: 26px; height: 26px;"></i>
+      <div class="empty-state-card" style="padding: 18px 14px; gap: 8px;">
+        <div class="empty-icon-circle" style="width: 44px; height: 44px; margin-bottom: 0;">
+          <i data-lucide="calendar" style="width: 24px; height: 24px; color: var(--color-primary-blue);"></i>
         </div>
-        <h2 class="empty-title">Tidak ada kelas hari ini</h2>
-        <p class="empty-desc">
+        <h2 class="empty-title" style="font-size: 16px; margin: 0;">Tidak ada kelas hari ini</h2>
+        <p class="empty-desc" style="font-size: 12px; margin: 0; color: var(--color-secondary-text);">
           Nikmati waktu luangmu. Jadwal berikutnya sudah kami siapkan.
         </p>
         ${
           data.nextDayUpcomingClass
             ? `
-          <div class="nested-highlight-card" onclick="document.querySelector('[data-tab=jadwal]').click()">
+          <div class="nested-highlight-card" style="margin-top: 4px; padding: 10px 12px;" onclick="document.querySelector('[data-tab=jadwal]').click()">
             <div class="nested-content">
-              <span class="nested-badge">KELAS BERIKUTNYA</span>
+              <span class="nested-badge">Kelas berikutnya</span>
               <span class="nested-time">${data.nextDayName} · ${data.nextDayUpcomingClass.startTime.replace(':', '.')}</span>
               <span class="nested-subject">${data.nextDayUpcomingClass.courseName}</span>
               <span class="nested-meta">${data.nextDayUpcomingClass.roomCode} · ${getLecturerDisplay(data.nextDayUpcomingClass.lecturerName, data.nextDayUpcomingClass.lecturerCode, data.nextDayUpcomingClass.courseName)}</span>
             </div>
-            <i data-lucide="chevron-right" style="width: 18px; height: 18px; color: var(--color-primary-blue);"></i>
           </div>
         `
             : ''
@@ -490,17 +489,15 @@
 
     const unreadCount = state.notifications.filter((n) => !n.read).length;
     if (badgeEl) {
-      badgeEl.innerText = unreadCount > 0 ? `${unreadCount} belum dibaca` : 'Semua dibaca';
-      badgeEl.style.display = unreadCount > 0 ? 'inline-block' : 'none';
+      if (unreadCount > 0) {
+        badgeEl.innerText = `${unreadCount} belum dibaca`;
+        badgeEl.style.display = 'inline-block';
+      } else {
+        badgeEl.style.display = 'none';
+      }
     }
     if (markAllReadBtn) {
-      if (unreadCount === 0) {
-        markAllReadBtn.style.opacity = '0.4';
-        markAllReadBtn.style.pointerEvents = 'none';
-      } else {
-        markAllReadBtn.style.opacity = '1';
-        markAllReadBtn.style.pointerEvents = 'auto';
-      }
+      markAllReadBtn.style.display = (unreadCount > 0) ? 'inline-block' : 'none';
     }
     if (headerDot) {
       headerDot.style.display = unreadCount > 0 ? 'block' : 'none';
@@ -511,12 +508,12 @@
 
     if (state.notifications.length === 0) {
       container.innerHTML = `
-        <div class="empty-state-card" style="padding: 36px 20px;">
-          <div class="empty-icon-circle">
-            <i data-lucide="bell-off" style="width: 26px; height: 26px; color: var(--color-muted-text);"></i>
+        <div class="empty-state-card" style="padding: 32px 16px;">
+          <div class="empty-icon-circle" style="width: 44px; height: 44px;">
+            <i data-lucide="bell-off" style="width: 22px; height: 22px; color: var(--color-muted-text);"></i>
           </div>
-          <p style="font-weight: 700; font-size: 14px; color: var(--color-primary-text); margin-top: 10px;">Belum Ada Notifikasi</p>
-          <p style="font-size: 12px; color: var(--color-secondary-text); margin-top: 2px;">Pemberitahuan pengingat kelas dan info perkuliahan TRJT 3A akan tampil di sini.</p>
+          <p style="font-weight: 600; font-size: 14px; color: var(--color-primary-text); margin-top: 8px;">Belum ada notifikasi</p>
+          <p style="font-size: 12px; color: var(--color-secondary-text); margin-top: 2px;">Pemberitahuan pengingat kelas dan informasi perkuliahan TRJT 3A akan tampil di sini.</p>
         </div>
       `;
       return;
@@ -528,12 +525,17 @@
         const isCancel = item.type === 'cancel';
         const isRoom = item.type === 'room' || item.type === 'info';
         const isMat = item.type === 'material';
+        const isTest = item.type === 'test';
 
         let typeClass = 'type-h10';
         let iconName = 'bell';
         let categoryLabel = 'Pengingat kelas';
 
-        if (isCancel) {
+        if (isTest) {
+          typeClass = 'type-h10';
+          iconName = 'bell-ring';
+          categoryLabel = 'Uji notifikasi';
+        } else if (isCancel) {
           typeClass = 'type-cancel';
           iconName = 'alert-triangle';
           categoryLabel = 'Dibatalkan';
@@ -546,6 +548,10 @@
           iconName = 'folder';
           categoryLabel = 'Materi baru';
         }
+
+        const title = item.subject || item.title || 'Pengingat perkuliahan';
+        const desc = item.desc || (isH10 ? 'Dimulai 10 menit lagi' : (isTest ? 'Perangkat ini siap menerima pengingat kelas.' : ''));
+        const info = item.meta ? item.meta : (item.lecturer ? item.lecturer : '');
 
         return `
           <div class="notif-card ${item.read ? 'read' : 'unread'}" data-index="${index}">
@@ -562,19 +568,9 @@
                   ${item.time}
                 </span>
               </div>
-              <h3 class="notif-course-title">${item.subject}</h3>
-              ${item.lecturer ? `
-                <div class="notif-lecturer-row">
-                  <i data-lucide="user-round" style="width: 13px; height: 13px; color: var(--color-primary-blue);"></i>
-                  <span>${item.lecturer}</span>
-                </div>` : ''
-              }
-              <div class="notif-footer-row">
-                <span class="notif-meta-pill">
-                  <i data-lucide="clock" style="width: 12px; height: 12px; color: var(--color-primary-blue);"></i>
-                  ${item.meta}
-                </span>
-              </div>
+              <h3 class="notif-course-title">${title}</h3>
+              ${desc ? `<div class="notif-desc-text">${desc}</div>` : ''}
+              ${info ? `<div class="notif-info-line">${info}</div>` : ''}
             </div>
           </div>
         `;
@@ -931,15 +927,15 @@
 
         try {
           if (window.TRJT_FIREBASE) {
-            const res = await window.TRJT_FIREBASE.sendTestNotification();
-            showToast('✅ ' + (res.message || 'Notifikasi berhasil dikirim'), 'success');
+            await window.TRJT_FIREBASE.sendTestNotification();
+            showToast('✅ Notifikasi berhasil diterima', 'success');
           } else {
             if ('Notification' in window && Notification.permission === 'granted') {
               new Notification('🔔 Uji Notifikasi Berhasil', {
                 body: 'TRJT 3A Reminder siap mengingatkan jadwal kuliahmu.',
                 icon: './assets/icons/app-icon.svg'
               });
-              showToast('✅ Notifikasi berhasil dikirim', 'success');
+              showToast('✅ Notifikasi berhasil diterima', 'success');
             } else {
               throw new Error('Izin notifikasi belum diaktifkan.');
             }
@@ -970,17 +966,51 @@
     // Listen to Push Notification event (Foreground & Test Dispatch)
     window.addEventListener('trjt:push-notification', (event) => {
       const detail = event.detail || {};
-      const newNotif = {
-        id: `notif-${Date.now()}`,
-        type: 'h10',
-        title: detail.title || '🔔 Pengingat Kuliah',
-        subject: detail.courseName || 'TRJT 3A Notification',
-        lecturer: detail.lecturer || 'Dosen Pengampu',
-        meta: `${detail.startTime || ''} · ${detail.room || ''}`,
-        time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.'),
-        read: false
-      };
-      state.notifications.unshift(newNotif);
+      const isTest = detail.type === 'test' || (detail.title && detail.title.toLowerCase().includes('uji'));
+      const timeFormatted = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.');
+
+      if (isTest) {
+        // Find existing test notif to merge
+        const existingTestIdx = state.notifications.findIndex((n) => n.type === 'test' || (n.title && n.title.toLowerCase().includes('uji')));
+        if (existingTestIdx !== -1) {
+          const prev = state.notifications[existingTestIdx];
+          const count = (prev.testCount || 1) + 1;
+          prev.testCount = count;
+          prev.subject = 'Notifikasi berhasil diterima';
+          prev.desc = 'Perangkat ini siap menerima pengingat kelas.';
+          prev.meta = `Uji notifikasi TRJT 3A · ${count} kali`;
+          prev.time = timeFormatted;
+          prev.read = false;
+          state.notifications.splice(existingTestIdx, 1);
+          state.notifications.unshift(prev);
+        } else {
+          state.notifications.unshift({
+            id: `notif-test-${Date.now()}`,
+            type: 'test',
+            testCount: 1,
+            title: 'Uji notifikasi',
+            subject: 'Notifikasi berhasil diterima',
+            desc: 'Perangkat ini siap menerima pengingat kelas.',
+            meta: 'Uji notifikasi TRJT 3A · 1 kali',
+            time: timeFormatted,
+            read: false
+          });
+        }
+      } else {
+        const newNotif = {
+          id: `notif-${Date.now()}`,
+          type: detail.type || 'h10',
+          title: detail.title || 'Pengingat kelas',
+          subject: detail.courseName || detail.title || 'TRJT 3A Notification',
+          desc: detail.body || (detail.type === 'h10' ? 'Dimulai 10 menit lagi' : ''),
+          lecturer: detail.lecturer || '',
+          meta: detail.startTime && detail.room ? `${detail.startTime.replace(':', '.')} · ${detail.room}` : (detail.room || ''),
+          time: timeFormatted,
+          read: false
+        };
+        state.notifications.unshift(newNotif);
+      }
+
       saveNotificationsState();
       renderNotifications();
       renderSettingsUI();
