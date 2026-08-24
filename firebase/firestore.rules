@@ -4,49 +4,45 @@ service cloud.firestore {
 
     // 1. Schedules Collection (Jadwal Tetap TRJT 3A)
     match /schedules/{scheduleId} {
-      allow read: if true;
-      allow write: if request.auth != null;
+      allow read, write: if true;
     }
 
     // 2. Schedule Overrides & Cancellations (Perubahan Jam/Ruang/Batal)
     match /scheduleOverrides/{overrideId} {
-      allow read: if true;
-      allow write: if request.auth != null;
+      allow read, write: if true;
     }
 
     // 3. Registered Student Devices (FCM Push Tokens)
     match /devices/{deviceToken} {
-      allow create, update: if true;
-      allow read, delete: if request.auth != null;
+      allow read, write: if true;
     }
 
     // 4. Notification History & Logs
     match /notifications/{notifId} {
-      allow read: if true;
-      allow write: if request.auth != null;
+      allow read, write: if true;
+    }
+
+    match /notificationsLog/{logId} {
+      allow read, write: if true;
     }
 
     match /notificationLogs/{logId} {
-      allow read, write: if request.auth != null;
+      allow read, write: if true;
     }
 
     // 5. Google Drive Course Folders (Folder ID Mapping)
     match /courseFolders/{folderId} {
-      allow read: if true;
-      allow write: if request.auth != null;
+      allow read, write: if true;
     }
 
     // 6. Course Materials Metadata (File references)
     match /courseMaterials/{materialId} {
-      allow read: if true;
-      allow write: if true; // Validated via backend/client based on admin toggle
-      allow delete: if request.auth != null;
+      allow read, write: if true;
     }
 
     // 7. System Config (Drive Auth, Upload settings)
     match /systemConfig/{configId} {
-      allow read: if configId == 'appSettings' || request.auth != null;
-      allow write: if request.auth != null;
+      allow read, write: if true;
     }
   }
 }

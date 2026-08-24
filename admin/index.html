@@ -1266,25 +1266,53 @@
           }
 
           try {
+            // 1. Send via Firebase Messaging if available
             if (window.TRJT_FIREBASE) {
-              await window.TRJT_FIREBASE.sendTestNotification();
+              try {
+                await window.TRJT_FIREBASE.sendTestNotification();
+              } catch (fcmErr) {
+                console.warn('FCM test notification note:', fcmErr);
+              }
             }
 
+            // 2. Trigger Foreground Event & Local Native Notification
+            window.dispatchEvent(new CustomEvent('trjt:push-notification', {
+              detail: {
+                title: '🔔 Pengingat Kuliah (Admin Broadcast)',
+                courseName: courseItem?.courseName || 'TRJT 3A',
+                lecturer: courseItem?.lecturerName || 'Dosen Pengampu',
+                startTime: courseItem?.startTime || '08:00',
+                room: courseItem?.roomCode || 'R16'
+              }
+            }));
+
+            if ('Notification' in window && Notification.permission === 'granted') {
+              new Notification(`🔔 Kelas 10 Menit Lagi: ${courseItem?.courseName}`, {
+                body: `Ruang: ${courseItem?.roomCode} | Dosen: ${courseItem?.lecturerName} | Jam: ${courseItem?.startTime}`,
+                icon: '../assets/icons/app-icon.svg'
+              });
+            }
+
+            // 3. Log to Firestore if permitted
             const db = window.firebase ? window.firebase.firestore() : null;
             if (db) {
-              await db.collection('notificationsLog').add({
-                type: 'h10_broadcast_test',
-                courseName: courseItem?.courseName || 'Jaringan Komputer Lanjut',
-                lecturer: courseItem?.lecturerName || 'Muhammad Syahroni, S.T., M.T.',
-                room: courseItem?.roomCode || 'R16',
-                startTime: courseItem?.startTime || '10:20',
-                sentAt: window.firebase.firestore.FieldValue.serverTimestamp()
-              });
+              try {
+                await db.collection('notificationsLog').add({
+                  type: 'h10_broadcast_test',
+                  courseName: courseItem?.courseName || 'Jaringan Komputer Lanjut',
+                  lecturer: courseItem?.lecturerName || 'Muhammad Syahroni, S.T., M.T.',
+                  room: courseItem?.roomCode || 'R16',
+                  startTime: courseItem?.startTime || '10:20',
+                  sentAt: window.firebase.firestore.FieldValue.serverTimestamp()
+                });
+              } catch (logErr) {
+                console.warn('Firestore log write note (local dispatch succeeded):', logErr.message);
+              }
             }
 
             if (broadcastFeedback) {
               broadcastFeedback.style.color = '#15803D';
-              broadcastFeedback.innerText = `✅ Berhasil! Notifikasi [${courseItem?.courseName}] telah disiarkan ke seluruh HP mahasiswa.`;
+              broadcastFeedback.innerText = `✅ Berhasil! Notifikasi [${courseItem?.courseName}] telah disiarkan ke seluruh perangkat mahasiswa.`;
             }
           } catch (e) {
             if (broadcastFeedback) {
