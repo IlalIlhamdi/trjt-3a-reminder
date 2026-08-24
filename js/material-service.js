@@ -244,7 +244,48 @@
       console.warn('File data read note:', readErr);
     }
 
-    // 7. Save Metadata to Firestore
+    // 7. Direct Upload to Google Drive via Google Apps Script Web App
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxkflfXyxarRFMSHV6xJVM1IOFKWnY_7lFiQkWGqxgE3ylpsT9zUTnKX9VQhGgFzXVXFg/exec';
+    let realDriveFileId = driveFileId;
+    let realWebViewLink = webViewLink;
+    let realWebContentLink = webContentLink;
+
+    if (fileDataUrl) {
+      try {
+        const rawBase64 = fileDataUrl.split(',')[1];
+        if (rawBase64) {
+          const driveUploadPayload = {
+            fileName: cleanFileName,
+            mimeType: processedFile.type || 'application/octet-stream',
+            base64Data: rawBase64,
+            courseName: metadata.courseName || '',
+            scheduleId: metadata.scheduleId || '',
+            folderId: driveFolderId || '1W7F5rWsNNq-nsLUF1emnOj4eJsYSShzW'
+          };
+
+          const scriptRes = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'text/plain;charset=utf-8'
+            },
+            body: JSON.stringify(driveUploadPayload)
+          });
+
+          if (scriptRes.ok) {
+            const scriptData = await scriptRes.json();
+            if (scriptData && scriptData.success && scriptData.fileId) {
+              realDriveFileId = scriptData.fileId;
+              realWebViewLink = scriptData.fileUrl || `https://drive.google.com/file/d/${scriptData.fileId}/view?usp=sharing`;
+              realWebContentLink = scriptData.downloadUrl || `https://drive.google.com/uc?export=download&id=${scriptData.fileId}`;
+            }
+          }
+        }
+      } catch (scriptErr) {
+        console.warn('Google Drive direct upload note:', scriptErr.message);
+      }
+    }
+
+    // 8. Save Metadata to Firestore
     const db = window.firebase ? window.firebase.firestore() : null;
     const materialDoc = {
       id: materialId,
@@ -256,10 +297,10 @@
       fileSize: formatFileSize(processedFile.size),
       rawSizeBytes: processedFile.size,
       isImage: isImage,
-      driveFileId: driveFileId,
-      driveFolderId: driveFolderId || 'root',
-      webViewLink: webViewLink,
-      webContentLink: webContentLink,
+      driveFileId: realDriveFileId,
+      driveFolderId: driveFolderId || '1W7F5rWsNNq-nsLUF1emnOj4eJsYSShzW',
+      webViewLink: realWebViewLink,
+      webContentLink: realWebContentLink,
       thumbnailUrl: thumbnailUrl,
       fileDataUrl: (fileDataUrl && fileDataUrl.length < 1500000) ? fileDataUrl : null, // Store if < 1.5MB in doc
       description: metadata.description ? metadata.description.trim() : '',
