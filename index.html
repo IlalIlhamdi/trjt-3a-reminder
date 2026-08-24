@@ -124,9 +124,16 @@
                 <h2 class="section-title">Notifikasi</h2>
                 <span id="notif-unread-count-badge" class="notif-count-badge" style="display: none;">0 belum dibaca</span>
               </div>
-              <button id="btn-mark-all-read" class="btn-mark-all">
-                Tandai semua
-              </button>
+              <div class="notif-actions-group">
+                <button id="btn-mark-all-read" class="btn-notif-action" title="Tandai semua telah dibaca">
+                  <i data-lucide="check-check" style="width: 13px; height: 13px;"></i>
+                  <span>Tandai dibaca</span>
+                </button>
+                <button id="btn-clear-all-notifs" class="btn-notif-action danger" title="Hapus semua riwayat notifikasi">
+                  <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i>
+                  <span>Hapus semua</span>
+                </button>
+              </div>
             </div>
             <p class="notif-subtitle">Pengingat jadwal dan informasi perkuliahan TRJT 3A</p>
           </div>

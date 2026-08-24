@@ -1630,24 +1630,67 @@ input:disabled + .slider {
   border: 1px solid #BFDBFE;
 }
 
-.btn-mark-all {
+.notif-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-notif-action {
   background: transparent;
-  border: none;
+  border: 1px solid var(--color-border);
   color: var(--color-primary-blue);
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 600;
   cursor: pointer;
-  padding: 4px 6px;
+  padding: 4px 8px;
   border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   transition: all var(--transition-fast);
 }
 
-.btn-mark-all:hover {
+.btn-notif-action:hover {
   background-color: var(--color-very-light-blue);
+  border-color: #BFDBFE;
 }
 
-.btn-mark-all:active {
+.btn-notif-action.danger {
+  color: #DC2626;
+  border-color: #FECACA;
+  background-color: #FEF2F2;
+}
+
+.btn-notif-action.danger:hover {
+  background-color: #FEE2E2;
+  border-color: #FCA5A5;
+}
+
+.btn-notif-action:active {
   transform: scale(0.96);
+}
+
+.btn-delete-single-notif {
+  background: transparent;
+  border: none;
+  color: #94A3B8;
+  padding: 4px;
+  cursor: pointer;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.btn-delete-single-notif:hover {
+  color: #DC2626;
+  background-color: #FEE2E2;
+}
+
+.btn-delete-single-notif:active {
+  transform: scale(0.9);
 }
 
 .notif-subtitle {

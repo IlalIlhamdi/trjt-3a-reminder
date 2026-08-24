@@ -485,6 +485,7 @@
     const headerDot = document.getElementById('header-unread-dot');
     const navDot = document.getElementById('nav-notif-dot');
     const markAllReadBtn = document.getElementById('btn-mark-all-read');
+    const clearAllBtn = document.getElementById('btn-clear-all-notifs');
     if (!container) return;
 
     const unreadCount = state.notifications.filter((n) => !n.read).length;
@@ -497,7 +498,10 @@
       }
     }
     if (markAllReadBtn) {
-      markAllReadBtn.style.display = (unreadCount > 0) ? 'inline-block' : 'none';
+      markAllReadBtn.style.display = (unreadCount > 0) ? 'inline-flex' : 'none';
+    }
+    if (clearAllBtn) {
+      clearAllBtn.style.display = (state.notifications.length > 0) ? 'inline-flex' : 'none';
     }
     if (headerDot) {
       headerDot.style.display = unreadCount > 0 ? 'block' : 'none';
@@ -563,10 +567,15 @@
                 <span class="notif-badge-tag ${typeClass}">
                   ${categoryLabel}
                 </span>
-                <span class="notif-time-text">
-                  ${!item.read ? '<span class="unread-indicator-dot"></span>' : ''}
-                  ${item.time}
-                </span>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span class="notif-time-text">
+                    ${!item.read ? '<span class="unread-indicator-dot"></span>' : ''}
+                    ${item.time}
+                  </span>
+                  <button class="btn-delete-single-notif" onclick="window.deleteSingleNotification('${item.id || index}', event)" title="Hapus pesan ini" aria-label="Hapus notifikasi">
+                    <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i>
+                  </button>
+                </div>
               </div>
               <h3 class="notif-course-title">${title}</h3>
               ${desc ? `<div class="notif-desc-text">${desc}</div>` : ''}
@@ -578,7 +587,8 @@
       .join('');
 
     container.querySelectorAll('.notif-card').forEach((card) => {
-      card.addEventListener('click', () => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.btn-delete-single-notif')) return;
         const idx = card.getAttribute('data-index');
         if (idx !== null && state.notifications[idx]) {
           const notif = state.notifications[idx];
@@ -605,6 +615,25 @@
       });
     });
   }
+
+  window.deleteSingleNotification = function (idOrIndex, e) {
+    if (e) e.stopPropagation();
+    state.notifications = state.notifications.filter((n, idx) => n.id !== idOrIndex && String(idx) !== String(idOrIndex));
+    saveNotificationsState();
+    renderNotifications();
+    showToast('🗑️ Pesan notifikasi dihapus', 'info');
+    if (window.lucide) window.lucide.createIcons();
+  };
+
+  window.clearAllNotifications = function () {
+    if (state.notifications.length === 0) return;
+    if (!confirm('Apakah Anda yakin ingin menghapus semua riwayat notifikasi?')) return;
+    state.notifications = [];
+    saveNotificationsState();
+    renderNotifications();
+    showToast('🗑️ Semua riwayat notifikasi telah dihapus', 'info');
+    if (window.lucide) window.lucide.createIcons();
+  };
 
   function triggerH10Notification(courseName, roomCode, startTime, lecturerName) {
     // Only internal mock push if not simulated
@@ -837,6 +866,14 @@
         renderNotifications();
         showToast('✅ Semua notifikasi telah ditandai dibaca', 'success');
         if (window.lucide) window.lucide.createIcons();
+      });
+    }
+
+    // Clear all notifications
+    const clearAllNotifsBtn = document.getElementById('btn-clear-all-notifs');
+    if (clearAllNotifsBtn) {
+      clearAllNotifsBtn.addEventListener('click', () => {
+        window.clearAllNotifications();
       });
     }
 
