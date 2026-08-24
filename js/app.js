@@ -295,7 +295,6 @@
             <i data-lucide="check-circle-2" style="width: 24px; height: 24px; color: var(--color-status-in-progress);"></i>
           </div>
           <h2 class="empty-title" style="font-size: 16px; margin: 0;">Semua kelas hari ini selesai</h2>
-          <span class="soft-badge-success" style="font-size: 11px; padding: 2px 10px; font-weight: 600;">${data.completedCount} dari ${data.totalCount} kelas selesai</span>
           ${
             data.nextDayUpcomingClass
               ? `
