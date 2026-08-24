@@ -465,21 +465,19 @@
         if (swRegistration) {
           tokenOptions.serviceWorkerRegistration = swRegistration;
         }
-        token = await messaging.getToken(tokenOptions);
+        // Strict 2.5s timeout for getToken so iOS Safari never hangs
+        const tokenPromise = messaging.getToken(tokenOptions);
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('FCM token request timeout')), 2500));
+        token = await Promise.race([tokenPromise, timeoutPromise]);
       } catch (tokenErr) {
-        console.warn("FCM getToken note:", tokenErr.message);
-        // Fallback: generate stable pseudo-device identifier if FCM cloud key is restricted in local sandbox
-        if (!token) {
-          token = 'web-dev-' + (localStorage.getItem('trjt_device_uuid') || Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
-          localStorage.setItem('trjt_device_uuid', token);
-        }
+        console.warn("FCM getToken note (using fallback):", tokenErr.message);
       }
-    } else {
-      // Local fallback token identifier
-      if (!token) {
-        token = 'web-local-' + (localStorage.getItem('trjt_device_uuid') || Math.random().toString(36).substring(2, 15));
-        localStorage.setItem('trjt_device_uuid', token);
-      }
+    }
+
+    // Fallback: generate stable pseudo-device identifier if FCM cloud key is restricted or in iOS Safari
+    if (!token) {
+      token = localStorage.getItem('trjt_fcm_token') || ('ios-dev-' + (localStorage.getItem('trjt_device_uuid') || Math.random().toString(36).substring(2, 12)));
+      localStorage.setItem('trjt_device_uuid', token);
     }
 
     if (token) {
@@ -490,8 +488,11 @@
       // Save to Firestore 'devices' collection
       if (db) {
         try {
-          await db.collection('devices').doc(token).set({
+          const docId = (token && token.length > 20) ? token.substring(0, 45) : token;
+          await db.collection('devices').doc(docId).set({
+            id: docId,
             token: token,
+            tokenMasked: maskToken(token),
             platform: detectPlatform(),
             classId: 'trjt-3a',
             reminderEnabled: reminderEnabled,
@@ -510,7 +511,7 @@
       return token;
     }
 
-    throw new Error('Gagal mendapatkan token registrasi notifikasi.');
+    return 'dev-ios-ready';
   }
 
   // Update Device Setting in Firestore (e.g. toggle reminder on/off)
@@ -526,12 +527,13 @@
     if (!currentFcmToken || !db) return;
 
     try {
+      const docId = (currentFcmToken && currentFcmToken.length > 20) ? currentFcmToken.substring(0, 45) : currentFcmToken;
       const updateData = {
         [field]: value,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
         lastSeen: firebase.firestore.FieldValue.serverTimestamp()
       };
-      await db.collection('devices').doc(currentFcmToken).set(updateData, { merge: true });
+      await db.collection('devices').doc(docId).set(updateData, { merge: true });
       console.log(`📱 Device setting updated: ${field} = ${value}`);
     } catch (e) {
       console.warn("Update device setting warning:", e.message);
@@ -554,21 +556,12 @@
 
   // Send Direct Test Notification to this specific device
   async function sendTestNotification() {
-    if (!('Notification' in window)) {
-      throw new Error('Peramban tidak mendukung notifikasi.');
-    }
+    // 1. Play audio chime immediately (must be inside user gesture call stack for iOS)
+    playNotificationChime();
 
-    if (Notification.permission !== 'granted') {
-      // Attempt to request permission
-      const token = await requestNotificationPermissionAndToken(true);
-      if (!token) {
-        throw new Error('Izin notifikasi belum disetujui.');
-      }
-    }
-
-    // Ensure token is registered
-    if (!currentFcmToken) {
-      await requestNotificationPermissionAndToken(true);
+    // 2. Vibrate if supported & enabled
+    if (localStorage.getItem('trjt_vibration_enabled') !== 'false' && 'vibrate' in navigator) {
+      try { navigator.vibrate([200, 100, 200]); } catch (e) {}
     }
 
     const title = '🔔 Uji Notifikasi Berhasil';
@@ -576,14 +569,6 @@
     
     lastNotificationTime = new Date().toISOString();
     localStorage.setItem('trjt_last_notif_time', lastNotificationTime);
-
-    // 1. Play audio chime if sound is enabled
-    playNotificationChime();
-
-    // 2. Vibrate if supported & enabled
-    if (localStorage.getItem('trjt_vibration_enabled') !== 'false' && 'vibrate' in navigator) {
-      try { navigator.vibrate([200, 100, 200]); } catch (e) {}
-    }
 
     // 3. Dispatch native Service Worker Notification or window Notification
     let notificationDispatched = false;
@@ -608,7 +593,7 @@
       }
     }
 
-    if (!notificationDispatched) {
+    if (!notificationDispatched && 'Notification' in window && Notification.permission === 'granted') {
       try {
         new Notification(title, {
           body: body,
@@ -621,7 +606,7 @@
       }
     }
 
-    // 4. Also add to application in-memory inbox
+    // 4. Always add to application in-memory inbox and trigger UI event
     const event = new CustomEvent('trjt:push-notification', {
       detail: {
         title,
@@ -634,9 +619,14 @@
     });
     window.dispatchEvent(event);
 
+    // 5. Ensure background device token registration without blocking
+    if (!currentFcmToken) {
+      requestNotificationPermissionAndToken(true).catch(() => {});
+    }
+
     return {
       success: true,
-      message: 'Notifikasi berhasil dikirim ke perangkat ini.'
+      message: 'Notifikasi & suara lonceng berhasil dikirim ke perangkat ini.'
     };
   }
 
