@@ -242,6 +242,73 @@
         </div>
       </div>
 
+      <!-- Section: Google Drive Admin Integration (Phase 2) -->
+      <div class="admin-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <h2 style="font-size: 1.125rem; font-weight: 700; color: var(--color-primary-text); display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="folder-sync" style="width: 20px; height: 20px; color: var(--color-primary-blue);"></i>
+              Integrasi Google Drive Admin
+            </h2>
+            <p style="font-size: 13px; color: var(--color-secondary-text); margin-top: 2px;">
+              Penyimpanan file materi langsung ke Google Drive admin (Folder utama: <strong>TRJT 3A — Semester 5</strong>)
+            </p>
+          </div>
+          <span id="drive-status-badge" class="soft-badge-neutral">Belum Terhubung</span>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; background-color: var(--color-panel-bg); padding: 16px; border-radius: var(--radius-inner); border: 1px solid var(--color-border-subtle);">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="brand-logo-box" style="width: 44px; height: 44px; background-color: #EFF6FF; border-color: #BFDBFE;">
+              <i data-lucide="hard-drive" style="width: 22px; height: 22px; color: var(--color-primary-blue);"></i>
+            </div>
+            <div>
+              <span style="font-size: 11px; font-weight: 600; color: var(--color-secondary-text); text-transform: uppercase;">Akun Google Drive Tujuan</span>
+              <div id="drive-account-text" style="font-size: 14px; font-weight: 700; color: var(--color-primary-text); margin-top: 2px;">Belum Terhubung</div>
+              <p id="drive-folder-text" style="font-size: 12px; color: var(--color-secondary-text); margin-top: 2px;">Klik 'Hubungkan Google Drive' untuk menghubungkan akun Drive admin.</p>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <button id="btn-connect-drive" class="btn-primary" style="font-size: 13px; padding: 8px 16px;">
+              <i data-lucide="link" style="width: 14px; height: 14px;"></i> Hubungkan Google Drive
+            </button>
+            <button id="btn-init-folders" class="btn-secondary" style="font-size: 13px; padding: 8px 14px; display: none;">
+              <i data-lucide="folder-check" style="width: 14px; height: 14px;"></i> Inisialisasi 11 Folder MK
+            </button>
+            <button id="btn-disconnect-drive" class="btn-secondary" style="font-size: 13px; padding: 8px 14px; display: none; color: #DC2626; border-color: #FECACA;">
+              <i data-lucide="unlink" style="width: 14px; height: 14px;"></i> Putuskan Koneksi
+            </button>
+          </div>
+        </div>
+
+        <!-- Course Folders Structure View -->
+        <div id="drive-folders-panel" style="display: none; flex-direction: column; gap: 10px;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <span style="font-size: 12px; font-weight: 700; color: var(--color-primary-text); text-transform: uppercase; letter-spacing: 0.04em;">
+              📁 Struktur Folder Mata Kuliah (TRJT 3A — Semester 5)
+            </span>
+            <span id="drive-folders-count-badge" class="soft-badge-info" style="font-size: 11px;">11 Folder Terdaftar</span>
+          </div>
+
+          <div style="max-height: 220px; overflow-y: auto; border: 1px solid var(--color-border-card); border-radius: var(--radius-inner);">
+            <table class="admin-table" style="font-size: 12px;">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Mata Kuliah</th>
+                  <th>Drive Folder ID</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="drive-folders-table-body">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       <!-- Section: Override Jadwal / Batalkan Kelas -->
       <div class="admin-card">
         <div>
@@ -333,8 +400,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
   <script src="../js/firebase-config.js"></script>
 
-  <!-- App Data -->
+  <!-- App Data & Services -->
   <script src="../js/data.js"></script>
+  <script src="../js/drive-service.js"></script>
 
   <script>
     (function () {
@@ -370,7 +438,62 @@
         renderSchedulesTable();
         populateOverrideDropdown();
         renderAdminDiagnostics();
+        renderAdminDriveIntegration();
         if (window.lucide) window.lucide.createIcons();
+      }
+
+      async function renderAdminDriveIntegration() {
+        if (!window.TRJT_DRIVE) return;
+
+        const driveStatus = await window.TRJT_DRIVE.getConnectionStatus();
+        const badgeEl = document.getElementById('drive-status-badge');
+        const accountEl = document.getElementById('drive-account-text');
+        const folderTextEl = document.getElementById('drive-folder-text');
+        const btnConnect = document.getElementById('btn-connect-drive');
+        const btnInit = document.getElementById('btn-init-folders');
+        const btnDisconnect = document.getElementById('btn-disconnect-drive');
+        const panelFolders = document.getElementById('drive-folders-panel');
+        const tableBody = document.getElementById('drive-folders-table-body');
+        const countBadge = document.getElementById('drive-folders-count-badge');
+
+        const isConnected = !!driveStatus.connected;
+
+        if (badgeEl) {
+          badgeEl.className = isConnected ? 'soft-badge-success' : 'soft-badge-neutral';
+          badgeEl.innerText = isConnected ? 'Terhubung' : 'Belum Terhubung';
+        }
+
+        if (accountEl) {
+          accountEl.innerText = isConnected ? (driveStatus.adminEmail || 'Admin Google Drive') : 'Belum Terhubung';
+          accountEl.style.color = isConnected ? 'var(--color-deep-blue)' : 'var(--color-primary-text)';
+        }
+
+        if (folderTextEl) {
+          if (isConnected) {
+            folderTextEl.innerHTML = `Folder Utama: <strong>${driveStatus.rootFolderName || 'TRJT 3A — Semester 5'}</strong> (ID: <code>${driveStatus.rootFolderId || 'drive-root-sem5'}</code>)`;
+          } else {
+            folderTextEl.innerText = "Klik 'Hubungkan Google Drive' untuk menghubungkan akun Drive admin.";
+          }
+        }
+
+        if (btnConnect) btnConnect.style.display = isConnected ? 'none' : 'inline-flex';
+        if (btnInit) btnInit.style.display = isConnected ? 'inline-flex' : 'none';
+        if (btnDisconnect) btnDisconnect.style.display = isConnected ? 'inline-flex' : 'none';
+        if (panelFolders) panelFolders.style.display = isConnected ? 'flex' : 'none';
+
+        if (isConnected && tableBody) {
+          const folders = await window.TRJT_DRIVE.getCourseFolders();
+          if (countBadge) countBadge.innerText = `${folders.length} Folder Terdaftar`;
+
+          tableBody.innerHTML = folders.map((f, idx) => `
+            <tr>
+              <td style="font-weight: 700; color: var(--color-secondary-text);">${idx + 1}</td>
+              <td style="font-weight: 600; color: var(--color-primary-text);">${f.courseName}</td>
+              <td><code style="font-size: 11px; background: #F1F5F9; padding: 2px 6px; border-radius: 4px;">${f.driveFolderId || 'folder-' + f.id}</code></td>
+              <td><span class="soft-badge-success" style="font-size: 10px;">Tersinkron</span></td>
+            </tr>
+          `).join('');
+        }
       }
 
       function renderAdminDiagnostics() {
@@ -558,6 +681,81 @@
           }
         });
       }
+
+      // Google Drive Connect
+      const btnConnectDrive = document.getElementById('btn-connect-drive');
+      if (btnConnectDrive) {
+        btnConnectDrive.addEventListener('click', async () => {
+          const emailInput = prompt('Masukkan Email Google Admin untuk terhubung ke Google Drive:', 'admin@trjt3a.ac.id');
+          if (!emailInput) return;
+
+          btnConnectDrive.disabled = true;
+          btnConnectDrive.innerHTML = 'Menghubungkan…';
+
+          try {
+            if (window.TRJT_DRIVE) {
+              await window.TRJT_DRIVE.connectAdminGoogleDrive(emailInput);
+              alert('✅ Google Drive berhasil terhubung dan 11 folder mata kuliah (TRJT 3A — Semester 5) telah diinisialisasi!');
+            }
+          } catch (err) {
+            alert('❌ Gagal: ' + err.message);
+          } finally {
+            btnConnectDrive.disabled = false;
+            btnConnectDrive.innerHTML = '<i data-lucide="link" style="width: 14px; height: 14px;"></i> Hubungkan Google Drive';
+            renderAdminDriveIntegration();
+            if (window.lucide) window.lucide.createIcons();
+          }
+        });
+      }
+
+      // Initialize Folders Button
+      const btnInitFolders = document.getElementById('btn-init-folders');
+      if (btnInitFolders) {
+        btnInitFolders.addEventListener('click', async () => {
+          btnInitFolders.disabled = true;
+          btnInitFolders.innerHTML = 'Memeriksa…';
+
+          try {
+            if (window.TRJT_DRIVE) {
+              const res = await window.TRJT_DRIVE.initializeDriveFolders();
+              alert(`✅ 11 Folder Mata Kuliah berhasil diverifikasi (${res.foldersCount || 11} folder aktif).`);
+            }
+          } catch (err) {
+            alert('❌ Gagal: ' + err.message);
+          } finally {
+            btnInitFolders.disabled = false;
+            btnInitFolders.innerHTML = '<i data-lucide="folder-check" style="width: 14px; height: 14px;"></i> Inisialisasi 11 Folder MK';
+            renderAdminDriveIntegration();
+            if (window.lucide) window.lucide.createIcons();
+          }
+        });
+      }
+
+      // Disconnect Drive Button
+      const btnDisconnectDrive = document.getElementById('btn-disconnect-drive');
+      if (btnDisconnectDrive) {
+        btnDisconnectDrive.addEventListener('click', async () => {
+          if (!confirm('Apakah Anda yakin ingin memutuskan koneksi Google Drive admin?')) return;
+
+          btnDisconnectDrive.disabled = true;
+          try {
+            if (window.TRJT_DRIVE) {
+              await window.TRJT_DRIVE.disconnectAdminGoogleDrive();
+              alert('ℹ️ Koneksi Google Drive telah diputuskan.');
+            }
+          } catch (err) {
+            alert('❌ Gagal: ' + err.message);
+          } finally {
+            btnDisconnectDrive.disabled = false;
+            renderAdminDriveIntegration();
+            if (window.lucide) window.lucide.createIcons();
+          }
+        });
+      }
+
+      // Realtime Drive Events
+      window.addEventListener('trjt:drive-status-changed', () => renderAdminDriveIntegration());
+      window.addEventListener('trjt:drive-folders-changed', () => renderAdminDriveIntegration());
 
       // Init
       setTimeout(checkAuth, 100);

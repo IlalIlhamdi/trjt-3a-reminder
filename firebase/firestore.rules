@@ -3,7 +3,6 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // 1. Schedules Collection (Jadwal Tetap TRJT 3A)
-    // Mahasiswa can read public schedule; Only authenticated admin can write
     match /schedules/{scheduleId} {
       allow read: if true;
       allow write: if request.auth != null;
@@ -29,6 +28,25 @@ service cloud.firestore {
 
     match /notificationLogs/{logId} {
       allow read, write: if request.auth != null;
+    }
+
+    // 5. Google Drive Course Folders (Folder ID Mapping)
+    match /courseFolders/{folderId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // 6. Course Materials Metadata (File references)
+    match /courseMaterials/{materialId} {
+      allow read: if true;
+      allow write: if true; // Validated via backend/client based on admin toggle
+      allow delete: if request.auth != null;
+    }
+
+    // 7. System Config (Drive Auth, Upload settings)
+    match /systemConfig/{configId} {
+      allow read: if configId == 'appSettings' || request.auth != null;
+      allow write: if request.auth != null;
     }
   }
 }

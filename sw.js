@@ -1,9 +1,10 @@
-const CACHE_NAME = 'trjt3a-reminder-v3.2';
+const CACHE_NAME = 'trjt3a-reminder-v3.3';
 const ASSETS = [
   './',
   './index.html',
   './css/design-system.css',
   './js/firebase-config.js',
+  './js/drive-service.js',
   './js/time-provider.js',
   './js/data.js',
   './js/app.js',
