@@ -296,9 +296,6 @@
           </div>
           <h2 class="empty-title" style="font-size: 16px; margin: 0;">Semua kelas hari ini selesai</h2>
           <span class="soft-badge-success" style="font-size: 11px; padding: 2px 10px; font-weight: 600;">${data.completedCount} dari ${data.totalCount} kelas selesai</span>
-          <p class="empty-desc" style="font-size: 12px; margin: 0; color: var(--color-secondary-text);">
-            ${data.completedCount} dari ${data.totalCount} kelas telah selesai.
-          </p>
           ${
             data.nextDayUpcomingClass
               ? `
