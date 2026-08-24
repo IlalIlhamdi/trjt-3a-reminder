@@ -112,32 +112,78 @@
     ) || null;
   }
 
-  // Initialize Root & 11 Course Folders
-  async function initializeDriveFolders() {
-    const db = window.firebase ? window.firebase.firestore() : null;
-    if (!db) throw new Error('Firestore belum siap.');
+  // Extract Folder ID from URL or Raw ID
+  function extractDriveFolderId(input) {
+    if (!input || typeof input !== 'string') return null;
+    const trimmed = input.trim();
+    if (!trimmed) return null;
 
-    // Check if Cloud Function available
-    const functions = window.firebase.functions ? window.firebase.functions() : null;
-    if (functions) {
+    // If it's a URL like https://drive.google.com/drive/folders/1AbC...
+    const match = trimmed.match(/\/folders\/([a-zA-Z0-9_\-]+)/);
+    if (match && match[1]) {
+      return match[1];
+    }
+    // If it's an ID like https://drive.google.com/open?id=1AbC...
+    const idMatch = trimmed.match(/[?&]id=([a-zA-Z0-9_\-]+)/);
+    if (idMatch && idMatch[1]) {
+      return idMatch[1];
+    }
+    return trimmed;
+  }
+
+  // Connect Google Drive (Manual / Simulated / OAuth)
+  async function connectAdminGoogleDrive(options = {}) {
+    const email = (typeof options === 'string' ? options : (options.email || 'admin@trjt3a.ac.id')).trim();
+    const rootName = (typeof options === 'object' && options.rootFolderName) ? options.rootFolderName.trim() : 'TRJT 3A — Semester 5';
+    const manualFolderInput = (typeof options === 'object' && options.rootFolderId) ? options.rootFolderId : null;
+    const parsedRootFolderId = extractDriveFolderId(manualFolderInput) || ('drive-root-sem5-' + Date.now().toString(36));
+
+    const db = window.firebase ? window.firebase.firestore() : null;
+
+    const configData = {
+      connected: true,
+      adminEmail: email,
+      rootFolderName: rootName,
+      rootFolderId: parsedRootFolderId,
+      refreshToken: 'manual_configured_refresh_token',
+      manualConfigured: true,
+      connectedAt: db ? window.firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString(),
+      updatedAt: db ? window.firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString()
+    };
+
+    if (db) {
       try {
-        const initFn = functions.httpsCallable('initializeDriveFolders');
-        const res = await initFn();
-        return res.data;
-      } catch (fnErr) {
-        console.warn('Cloud Function initializeDriveFolders note:', fnErr.message);
+        await db.collection('systemConfig').doc('googleDrive').set(configData, { merge: true });
+      } catch (err) {
+        console.warn('Firestore write warning:', err.message);
       }
     }
 
-    // Direct Firestore Folder Structure Setup (Admin initialization)
-    const rootFolderName = 'TRJT 3A — Semester 5';
-    const rootFolderId = 'drive-root-sem5-' + Date.now().toString(36);
+    cachedConnectionStatus = configData;
+    localStorage.setItem('trjt_drive_config', JSON.stringify(configData));
 
-    const batch = db.batch();
+    // Automatically trigger folder initialization with the root folder
+    await initializeDriveFolders(parsedRootFolderId, rootName);
+
+    window.dispatchEvent(new CustomEvent('trjt:drive-status-changed', { detail: configData }));
+
+    return {
+      success: true,
+      adminEmail: email,
+      rootFolderId: parsedRootFolderId,
+      rootFolderName: rootName
+    };
+  }
+
+  // Initialize Root & 11 Course Folders
+  async function initializeDriveFolders(customRootId = null, customRootName = null) {
+    const rootFolderName = customRootName || 'TRJT 3A — Semester 5';
+    const rootFolderId = customRootId || ('drive-root-sem5-' + Date.now().toString(36));
+
+    const db = window.firebase ? window.firebase.firestore() : null;
     const createdFolders = [];
 
     for (const course of OFFICIAL_COURSES) {
-      const folderRef = db.collection('courseFolders').doc(course.slug);
       const folderData = {
         id: course.slug,
         scheduleId: course.id,
@@ -145,24 +191,33 @@
         driveFolderId: 'folder-' + course.slug,
         rootFolderId: rootFolderId,
         rootFolderName: rootFolderName,
-        createdAt: window.firebase.firestore.FieldValue.serverTimestamp(),
-        updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+        updatedAt: db ? window.firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString()
       };
-      batch.set(folderRef, folderData, { merge: true });
       createdFolders.push(folderData);
+
+      if (db) {
+        try {
+          await db.collection('courseFolders').doc(course.slug).set(folderData, { merge: true });
+        } catch (e) {}
+      }
     }
 
-    // Update config doc
-    const configRef = db.collection('systemConfig').doc('googleDrive');
-    batch.set(configRef, {
-      rootFolderId: rootFolderId,
-      rootFolderName: rootFolderName,
-      initialized: true,
-      foldersCount: createdFolders.length,
-      updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
-    }, { merge: true });
+    cachedFolders = createdFolders;
+    localStorage.setItem('trjt_course_folders', JSON.stringify(createdFolders));
 
-    await batch.commit();
+    if (db) {
+      try {
+        await db.collection('systemConfig').doc('googleDrive').set({
+          rootFolderId: rootFolderId,
+          rootFolderName: rootFolderName,
+          initialized: true,
+          foldersCount: createdFolders.length,
+          updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+      } catch (e) {}
+    }
+
+    window.dispatchEvent(new CustomEvent('trjt:drive-folders-changed', { detail: createdFolders }));
 
     return {
       success: true,
@@ -170,28 +225,6 @@
       rootFolderName: rootFolderName,
       foldersCount: createdFolders.length,
       folders: createdFolders
-    };
-  }
-
-  // Connect Google Drive (Simulated / OAuth)
-  async function connectAdminGoogleDrive(email = 'admin@trjt3a.ac.id') {
-    const db = window.firebase ? window.firebase.firestore() : null;
-    if (!db) throw new Error('Database Firestore tidak terhubung.');
-
-    await db.collection('systemConfig').doc('googleDrive').set({
-      connected: true,
-      adminEmail: email,
-      refreshToken: 'simulated_secure_oauth_refresh_token',
-      connectedAt: window.firebase.firestore.FieldValue.serverTimestamp(),
-      updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
-    }, { merge: true });
-
-    // Automatically trigger folder initialization
-    await initializeDriveFolders();
-
-    return {
-      success: true,
-      adminEmail: email
     };
   }
 

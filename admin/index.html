@@ -566,8 +566,66 @@
         </div>
       </div>
 
-    </div>
+  </div>
 
+  <!-- Modal Konfigurasi Manual Google Drive Admin -->
+  <div id="modal-drive-config" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-sheet" style="max-width: 580px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div class="brand-logo-box" style="width: 36px; height: 36px; background-color: #EFF6FF; border-color: #BFDBFE;">
+            <i data-lucide="hard-drive" style="width: 18px; height: 18px; color: var(--color-primary-blue);"></i>
+          </div>
+          <div>
+            <h2 style="font-size: 15px; font-weight: 700; color: var(--color-primary-text);">Konfigurasi Google Drive Admin</h2>
+            <p style="font-size: 12px; color: var(--color-secondary-text); margin-top: 1px;">Hubungkan akun Google Drive penyimpanan materi kelas</p>
+          </div>
+        </div>
+        <button id="btn-close-drive-config" class="btn-close-modal" aria-label="Tutup">
+          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+        </button>
+      </div>
+
+      <form id="form-drive-config" class="modal-body">
+        
+        <div class="form-group">
+          <label style="font-size: 12px; font-weight: 700; color: var(--color-primary-text);">Email Google Admin *</label>
+          <input type="email" id="input-drive-email" class="form-input" placeholder="contoh: admin.trjt3a@gmail.com" required value="admin.trjt3a@gmail.com">
+          <span style="font-size: 11px; color: var(--color-secondary-text);">Akun Google Drive tempat folder materi perkuliahan disimpan.</span>
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 12px; font-weight: 700; color: var(--color-primary-text);">Nama Folder Utama</label>
+          <input type="text" id="input-drive-root-name" class="form-input" value="TRJT 3A — Semester 5" required>
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 12px; font-weight: 700; color: var(--color-primary-text);">
+            Link / ID Folder Google Drive (Opsional)
+          </label>
+          <input type="text" id="input-drive-root-id" class="form-input" placeholder="Contoh: 1A2b3C4d... atau tempel URL link folder Google Drive">
+          <span style="font-size: 11px; color: var(--color-secondary-text);">Jika Anda sudah membuat folder di Google Drive, tempel link atau ID folder di sini. Jika dikosongkan, sistem otomatis membuat ID folder.</span>
+        </div>
+
+        <div style="background-color: #F8FAFC; border: 1px solid var(--color-border-card); border-radius: var(--radius-inner); padding: 12px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="font-size: 12px; font-weight: 700; color: var(--color-deep-blue); display: flex; align-items: center; gap: 6px;">
+            <i data-lucide="check-circle-2" style="width: 14px; height: 14px; color: #15803D;"></i>
+            Otomatisasi 11 Subfolder Mata Kuliah
+          </div>
+          <p style="font-size: 11px; color: var(--color-secondary-text); margin: 0;">
+            Sistem otomatis menyiapkan dan memetakan 11 subfolder mata kuliah (Antena, Jarkom, Satelit, Fiber Optik, Seluler, Metopen) di dalam folder utama.
+          </p>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 8px;">
+          <button type="button" id="btn-cancel-drive-config" class="btn-secondary" style="padding: 10px 16px; font-size: 13px;">Batal</button>
+          <button type="submit" id="btn-save-drive-config" class="btn-primary" style="padding: 10px 20px; font-size: 13px;">
+            <i data-lucide="save" style="width: 14px; height: 14px;"></i> Simpan & Hubungkan
+          </button>
+        </div>
+
+      </form>
+    </div>
   </div>
 
   <!-- Firebase Scripts -->
@@ -864,26 +922,64 @@
         });
       }
 
-      // Google Drive Connect
+      // Google Drive Connect Modal Open / Close / Submit
       const btnConnectDrive = document.getElementById('btn-connect-drive');
-      if (btnConnectDrive) {
-        btnConnectDrive.addEventListener('click', async () => {
-          const emailInput = prompt('Masukkan Email Google Admin untuk terhubung ke Google Drive:', 'admin@trjt3a.ac.id');
-          if (!emailInput) return;
+      const modalDriveConfig = document.getElementById('modal-drive-config');
+      const btnCloseDriveConfig = document.getElementById('btn-close-drive-config');
+      const btnCancelDriveConfig = document.getElementById('btn-cancel-drive-config');
+      const formDriveConfig = document.getElementById('form-drive-config');
+      const btnSaveDriveConfig = document.getElementById('btn-save-drive-config');
 
-          btnConnectDrive.disabled = true;
-          btnConnectDrive.innerHTML = 'Menghubungkan…';
+      if (btnConnectDrive) {
+        btnConnectDrive.addEventListener('click', () => {
+          if (modalDriveConfig) modalDriveConfig.classList.add('is-open');
+          if (window.lucide) window.lucide.createIcons();
+        });
+      }
+
+      function closeDriveConfigModal() {
+        if (modalDriveConfig) modalDriveConfig.classList.remove('is-open');
+      }
+
+      if (btnCloseDriveConfig) btnCloseDriveConfig.addEventListener('click', closeDriveConfigModal);
+      if (btnCancelDriveConfig) btnCancelDriveConfig.addEventListener('click', closeDriveConfigModal);
+
+      if (modalDriveConfig) {
+        modalDriveConfig.addEventListener('click', (e) => {
+          if (e.target === modalDriveConfig) closeDriveConfigModal();
+        });
+      }
+
+      if (formDriveConfig) {
+        formDriveConfig.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const email = document.getElementById('input-drive-email').value;
+          const rootName = document.getElementById('input-drive-root-name').value;
+          const rootId = document.getElementById('input-drive-root-id').value;
+
+          if (btnSaveDriveConfig) {
+            btnSaveDriveConfig.disabled = true;
+            btnSaveDriveConfig.innerHTML = '<i data-lucide="loader-2" class="spin-animate" style="width: 14px; height: 14px;"></i> Menyimpan…';
+            if (window.lucide) window.lucide.createIcons();
+          }
 
           try {
             if (window.TRJT_DRIVE) {
-              await window.TRJT_DRIVE.connectAdminGoogleDrive(emailInput);
-              alert('✅ Google Drive berhasil terhubung dan 11 folder mata kuliah (TRJT 3A — Semester 5) telah diinisialisasi!');
+              const res = await window.TRJT_DRIVE.connectAdminGoogleDrive({
+                email: email,
+                rootFolderName: rootName,
+                rootFolderId: rootId
+              });
+              closeDriveConfigModal();
+              alert(`✅ Google Drive (${res.adminEmail}) berhasil terhubung!\nFolder Utama: ${res.rootFolderName} (ID: ${res.rootFolderId})\n11 Subfolder Mata Kuliah siap digunakan.`);
             }
           } catch (err) {
             alert('❌ Gagal: ' + err.message);
           } finally {
-            btnConnectDrive.disabled = false;
-            btnConnectDrive.innerHTML = '<i data-lucide="link" style="width: 14px; height: 14px;"></i> Hubungkan Google Drive';
+            if (btnSaveDriveConfig) {
+              btnSaveDriveConfig.disabled = false;
+              btnSaveDriveConfig.innerHTML = '<i data-lucide="save" style="width: 14px; height: 14px;"></i> Simpan & Hubungkan';
+            }
             renderAdminDriveIntegration();
             if (window.lucide) window.lucide.createIcons();
           }
