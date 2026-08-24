@@ -355,12 +355,17 @@
                 <i data-lucide="user-round" style="width: 14px; height: 14px;"></i>
                 ${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}
               </div>
-              <div class="timeline-footer">
-                <span class="room-badge">
-                  <i data-lucide="map-pin" style="width: 12px; height: 12px;"></i>
-                  ${getRoomDisplay(item.roomCode, item.roomName)}
-                </span>
-                ${statusBadge}
+              <div class="timeline-footer" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span class="room-badge">
+                    <i data-lucide="map-pin" style="width: 12px; height: 12px;"></i>
+                    ${getRoomDisplay(item.roomCode, item.roomName)}
+                  </span>
+                  ${statusBadge}
+                </div>
+                <button class="btn-course-material" style="padding: 4px 10px; font-size: 11px;" onclick="window.openCourseMaterialsModal('${item.id}', '${item.courseName.replace(/'/g, "\\'")}', '${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName).replace(/'/g, "\\'")}', '${item.roomCode}')">
+                  <i data-lucide="folder" style="width: 12px; height: 12px;"></i> Materi
+                </button>
               </div>
             </div>
           </div>
@@ -410,8 +415,11 @@
               ${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}
             </div>
 
-            <div class="schedule-card-bottom">
+            <div class="schedule-card-bottom" style="display: flex; align-items: center; justify-content: space-between;">
               <span>${item.roomName ? item.roomName : 'Gedung III Teknik Elektro Lt. 2'}</span>
+              <button class="btn-course-material" onclick="window.openCourseMaterialsModal('${item.id}', '${item.courseName.replace(/'/g, "\\'")}', '${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName).replace(/'/g, "\\'")}', '${item.roomCode}')">
+                <i data-lucide="folder" style="width: 13px; height: 13px;"></i> Materi
+              </button>
             </div>
           </div>
         `;
@@ -838,7 +846,328 @@
       renderSettingsUI();
       if (window.lucide) window.lucide.createIcons();
     });
+
+    // Realtime Material Updates
+    window.addEventListener('trjt:materials-updated', () => {
+      if (activeMaterialCourse) {
+        renderCourseMaterialsList();
+      }
+    });
+
+    // Material Modal Close
+    const btnCloseMat = document.getElementById('btn-close-materials-modal');
+    if (btnCloseMat) btnCloseMat.addEventListener('click', closeCourseMaterialsModal);
+
+    const modalMat = document.getElementById('modal-course-materials');
+    if (modalMat) {
+      modalMat.addEventListener('click', (e) => {
+        if (e.target === modalMat) closeCourseMaterialsModal();
+      });
+    }
+
+    // Material Category Pills
+    document.querySelectorAll('#modal-course-materials .filter-pill').forEach((pill) => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('#modal-course-materials .filter-pill').forEach((p) => p.classList.remove('active'));
+        pill.classList.add('active');
+        activeMaterialFilter = pill.getAttribute('data-filter') || 'all';
+        renderCourseMaterialsList();
+      });
+    });
+
+    // Material Search Input
+    const searchInput = document.getElementById('mat-search-input');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        activeMaterialSearch = e.target.value;
+        renderCourseMaterialsList();
+      });
+    }
+
+    // Open Upload Modal Trigger
+    const btnTriggerUpload = document.getElementById('btn-trigger-upload-modal');
+    if (btnTriggerUpload) btnTriggerUpload.addEventListener('click', openUploadModal);
+
+    // Upload Modal Close
+    const btnCloseUpload = document.getElementById('btn-close-upload-modal');
+    if (btnCloseUpload) btnCloseUpload.addEventListener('click', closeUploadModal);
+
+    const modalUpload = document.getElementById('modal-upload-material');
+    if (modalUpload) {
+      modalUpload.addEventListener('click', (e) => {
+        if (e.target === modalUpload) closeUploadModal();
+      });
+    }
+
+    // File Input Pickers
+    ['file-input-camera', 'file-input-gallery', 'file-input-document'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('change', (e) => {
+          if (e.target.files && e.target.files[0]) {
+            handleFileSelected(e.target.files[0]);
+          }
+        });
+      }
+    });
+
+    // Remove Selected File
+    const btnRemoveFile = document.getElementById('btn-remove-selected-file');
+    if (btnRemoveFile) {
+      btnRemoveFile.addEventListener('click', () => {
+        selectedUploadFile = null;
+        const previewBox = document.getElementById('upload-preview-box');
+        if (previewBox) previewBox.style.display = 'none';
+        ['file-input-camera', 'file-input-gallery', 'file-input-document'].forEach((id) => {
+          const input = document.getElementById(id);
+          if (input) input.value = '';
+        });
+      });
+    }
+
+    // Upload Form Submit
+    const formUpload = document.getElementById('form-upload-material');
+    if (formUpload) {
+      formUpload.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!selectedUploadFile) {
+          showToast('⚠️ Silakan pilih file atau foto terlebih dahulu', 'error');
+          return;
+        }
+
+        const submitBtn = document.getElementById('btn-submit-upload-mat');
+        const statusText = document.getElementById('upload-status-text');
+        const descInput = document.getElementById('upload-material-desc');
+        const authorInput = document.getElementById('upload-material-author');
+
+        if (submitBtn) submitBtn.disabled = true;
+        if (statusText) statusText.style.display = 'block';
+        if (window.lucide) window.lucide.createIcons();
+
+        try {
+          if (!window.TRJT_MATERIALS) throw new Error('Layanan materi belum siap.');
+
+          const metadata = {
+            scheduleId: activeMaterialCourse.scheduleId,
+            courseName: activeMaterialCourse.courseName,
+            description: descInput ? descInput.value : '',
+            uploadedBy: authorInput && authorInput.value.trim() ? authorInput.value.trim() : 'Mahasiswa TRJT 3A'
+          };
+
+          await window.TRJT_MATERIALS.uploadCourseMaterial(selectedUploadFile, metadata);
+
+          closeUploadModal();
+          showToast('✅ Materi berhasil disimpan ke Google Drive!', 'success');
+          await renderCourseMaterialsList();
+        } catch (err) {
+          showToast('❌ Gagal unggah: ' + err.message, 'error');
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i data-lucide="cloud-upload" style="width: 18px; height: 18px;"></i> Simpan ke Google Drive';
+          }
+          if (statusText) statusText.style.display = 'none';
+          if (window.lucide) window.lucide.createIcons();
+        }
+      });
+    }
   }
+
+  // --- Course Materials Modal & Controller System ---
+  let activeMaterialCourse = null;
+  let activeMaterialFilter = 'all';
+  let activeMaterialSearch = '';
+  let selectedUploadFile = null;
+
+  async function openCourseMaterialsModal(scheduleId, courseName, lecturer, room) {
+    activeMaterialCourse = { scheduleId, courseName, lecturer, room };
+    activeMaterialFilter = 'all';
+    activeMaterialSearch = '';
+
+    const modal = document.getElementById('modal-course-materials');
+    const titleEl = document.getElementById('mat-modal-course-name');
+    const metaEl = document.getElementById('mat-modal-course-meta');
+    const searchInput = document.getElementById('mat-search-input');
+
+    if (titleEl) titleEl.innerText = courseName;
+    if (metaEl) metaEl.innerText = `${lecturer || 'Dosen Pengampu'} · Ruang ${room || '-'}`;
+    if (searchInput) searchInput.value = '';
+
+    document.querySelectorAll('#modal-course-materials .filter-pill').forEach((pill) => {
+      if (pill.getAttribute('data-filter') === 'all') pill.classList.add('active');
+      else pill.classList.remove('active');
+    });
+
+    await renderCourseMaterialsList();
+
+    if (modal) {
+      modal.classList.add('is-open');
+    }
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  function closeCourseMaterialsModal() {
+    const modal = document.getElementById('modal-course-materials');
+    if (modal) modal.classList.remove('is-open');
+  }
+
+  async function renderCourseMaterialsList() {
+    const container = document.getElementById('mat-list-container');
+    const emptyState = document.getElementById('mat-empty-state');
+    const countAll = document.getElementById('count-mat-all');
+    const countPhoto = document.getElementById('count-mat-photo');
+    const countDoc = document.getElementById('count-mat-doc');
+
+    if (!container || !activeMaterialCourse) return;
+
+    let items = [];
+    if (window.TRJT_MATERIALS) {
+      items = await window.TRJT_MATERIALS.getMaterialsForCourse(activeMaterialCourse.courseName);
+    }
+
+    const photoItems = items.filter((m) => m.isImage || ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes(m.fileExtension));
+    const docItems = items.filter((m) => !m.isImage && !['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes(m.fileExtension));
+
+    if (countAll) countAll.innerText = items.length;
+    if (countPhoto) countPhoto.innerText = photoItems.length;
+    if (countDoc) countDoc.innerText = docItems.length;
+
+    let filtered = items;
+    if (activeMaterialFilter === 'photo') {
+      filtered = photoItems;
+    } else if (activeMaterialFilter === 'doc') {
+      filtered = docItems;
+    }
+
+    if (activeMaterialSearch.trim()) {
+      const q = activeMaterialSearch.toLowerCase().trim();
+      filtered = filtered.filter((m) => 
+        (m.fileName && m.fileName.toLowerCase().includes(q)) ||
+        (m.description && m.description.toLowerCase().includes(q)) ||
+        (m.uploadedBy && m.uploadedBy.toLowerCase().includes(q))
+      );
+    }
+
+    if (filtered.length === 0) {
+      container.innerHTML = '';
+      if (emptyState) emptyState.style.display = 'flex';
+      return;
+    }
+
+    if (emptyState) emptyState.style.display = 'none';
+
+    container.innerHTML = filtered.map((m) => {
+      const isPhoto = m.isImage || ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes(m.fileExtension);
+      const icon = isPhoto ? 'image' : (m.fileExtension === 'pdf' ? 'file-text' : (['doc', 'docx'].includes(m.fileExtension) ? 'file-edit' : (['xls', 'xlsx'].includes(m.fileExtension) ? 'file-spreadsheet' : 'file')));
+      
+      const thumbHtml = m.thumbnailUrl 
+        ? `<img src="${m.thumbnailUrl}" class="material-thumb-img" alt="${m.fileName}">`
+        : `<i data-lucide="${icon}" style="width: 24px; height: 24px; color: var(--color-primary-blue);"></i>`;
+
+      const dateStr = m.uploadedAt 
+        ? (typeof m.uploadedAt === 'string' ? new Date(m.uploadedAt).toLocaleDateString('id-ID') : 'Baru saja')
+        : 'Baru saja';
+
+      return `
+        <div class="material-card">
+          <div class="material-thumb-box">
+            ${thumbHtml}
+          </div>
+          <div class="material-info">
+            <h4 class="material-filename">${m.fileName}</h4>
+            <div class="material-meta-row">
+              <span><i data-lucide="hard-drive" style="width: 11px; height: 11px; vertical-align: middle;"></i> ${m.fileSize || '1 MB'}</span>
+              <span>·</span>
+              <span><i data-lucide="calendar" style="width: 11px; height: 11px; vertical-align: middle;"></i> ${dateStr}</span>
+              <span>·</span>
+              <span style="color: var(--color-deep-blue); font-weight: 600;">${m.uploadedBy || 'Mahasiswa'}</span>
+            </div>
+            ${m.description ? `<div class="material-note">${m.description}</div>` : ''}
+            <div class="material-actions-row">
+              <a href="${m.webViewLink || '#'}" target="_blank" rel="noopener noreferrer" class="btn-mat-action btn-mat-open">
+                <i data-lucide="external-link" style="width: 12px; height: 12px;"></i> Buka di Drive
+              </a>
+              <button class="btn-mat-action btn-mat-delete" onclick="window.confirmDeleteMaterial('${m.id}')" title="Hapus materi">
+                <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  window.confirmDeleteMaterial = async function (materialId) {
+    if (!confirm('Apakah Anda yakin ingin menghapus file materi ini?')) return;
+    try {
+      if (window.TRJT_MATERIALS) {
+        await window.TRJT_MATERIALS.deleteCourseMaterial(materialId);
+        showToast('🗑️ Materi berhasil dihapus', 'info');
+        renderCourseMaterialsList();
+      }
+    } catch (e) {
+      showToast('❌ Gagal menghapus: ' + e.message, 'error');
+    }
+  };
+
+  function openUploadModal() {
+    if (!activeMaterialCourse) return;
+    selectedUploadFile = null;
+
+    const modal = document.getElementById('modal-upload-material');
+    const subEl = document.getElementById('upload-modal-course-sub');
+    const form = document.getElementById('form-upload-material');
+    const previewBox = document.getElementById('upload-preview-box');
+    const statusText = document.getElementById('upload-status-text');
+    const submitBtn = document.getElementById('btn-submit-upload-mat');
+
+    if (subEl) subEl.innerText = `Mata Kuliah: ${activeMaterialCourse.courseName}`;
+    if (form) form.reset();
+    if (previewBox) previewBox.style.display = 'none';
+    if (statusText) statusText.style.display = 'none';
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i data-lucide="cloud-upload" style="width: 18px; height: 18px;"></i> Simpan ke Google Drive';
+    }
+
+    if (modal) modal.classList.add('is-open');
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  function closeUploadModal() {
+    const modal = document.getElementById('modal-upload-material');
+    if (modal) modal.classList.remove('is-open');
+  }
+
+  function handleFileSelected(file) {
+    if (!file) return;
+    selectedUploadFile = file;
+
+    const previewBox = document.getElementById('upload-preview-box');
+    const previewIcon = document.getElementById('upload-preview-icon');
+    const fileNameEl = document.getElementById('upload-file-name');
+    const fileSizeEl = document.getElementById('upload-file-size');
+
+    if (fileNameEl) fileNameEl.innerText = file.name;
+    if (fileSizeEl && window.TRJT_MATERIALS) fileSizeEl.innerText = window.TRJT_MATERIALS.formatFileSize(file.size);
+
+    if (previewIcon) {
+      if (file.type.startsWith('image/')) {
+        const url = URL.createObjectURL(file);
+        previewIcon.innerHTML = `<img src="${url}" style="width: 100%; height: 100%; object-fit: cover;">`;
+      } else {
+        previewIcon.innerHTML = `<i data-lucide="file-text" style="width: 22px; height: 22px; color: var(--color-primary-blue);"></i>`;
+      }
+    }
+
+    if (previewBox) previewBox.style.display = 'flex';
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  window.openCourseMaterialsModal = openCourseMaterialsModal;
+  window.closeCourseMaterialsModal = closeCourseMaterialsModal;
 
   function tick() {
     const scheduleData = evaluateScheduleState(timeProvider, window.TRJT_SCHEDULE);

@@ -35,7 +35,7 @@
       <!-- App Header -->
       <header class="app-header">
         <div class="header-top">
-          <div class="brand-badge">
+          <a href="./admin/index.html" class="brand-badge" style="text-decoration: none;" title="Masuk ke Portal Admin TRJT 3A">
             <div class="brand-logo-box">
               <img src="./assets/icons/trjt-logo.svg" alt="TRJT Logo" style="width: 100%; height: 100%; object-fit: contain;">
             </div>
@@ -43,7 +43,7 @@
               <span class="brand-title">TRJT 3A</span>
               <span class="brand-subtitle">Class Reminder</span>
             </div>
-          </div>
+          </a>
 
           <button id="btn-header-bell" class="btn-header-bell" onclick="document.querySelector('[data-tab=notifikasi]').click()" aria-label="Lihat Notifikasi">
             <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
@@ -355,6 +355,151 @@
     </div>
   </div>
 
+  <!-- ==========================================
+       MODAL 1: DETAIL MATERI MATA KULIAH
+       ========================================== -->
+  <div id="modal-course-materials" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-sheet">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="brand-logo-box" style="width: 40px; height: 40px; background-color: #EFF6FF; border-color: #BFDBFE;">
+            <i data-lucide="book-open" style="width: 20px; height: 20px; color: var(--color-primary-blue);"></i>
+          </div>
+          <div>
+            <h2 id="mat-modal-course-name" style="font-size: 15px; font-weight: 700; color: var(--color-primary-text); line-height: 1.25;">Materi Mata Kuliah</h2>
+            <p id="mat-modal-course-meta" style="font-size: 12px; color: var(--color-secondary-text); margin-top: 2px;">Dosen Pengampu · Ruang</p>
+          </div>
+        </div>
+        <button id="btn-close-materials-modal" class="btn-close-modal" aria-label="Tutup">
+          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        
+        <!-- Top Action & Search Bar -->
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+            <button id="btn-trigger-upload-modal" class="btn-primary" style="padding: 8px 16px; font-size: 13px; flex-shrink: 0;">
+              <i data-lucide="plus-circle" style="width: 16px; height: 16px;"></i> Tambah Materi
+            </button>
+            <div style="position: relative; flex: 1;">
+              <i data-lucide="search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: var(--color-secondary-text);"></i>
+              <input type="text" id="mat-search-input" class="form-input" placeholder="Cari materi..." style="width: 100%; padding-left: 32px; font-size: 13px; padding-top: 7px; padding-bottom: 7px; border-radius: 9999px;">
+            </div>
+          </div>
+
+          <!-- Category Pills Filter -->
+          <div class="filter-pills-wrap">
+            <button class="filter-pill active" data-filter="all">Semua File (<span id="count-mat-all">0</span>)</button>
+            <button class="filter-pill" data-filter="photo">📷 Foto (<span id="count-mat-photo">0</span>)</button>
+            <button class="filter-pill" data-filter="doc">📄 Dokumen (<span id="count-mat-doc">0</span>)</button>
+          </div>
+        </div>
+
+        <!-- Materials List Container -->
+        <div id="mat-list-container" style="display: flex; flex-direction: column; gap: 10px; min-height: 120px;">
+          <!-- Dynamically populated -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="mat-empty-state" class="empty-state-card" style="padding: 32px 16px; display: none;">
+          <div class="empty-icon-circle">
+            <i data-lucide="folder-open" style="width: 28px; height: 28px; color: var(--color-muted-text);"></i>
+          </div>
+          <p style="font-weight: 700; font-size: 14px; color: var(--color-primary-text); margin-top: 10px;">Belum Ada Materi</p>
+          <p style="font-size: 12px; color: var(--color-secondary-text); margin-top: 3px; max-width: 280px; text-align: center;">File, foto slide, dan dokumen modul perkuliahan untuk mata kuliah ini akan tersimpan di Google Drive admin.</p>
+          <button class="btn-primary" onclick="document.getElementById('btn-trigger-upload-modal').click()" style="margin-top: 14px; padding: 7px 16px; font-size: 12px;">
+            <i data-lucide="plus" style="width: 14px; height: 14px;"></i> Tambah Materi Pertama
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL 2: UPLOAD MATERI KE GOOGLE DRIVE
+       ========================================== -->
+  <div id="modal-upload-material" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-sheet">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div>
+          <h2 style="font-size: 15px; font-weight: 700; color: var(--color-primary-text);">Unggah Materi Perkuliahan</h2>
+          <p id="upload-modal-course-sub" style="font-size: 12px; color: var(--color-secondary-text); margin-top: 2px;">Tersimpan otomatis di Google Drive Admin</p>
+        </div>
+        <button id="btn-close-upload-modal" class="btn-close-modal" aria-label="Tutup">
+          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+        </button>
+      </div>
+
+      <!-- Upload Form Body -->
+      <form id="form-upload-material" class="modal-body">
+        
+        <!-- Picker Actions Row (Camera, Gallery, Files) -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+          <label style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 6px; background-color: #EFF6FF; border: 1px dashed #93C5FD; border-radius: 14px; cursor: pointer; text-align: center; transition: all var(--transition-fast);">
+            <input type="file" id="file-input-camera" accept="image/*" capture="environment" style="display: none;">
+            <i data-lucide="camera" style="width: 22px; height: 22px; color: var(--color-primary-blue);"></i>
+            <span style="font-size: 11px; font-weight: 600; color: var(--color-deep-blue);">Ambil Foto</span>
+          </label>
+
+          <label style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 6px; background-color: #EFF6FF; border: 1px dashed #93C5FD; border-radius: 14px; cursor: pointer; text-align: center; transition: all var(--transition-fast);">
+            <input type="file" id="file-input-gallery" accept="image/*" style="display: none;">
+            <i data-lucide="image" style="width: 22px; height: 22px; color: var(--color-primary-blue);"></i>
+            <span style="font-size: 11px; font-weight: 600; color: var(--color-deep-blue);">Galeri Foto</span>
+          </label>
+
+          <label style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 6px; background-color: #F8FAFC; border: 1px dashed var(--color-border-card); border-radius: 14px; cursor: pointer; text-align: center; transition: all var(--transition-fast);">
+            <input type="file" id="file-input-document" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.rar" style="display: none;">
+            <i data-lucide="file-text" style="width: 22px; height: 22px; color: var(--color-secondary-text);"></i>
+            <span style="font-size: 11px; font-weight: 600; color: var(--color-primary-text);">Pilih Dokumen</span>
+          </label>
+        </div>
+
+        <!-- Selected File Preview Card -->
+        <div id="upload-preview-box" style="display: none; padding: 12px; background-color: var(--color-panel-bg); border: 1px solid var(--color-border-card); border-radius: 14px; align-items: center; gap: 12px;">
+          <div id="upload-preview-icon" style="width: 44px; height: 44px; border-radius: 10px; background-color: #EFF6FF; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+            <i data-lucide="file" style="width: 20px; height: 20px; color: var(--color-primary-blue);"></i>
+          </div>
+          <div style="flex: 1; min-width: 0;">
+            <p id="upload-file-name" style="font-size: 13px; font-weight: 700; color: var(--color-primary-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">file-name.pdf</p>
+            <p id="upload-file-size" style="font-size: 11px; color: var(--color-secondary-text); margin-top: 2px;">2.4 MB</p>
+          </div>
+          <button type="button" id="btn-remove-selected-file" style="background: none; border: none; cursor: pointer; color: var(--color-muted-text); padding: 4px;">
+            <i data-lucide="trash-2" style="width: 16px; height: 16px; color: #DC2626;"></i>
+          </button>
+        </div>
+
+        <!-- Description / Note Input -->
+        <div class="form-group">
+          <label style="font-size: 12px; font-weight: 600; color: var(--color-primary-text);">Catatan / Keterangan (Opsional)</label>
+          <input type="text" id="upload-material-desc" class="form-input" placeholder="Contoh: Modul Praktikum Bab 3, Slide Presentasi..." style="font-size: 13px;">
+        </div>
+
+        <!-- Uploader Name Input -->
+        <div class="form-group">
+          <label style="font-size: 12px; font-weight: 600; color: var(--color-primary-text);">Nama Pengunggah (Opsional)</label>
+          <input type="text" id="upload-material-author" class="form-input" placeholder="Contoh: Komti / Nama Mahasiswa" style="font-size: 13px;">
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="btn-submit-upload-mat" class="btn-primary" style="padding: 12px; font-size: 14px; justify-content: center; margin-top: 6px;">
+          <i data-lucide="cloud-upload" style="width: 18px; height: 18px;"></i> Simpan ke Google Drive
+        </button>
+
+        <!-- Upload Status Feedback -->
+        <div id="upload-status-text" style="display: none; text-align: center; font-size: 13px; font-weight: 600; color: var(--color-primary-blue);">
+          <i data-lucide="loader-2" class="spin-animate" style="width: 14px; height: 14px; vertical-align: middle;"></i> Mengunggah ke Google Drive…
+        </div>
+
+      </form>
+    </div>
+  </div>
+
   <!-- Firebase App & Services (v10 compat SDK) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -366,6 +511,7 @@
   <script src="./js/time-provider.js?v=3.0"></script>
   <script src="./js/data.js?v=3.0"></script>
   <script src="./js/drive-service.js?v=3.0"></script>
+  <script src="./js/material-service.js?v=3.0"></script>
   <script src="./js/app.js?v=3.0"></script>
 </body>
 </html>

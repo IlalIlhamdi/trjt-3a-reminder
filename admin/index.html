@@ -309,6 +309,66 @@
         </div>
       </div>
 
+      <!-- Section: Course Materials Management (Phase 3-6) -->
+      <div class="admin-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <h2 style="font-size: 1.125rem; font-weight: 700; color: var(--color-primary-text); display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="files" style="width: 20px; height: 20px; color: var(--color-primary-blue);"></i>
+              Manajemen Materi Perkuliahan (Google Drive)
+            </h2>
+            <p style="font-size: 13px; color: var(--color-secondary-text); margin-top: 2px;">
+              Kelola dokumen, modul, dan foto materi per mata kuliah yang tersimpan di Google Drive admin.
+            </p>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span id="admin-mat-total-count" class="soft-badge-info">0 File Tersimpan</span>
+          </div>
+        </div>
+
+        <!-- Controls Bar: Permissions & Course Filter -->
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; background-color: var(--color-panel-bg); padding: 14px 16px; border-radius: var(--radius-inner); border: 1px solid var(--color-border-subtle);">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <label class="switch-toggle" style="margin: 0;">
+              <input type="checkbox" id="switch-allow-student-upload" checked>
+              <span class="slider"></span>
+            </label>
+            <div>
+              <span style="font-size: 13px; font-weight: 700; color: var(--color-primary-text);">Izinkan Mahasiswa Mengunggah Materi</span>
+              <p style="font-size: 11px; color: var(--color-secondary-text); margin: 0;">Bila dinonaktifkan, hanya admin yang dapat mengunggah materi baru.</p>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px; min-width: 220px;">
+            <label style="font-size: 12px; font-weight: 600; color: var(--color-secondary-text); white-space: nowrap;">Filter MK:</label>
+            <select id="admin-mat-filter-course" class="form-select" style="font-size: 12px; padding: 6px 10px;">
+              <option value="">Semua Mata Kuliah</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Materials List Table -->
+        <div style="overflow-x: auto; border: 1px solid var(--color-border-card); border-radius: var(--radius-inner);">
+          <table class="admin-table" style="font-size: 12px;">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Nama File</th>
+                <th>Mata Kuliah</th>
+                <th>Ukuran</th>
+                <th>Pengunggah / Catatan</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="admin-materials-table-body">
+              <tr>
+                <td colspan="6" style="text-align: center; color: var(--color-secondary-text); padding: 20px;">Memuat materi...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- Section: Override Jadwal / Batalkan Kelas -->
       <div class="admin-card">
         <div>
@@ -403,6 +463,7 @@
   <!-- App Data & Services -->
   <script src="../js/data.js"></script>
   <script src="../js/drive-service.js"></script>
+  <script src="../js/material-service.js"></script>
 
   <script>
     (function () {
@@ -437,8 +498,10 @@
         document.getElementById('btn-logout').style.display = 'inline-flex';
         renderSchedulesTable();
         populateOverrideDropdown();
+        populateAdminCourseFilter();
         renderAdminDiagnostics();
         renderAdminDriveIntegration();
+        renderAdminMaterialsTable();
         if (window.lucide) window.lucide.createIcons();
       }
 
@@ -756,6 +819,124 @@
       // Realtime Drive Events
       window.addEventListener('trjt:drive-status-changed', () => renderAdminDriveIntegration());
       window.addEventListener('trjt:drive-folders-changed', () => renderAdminDriveIntegration());
+
+      // --- Course Materials Management Controller (Admin) ---
+      function populateAdminCourseFilter() {
+        const filterSelect = document.getElementById('admin-mat-filter-course');
+        if (!filterSelect || !window.TRJT_SCHEDULE) return;
+
+        const uniqueCourses = [...new Set(window.TRJT_SCHEDULE.classes.map((c) => c.courseName))];
+        filterSelect.innerHTML = '<option value="">Semua Mata Kuliah</option>' +
+          uniqueCourses.map((name) => `<option value="${name}">${name}</option>`).join('');
+      }
+
+      function renderAdminMaterialsTable() {
+        const tableBody = document.getElementById('admin-materials-table-body');
+        const countBadge = document.getElementById('admin-mat-total-count');
+        const filterSelect = document.getElementById('admin-mat-filter-course');
+        const switchAllow = document.getElementById('switch-allow-student-upload');
+
+        if (!tableBody || !window.TRJT_MATERIALS) return;
+
+        const all = window.TRJT_MATERIALS.getAllMaterials();
+        const settings = window.TRJT_MATERIALS.getUploadSettings();
+
+        if (switchAllow) {
+          switchAllow.checked = settings.allowStudentUpload !== false;
+        }
+
+        const selectedCourse = filterSelect ? filterSelect.value : '';
+        const filtered = selectedCourse 
+          ? all.filter((m) => m.courseName === selectedCourse)
+          : all;
+
+        if (countBadge) {
+          countBadge.innerText = `${all.length} File Tersimpan`;
+        }
+
+        if (filtered.length === 0) {
+          tableBody.innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align: center; color: var(--color-secondary-text); padding: 24px;">
+                Belum ada file materi yang diunggah untuk mata kuliah ini.
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        tableBody.innerHTML = filtered.map((m, idx) => {
+          const isPhoto = m.isImage || ['jpg', 'jpeg', 'png', 'webp'].includes(m.fileExtension);
+          const icon = isPhoto ? 'image' : (m.fileExtension === 'pdf' ? 'file-text' : 'file');
+          const dateStr = m.uploadedAt ? (typeof m.uploadedAt === 'string' ? new Date(m.uploadedAt).toLocaleDateString('id-ID') : 'Baru saja') : 'Baru saja';
+
+          return `
+            <tr>
+              <td style="font-weight: 700; color: var(--color-secondary-text);">${idx + 1}</td>
+              <td>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <i data-lucide="${icon}" style="width: 16px; height: 16px; color: var(--color-primary-blue); flex-shrink: 0;"></i>
+                  <span style="font-weight: 600; color: var(--color-primary-text);">${m.fileName}</span>
+                </div>
+              </td>
+              <td style="font-weight: 600; color: var(--color-deep-blue);">${m.courseName}</td>
+              <td><span style="font-size: 11px; background: #F1F5F9; padding: 2px 6px; border-radius: 4px;">${m.fileSize || '-'}</span></td>
+              <td>
+                <div style="font-size: 11px; color: var(--color-primary-text); font-weight: 600;">${m.uploadedBy || 'Mahasiswa'}</div>
+                <div style="font-size: 11px; color: var(--color-secondary-text);">${m.description || dateStr}</div>
+              </td>
+              <td>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <a href="${m.webViewLink || '#'}" target="_blank" rel="noopener noreferrer" class="btn-secondary" style="font-size: 11px; padding: 4px 8px;" title="Buka di Drive">
+                    <i data-lucide="external-link" style="width: 12px; height: 12px;"></i> Buka
+                  </a>
+                  <button class="btn-secondary" style="font-size: 11px; padding: 4px 8px; color: #DC2626; border-color: #FECACA;" onclick="window.adminDeleteMaterial('${m.id}')" title="Hapus File">
+                    <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        if (window.lucide) window.lucide.createIcons();
+      }
+
+      window.adminDeleteMaterial = async function (materialId) {
+        if (!confirm('Apakah Anda yakin ingin menghapus materi ini dari Google Drive dan database?')) return;
+        try {
+          if (window.TRJT_MATERIALS) {
+            await window.TRJT_MATERIALS.deleteCourseMaterial(materialId);
+            alert('✅ File materi berhasil dihapus.');
+            renderAdminMaterialsTable();
+          }
+        } catch (e) {
+          alert('❌ Gagal: ' + e.message);
+        }
+      };
+
+      // Material Events in Admin
+      const filterCourseSelect = document.getElementById('admin-mat-filter-course');
+      if (filterCourseSelect) {
+        filterCourseSelect.addEventListener('change', () => renderAdminMaterialsTable());
+      }
+
+      const switchAllowStudent = document.getElementById('switch-allow-student-upload');
+      if (switchAllowStudent) {
+        switchAllowStudent.addEventListener('change', async (e) => {
+          const isAllowed = e.target.checked;
+          try {
+            if (window.TRJT_MATERIALS) {
+              await window.TRJT_MATERIALS.updateUploadSettings(isAllowed);
+            }
+          } catch (err) {
+            alert('Gagal memperbarui pengaturan: ' + err.message);
+          }
+        });
+      }
+
+      window.addEventListener('trjt:materials-updated', () => renderAdminMaterialsTable());
+      window.addEventListener('trjt:upload-settings-updated', () => renderAdminMaterialsTable());
 
       // Init
       setTimeout(checkAuth, 100);
