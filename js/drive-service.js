@@ -27,7 +27,7 @@
     rootFolderName: 'TRJT 3A — Semester 5',
     rootFolderId: '1W7F5rWsNNq-nsLUF1emnOj4eJsYSShzW',
     rootFolderLink: 'https://drive.google.com/drive/folders/1W7F5rWsNNq-nsLUF1emnOj4eJsYSShzW?usp=drive_link',
-    appsScriptUrl: 'https://script.google.com/macros/s/AKfycbxkflfXyxarRFMSHV6xJVM1IOFKWnY_7lFiQkWGqxgE3ylpsT9zUTnKX9VQhGgFzXVXFg/exec',
+    appsScriptUrl: 'https://script.google.com/macros/s/AKfycbyXgjJ4CXqFqI45E1WQ_eua30gHSKI3a6auxWQqVACYLrExHKjw8-PQfhqjSsljlMFwLQ/exec',
     initialized: true,
     foldersCount: 11,
     manualConfigured: true,

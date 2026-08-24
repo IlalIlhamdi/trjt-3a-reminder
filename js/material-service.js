@@ -245,7 +245,7 @@
     }
 
     // 7. Direct Upload to Google Drive via Google Apps Script Web App
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxkflfXyxarRFMSHV6xJVM1IOFKWnY_7lFiQkWGqxgE3ylpsT9zUTnKX9VQhGgFzXVXFg/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyXgjJ4CXqFqI45E1WQ_eua30gHSKI3a6auxWQqVACYLrExHKjw8-PQfhqjSsljlMFwLQ/exec';
     let realDriveFileId = driveFileId;
     let realWebViewLink = webViewLink;
     let realWebContentLink = webContentLink;
