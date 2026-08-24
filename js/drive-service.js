@@ -23,7 +23,7 @@
   // DIRECT DEFAULT CONFIGURATION (Ready out-of-the-box)
   const DEFAULT_DRIVE_CONFIG = {
     connected: true,
-    adminEmail: 'admin.trjt3a@gmail.com',
+    adminEmail: 'ilalilhamdi0@gmail.com',
     rootFolderName: 'TRJT 3A — Semester 5',
     rootFolderId: '1TRJT3A-Semester5-DriveRootFolderId',
     initialized: true,
