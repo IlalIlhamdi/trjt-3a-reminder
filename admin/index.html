@@ -1168,76 +1168,79 @@
         `).join('');
       }
 
-      async function renderAdminRegisteredDevices() {
+      let devicesUnsubscribe = null;
+      function renderAdminRegisteredDevices() {
         const tableBody = document.getElementById('admin-devices-table-body');
         const badge = document.getElementById('admin-devices-count-badge');
         if (!tableBody) return;
 
-        let devices = [];
         const db = window.firebase ? window.firebase.firestore() : null;
+        if (!db) return;
 
-        if (db) {
-          try {
-            const snap = await db.collection('devices').limit(20).get();
-            snap.forEach((doc) => {
-              devices.push({ id: doc.id, ...doc.data() });
-            });
-          } catch (e) {
-            console.warn('Devices fetch note:', e.message);
-          }
+        if (devicesUnsubscribe) {
+          try { devicesUnsubscribe(); } catch (e) {}
         }
 
-        // Add local current browser device if list is empty
-        if (devices.length === 0 && window.TRJT_FIREBASE) {
-          const st = window.TRJT_FIREBASE.getNotificationStatus();
-          devices.push({
-            id: 'device-local',
-            token: st.tokenFull || 'fcm-device-browser-local-test',
-            tokenMasked: st.tokenMasked || 'abc123...xyz789',
-            platform: st.platform || (navigator.userAgent.includes('Android') ? 'Android' : 'Desktop Web'),
-            reminderEnabled: st.reminderEnabled,
-            soundEnabled: true,
-            lastSeen: new Date().toISOString()
+        devicesUnsubscribe = db.collection('devices')
+          .limit(30)
+          .onSnapshot((snapshot) => {
+            let devices = [];
+            if (snapshot && !snapshot.empty) {
+              snapshot.forEach((doc) => {
+                devices.push({ id: doc.id, ...doc.data() });
+              });
+            }
+
+            // Fallback device if empty
+            if (devices.length === 0 && window.TRJT_FIREBASE) {
+              const st = window.TRJT_FIREBASE.getNotificationStatus();
+              devices.push({
+                id: 'device-local',
+                token: st.tokenFull || 'fcm-device-browser-local-test',
+                tokenMasked: st.tokenMasked || 'abc123...xyz789',
+                platform: st.platform || 'Windows Desktop',
+                reminderEnabled: st.reminderEnabled,
+                soundEnabled: true,
+                lastSeen: new Date().toISOString()
+              });
+            }
+
+            if (badge) {
+              badge.innerText = `${devices.length} Perangkat Terdaftar`;
+            }
+
+            tableBody.innerHTML = devices.map((d, idx) => {
+              const masked = d.token ? (d.token.length > 14 ? d.token.substring(0, 6) + '...' + d.token.slice(-6) : d.token) : (d.tokenMasked || 'abc...xyz');
+              const isRemActive = d.reminderEnabled !== false;
+              let dateStr = 'Baru saja';
+              if (d.lastSeen) {
+                if (d.lastSeen.toDate) {
+                  dateStr = d.lastSeen.toDate().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                } else if (typeof d.lastSeen === 'string') {
+                  dateStr = new Date(d.lastSeen).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                }
+              }
+
+              return `
+                <tr>
+                  <td style="font-weight: 700; color: var(--color-secondary-text);">${idx + 1}</td>
+                  <td><code style="font-size: 11px; background: #F1F5F9; padding: 2px 6px; border-radius: 4px;">${masked}</code></td>
+                  <td><span style="font-weight: 600; color: var(--color-primary-text);">${d.platform || 'Smartphone'}</span></td>
+                  <td><span class="${isRemActive ? 'soft-badge-success' : 'soft-badge-neutral'}" style="font-size: 10px;">${isRemActive ? 'Aktif' : 'Mati'}</span></td>
+                  <td style="font-size: 11px; color: var(--color-secondary-text);">${dateStr}</td>
+                  <td>
+                    <button class="btn-primary" style="font-size: 11px; padding: 3px 8px;" onclick="window.adminSendDirectTestToDevice('${d.id}')">
+                      <i data-lucide="send" style="width: 11px; height: 11px;"></i> Tes Kirim
+                    </button>
+                  </td>
+                </tr>
+              `;
+            }).join('');
+
+            if (window.lucide) window.lucide.createIcons();
+          }, (err) => {
+            console.warn('Devices realtime error:', err.message);
           });
-        }
-
-        if (badge) {
-          badge.innerText = `${devices.length} Perangkat Terdaftar`;
-        }
-
-        if (devices.length === 0) {
-          tableBody.innerHTML = `
-            <tr>
-              <td colspan="6" style="text-align: center; color: var(--color-secondary-text); padding: 18px;">
-                Belum ada perangkat mahasiswa yang terdaftar di Firestore.
-              </td>
-            </tr>
-          `;
-          return;
-        }
-
-        tableBody.innerHTML = devices.map((d, idx) => {
-          const masked = d.token ? (d.token.length > 14 ? d.token.substring(0, 6) + '...' + d.token.slice(-6) : d.token) : (d.tokenMasked || 'abc...xyz');
-          const isRemActive = d.reminderEnabled !== false;
-          const dateStr = d.lastSeen ? (typeof d.lastSeen === 'string' ? new Date(d.lastSeen).toLocaleTimeString('id-ID') : 'Aktif') : 'Aktif';
-
-          return `
-            <tr>
-              <td style="font-weight: 700; color: var(--color-secondary-text);">${idx + 1}</td>
-              <td><code style="font-size: 11px; background: #F1F5F9; padding: 2px 6px; border-radius: 4px;">${masked}</code></td>
-              <td><span style="font-weight: 600; color: var(--color-primary-text);">${d.platform || 'Web/Android'}</span></td>
-              <td><span class="${isRemActive ? 'soft-badge-success' : 'soft-badge-neutral'}" style="font-size: 10px;">${isRemActive ? 'Aktif' : 'Mati'}</span></td>
-              <td style="font-size: 11px; color: var(--color-secondary-text);">${dateStr}</td>
-              <td>
-                <button class="btn-primary" style="font-size: 11px; padding: 3px 8px;" onclick="window.adminSendDirectTestToDevice('${d.id}')">
-                  <i data-lucide="send" style="width: 11px; height: 11px;"></i> Tes Kirim
-                </button>
-              </td>
-            </tr>
-          `;
-        }).join('');
-
-        if (window.lucide) window.lucide.createIcons();
       }
 
       window.adminSendDirectTestToDevice = async function (deviceId) {

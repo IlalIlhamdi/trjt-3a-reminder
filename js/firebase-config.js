@@ -128,6 +128,9 @@
         console.log("🔥 Firebase Connected: TRJT 3A Database Ready");
         setupFirestoreListeners();
 
+        // Auto register client device in Firestore
+        autoRegisterClientDevice();
+
         // If permission was already granted previously, ensure token is refreshed and active
         if ('Notification' in window && Notification.permission === 'granted') {
           syncDeviceTokenState(false);
@@ -137,6 +140,40 @@
       }
     } catch (err) {
       console.warn("⚠️ Firebase init:", err.message);
+    }
+  }
+
+  // Auto Register Client Device on Startup (Mobile / Desktop)
+  async function autoRegisterClientDevice() {
+    let deviceId = localStorage.getItem('trjt_device_uuid');
+    if (!deviceId) {
+      deviceId = 'dev-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 9);
+      localStorage.setItem('trjt_device_uuid', deviceId);
+    }
+
+    const platform = detectPlatform();
+    const isReminderOn = localStorage.getItem('trjt_h10_enabled') !== 'false';
+    const isSoundOn = localStorage.getItem('trjt_sound_enabled') !== 'false';
+
+    if (db) {
+      try {
+        const token = currentFcmToken || localStorage.getItem('trjt_fcm_token') || deviceId;
+        await db.collection('devices').doc(deviceId).set({
+          id: deviceId,
+          token: token,
+          tokenMasked: maskToken(token),
+          platform: platform,
+          classId: 'trjt-3a',
+          reminderEnabled: isReminderOn,
+          soundEnabled: isSoundOn,
+          active: true,
+          lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+        console.log("📱 Auto-registered client device in Firestore:", platform, deviceId);
+      } catch (e) {
+        console.warn("Auto register device note:", e.message);
+      }
     }
   }
 
@@ -220,6 +257,17 @@
       }, (error) => {
         console.warn("Firestore override listener:", error.message);
       });
+  }
+
+  // Platform Detection Helper
+  function detectPlatform() {
+    const ua = navigator.userAgent || '';
+    if (/android/i.test(ua)) return 'Android Smartphone';
+    if (/iphone|ipad|ipod/i.test(ua)) return 'iPhone / iPad';
+    if (/windows nt/i.test(ua)) return 'Windows Desktop';
+    if (/macintosh|mac os x/i.test(ua)) return 'macOS Laptop';
+    if (/linux/i.test(ua)) return 'Linux Device';
+    return 'Mobile / Web Browser';
   }
 
   // Honest Notification Status Evaluator
