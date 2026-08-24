@@ -85,7 +85,7 @@ self.addEventListener('push', (event) => {
     body: body,
     icon: './assets/icons/app-icon.svg',
     badge: './assets/icons/app-icon.svg',
-    vibrate: [200, 100, 200],
+    vibrate: [800, 250, 1000, 300, 800, 250, 1200, 400, 800, 250, 1000],
     tag: dataPayload.type || 'trjt-reminder',
     renotify: true,
     requireInteraction: true,

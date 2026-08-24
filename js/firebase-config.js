@@ -205,33 +205,92 @@
     }, { once: true, passive: true });
   });
 
-  function playNotificationChime() {
+  let activeVibrateInterval = null;
+
+  function stopNotificationAlert() {
+    if (activeVibrateInterval) {
+      clearInterval(activeVibrateInterval);
+      activeVibrateInterval = null;
+    }
+    if ('vibrate' in navigator) {
+      try { navigator.vibrate(0); } catch (e) {}
+    }
+  }
+
+  function playSingleChimeBurst(ctx, startTime, gainLevel = 0.85) {
+    // Rich Harmonious Academic Bell / Alarm Chime (E5 -> G#5 -> B5 -> E6)
+    const chords = [
+      { freq: 659.25, time: 0.0, dur: 0.55 },
+      { freq: 830.61, time: 0.14, dur: 0.55 },
+      { freq: 987.77, time: 0.28, dur: 0.65 },
+      { freq: 1318.51, time: 0.42, dur: 0.85 }
+    ];
+
+    chords.forEach(({ freq, time, dur }) => {
+      try {
+        const osc = ctx.createOscillator();
+        const oscHarmonic = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'triangle'; // Rich acoustic bell timbre
+        osc.frequency.setValueAtTime(freq, startTime + time);
+
+        oscHarmonic.type = 'sine';
+        oscHarmonic.frequency.setValueAtTime(freq * 2, startTime + time);
+
+        gain.gain.setValueAtTime(0.001, startTime + time);
+        gain.gain.linearRampToValueAtTime(gainLevel, startTime + time + 0.025);
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + time + dur);
+
+        osc.connect(gain);
+        oscHarmonic.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(startTime + time);
+        oscHarmonic.start(startTime + time);
+        osc.stop(startTime + time + dur + 0.05);
+        oscHarmonic.stop(startTime + time + dur + 0.05);
+      } catch (err) {}
+    });
+  }
+
+  function playNotificationChime(loopTimes = 5) {
     if (localStorage.getItem('trjt_sound_enabled') === 'false') return;
     try {
       const ctx = getAudioContext();
       if (!ctx) return;
+      if (ctx.state === 'suspended') ctx.resume();
 
       const now = ctx.currentTime;
-      // High-pitch friendly bell chime (F5 -> A5 -> C6)
-      const notes = [698.46, 880.00, 1046.50];
-      notes.forEach((freq, i) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, now + i * 0.1);
-
-        gain.gain.setValueAtTime(0, now + i * 0.1);
-        gain.gain.linearRampToValueAtTime(0.18, now + i * 0.1 + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.5);
-
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-
-        osc.start(now + i * 0.1);
-        osc.stop(now + i * 0.1 + 0.55);
-      });
+      // Play repeating loud chime bursts (looping over ~10-15s)
+      for (let i = 0; i < loopTimes; i++) {
+        playSingleChimeBurst(ctx, now + i * 1.5, 0.85);
+      }
     } catch (e) {
       console.warn("Audio chime error:", e);
+    }
+  }
+
+  function triggerStrongVibration(durationMs = 15000) {
+    if (localStorage.getItem('trjt_vibration_enabled') === 'false' || !('vibrate' in navigator)) return;
+    try {
+      // Strong continuous vibration pattern: 800ms on, 250ms off, 1000ms on, 300ms off, 1200ms on
+      const pattern = [800, 250, 1000, 300, 800, 250, 1200, 400];
+      navigator.vibrate(pattern);
+
+      let elapsed = 0;
+      if (activeVibrateInterval) clearInterval(activeVibrateInterval);
+      activeVibrateInterval = setInterval(() => {
+        elapsed += 4200;
+        if (elapsed >= durationMs) {
+          clearInterval(activeVibrateInterval);
+          activeVibrateInterval = null;
+        } else {
+          try { navigator.vibrate(pattern); } catch (e) {}
+        }
+      }, 4200);
+    } catch (e) {
+      console.warn("Vibration error:", e);
     }
   }
 
@@ -247,13 +306,11 @@
     lastNotificationTime = new Date().toISOString();
     localStorage.setItem('trjt_last_notif_time', lastNotificationTime);
 
-    // Play subtle audio chime
-    playNotificationChime();
+    // Play loud audio chime loop (5 cycles ~ 8-10s)
+    playNotificationChime(5);
 
-    // Vibrate if supported & enabled
-    if (localStorage.getItem('trjt_vibration_enabled') !== 'false' && 'vibrate' in navigator) {
-      try { navigator.vibrate([200, 100, 200]); } catch (e) {}
-    }
+    // Trigger strong rhythmic vibration for 15 seconds
+    triggerStrongVibration(15000);
 
     // Dispatch event to app UI
     const event = new CustomEvent('trjt:push-notification', {
@@ -647,6 +704,8 @@
     updateDeviceSetting: updateDeviceSetting,
     sendTestNotification: sendTestNotification,
     playNotificationChime: playNotificationChime,
+    triggerStrongVibration: triggerStrongVibration,
+    stopNotificationAlert: stopNotificationAlert,
     maskToken: maskToken,
     detectPlatform: detectPlatform,
     init: initFirebase
