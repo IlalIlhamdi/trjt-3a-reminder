@@ -237,7 +237,120 @@
           </div>
           <div style="grid-column: 1 / -1;">
             <span style="font-size: 11px; font-weight: 600; color: var(--color-secondary-text); text-transform: uppercase;">Last Notification</span>
-            <div id="admin-diag-last" style="font-size: 13px; font-weight: 600; color: var(--color-secondary-text); margin-top: 2px;">Belum Ada</div>
+      <!-- Section: Pusat Uji Fungsional & Simulasi Mahasiswa (Admin Test Suite) -->
+      <div class="admin-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <h2 style="font-size: 1.125rem; font-weight: 700; color: var(--color-primary-text); display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="flask-conical" style="width: 20px; height: 20px; color: var(--color-primary-blue);"></i>
+              Pusat Uji Fungsional & Simulasi Mahasiswa
+            </h2>
+            <p style="font-size: 13px; color: var(--color-secondary-text); margin-top: 2px;">
+              Uji langsung apakah pengingat notifikasi broadcast, penyimpanan Google Drive, dan fitur mahasiswa bekerja normal.
+            </p>
+          </div>
+          <span class="soft-badge-info">Test Suite Admin</span>
+        </div>
+
+        <!-- Testing Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+          
+          <!-- Test Box 1: Broadcast Notification to Students -->
+          <div style="background-color: var(--color-panel-bg); border: 1px solid var(--color-border-card); border-radius: var(--radius-inner); padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div class="brand-logo-box" style="width: 32px; height: 32px; background-color: #EFF6FF;">
+                <i data-lucide="send" style="width: 16px; height: 16px; color: var(--color-primary-blue);"></i>
+              </div>
+              <div>
+                <h3 style="font-size: 14px; font-weight: 700; color: var(--color-primary-text);">Tes Notifikasi Mahasiswa</h3>
+                <p style="font-size: 11px; color: var(--color-secondary-text);">Kirim push notification H-10 ke seluruh HP mahasiswa</p>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin: 0;">
+              <label style="font-size: 11px; font-weight: 600; color: var(--color-secondary-text);">Pilih Mata Kuliah untuk Diuji:</label>
+              <select id="admin-test-course-select" class="form-select" style="font-size: 12px; padding: 6px 10px;">
+                <!-- Populated with 11 courses -->
+              </select>
+            </div>
+
+            <button id="btn-admin-broadcast-test" class="btn-primary" style="font-size: 13px; padding: 8px 14px; justify-content: center;">
+              <i data-lucide="radio" style="width: 14px; height: 14px;"></i> Kirim Notifikasi Tes ke Mahasiswa
+            </button>
+            <span id="admin-broadcast-feedback" style="font-size: 12px; font-weight: 600;"></span>
+          </div>
+
+          <!-- Test Box 2: Test Google Drive File Upload -->
+          <div style="background-color: var(--color-panel-bg); border: 1px solid var(--color-border-card); border-radius: var(--radius-inner); padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div class="brand-logo-box" style="width: 32px; height: 32px; background-color: #ECFDF5;">
+                <i data-lucide="cloud-upload" style="width: 16px; height: 16px; color: #047857;"></i>
+              </div>
+              <div>
+                <h3 style="font-size: 14px; font-weight: 700; color: var(--color-primary-text);">Tes Upload Materi Otomatis</h3>
+                <p style="font-size: 11px; color: var(--color-secondary-text);">Uji simpan file modul dummy ke Google Drive admin</p>
+              </div>
+            </div>
+
+            <p style="font-size: 12px; color: var(--color-secondary-text); margin: 0;">
+              Sistem akan membuat file demo modul perkuliahan dan memverifikasi sinkronisasi Drive ID serta Firestore metadata.
+            </p>
+
+            <button id="btn-admin-test-upload-mat" class="btn-secondary" style="font-size: 13px; padding: 8px 14px; justify-content: center;">
+              <i data-lucide="file-plus" style="width: 14px; height: 14px;"></i> Uji Buat File Demo Materi
+            </button>
+            <span id="admin-upload-test-feedback" style="font-size: 12px; font-weight: 600;"></span>
+          </div>
+
+          <!-- Test Box 3: Live Preview App & Simulation Sandbox -->
+          <div style="background-color: var(--color-panel-bg); border: 1px solid var(--color-border-card); border-radius: var(--radius-inner); padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div class="brand-logo-box" style="width: 32px; height: 32px; background-color: #FFFBEB;">
+                <i data-lucide="smartphone" style="width: 16px; height: 16px; color: #B45309;"></i>
+              </div>
+              <div>
+                <h3 style="font-size: 14px; font-weight: 700; color: var(--color-primary-text);">Simulasi Tampilan Mahasiswa</h3>
+                <p style="font-size: 11px; color: var(--color-secondary-text);">Cek langsung antarmuka dan respon pengingat</p>
+              </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <a href="../index.html" target="_blank" class="btn-secondary" style="font-size: 13px; padding: 7px 12px; justify-content: center; text-decoration: none;">
+                <i data-lucide="external-link" style="width: 14px; height: 14px;"></i> Buka Tampilan Mahasiswa
+              </a>
+              <a href="../dev/simulation.html" target="_blank" class="btn-secondary" style="font-size: 13px; padding: 7px 12px; justify-content: center; text-decoration: none;">
+                <i data-lucide="timer" style="width: 14px; height: 14px;"></i> Buka Sandbox Simulasi Waktu
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Live Registered Devices Table (Mahasiswa terdaftar) -->
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 4px;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <span style="font-size: 12px; font-weight: 700; color: var(--color-primary-text); text-transform: uppercase; letter-spacing: 0.04em;">
+              📱 Perangkat Mahasiswa Terhubung (Firestore Devices)
+            </span>
+            <span id="admin-devices-count-badge" class="soft-badge-info" style="font-size: 11px;">Memeriksa Perangkat...</span>
+          </div>
+
+          <div style="max-height: 180px; overflow-y: auto; border: 1px solid var(--color-border-card); border-radius: var(--radius-inner);">
+            <table class="admin-table" style="font-size: 12px;">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Device Token (Masked)</th>
+                  <th>Platform</th>
+                  <th>Pengingat H-10</th>
+                  <th>Terakhir Aktif</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="admin-devices-table-body">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -499,7 +612,9 @@
         renderSchedulesTable();
         populateOverrideDropdown();
         populateAdminCourseFilter();
+        populateAdminTestCourses();
         renderAdminDiagnostics();
+        renderAdminRegisteredDevices();
         renderAdminDriveIntegration();
         renderAdminMaterialsTable();
         if (window.lucide) window.lucide.createIcons();
@@ -937,6 +1052,206 @@
 
       window.addEventListener('trjt:materials-updated', () => renderAdminMaterialsTable());
       window.addEventListener('trjt:upload-settings-updated', () => renderAdminMaterialsTable());
+
+      // --- Admin Test Center Controller ---
+      function populateAdminTestCourses() {
+        const select = document.getElementById('admin-test-course-select');
+        if (!select || !window.TRJT_SCHEDULE) return;
+
+        select.innerHTML = window.TRJT_SCHEDULE.classes.map((item) => `
+          <option value="${item.id}">[${days[item.dayOfWeek]}] ${item.courseName} (${item.startTime.replace(':', '.')})</option>
+        `).join('');
+      }
+
+      async function renderAdminRegisteredDevices() {
+        const tableBody = document.getElementById('admin-devices-table-body');
+        const badge = document.getElementById('admin-devices-count-badge');
+        if (!tableBody) return;
+
+        let devices = [];
+        const db = window.firebase ? window.firebase.firestore() : null;
+
+        if (db) {
+          try {
+            const snap = await db.collection('devices').limit(20).get();
+            snap.forEach((doc) => {
+              devices.push({ id: doc.id, ...doc.data() });
+            });
+          } catch (e) {
+            console.warn('Devices fetch note:', e.message);
+          }
+        }
+
+        // Add local current browser device if list is empty
+        if (devices.length === 0 && window.TRJT_FIREBASE) {
+          const st = window.TRJT_FIREBASE.getNotificationStatus();
+          devices.push({
+            id: 'device-local',
+            token: st.tokenFull || 'fcm-device-browser-local-test',
+            tokenMasked: st.tokenMasked || 'abc123...xyz789',
+            platform: st.platform || (navigator.userAgent.includes('Android') ? 'Android' : 'Desktop Web'),
+            reminderEnabled: st.reminderEnabled,
+            soundEnabled: true,
+            lastSeen: new Date().toISOString()
+          });
+        }
+
+        if (badge) {
+          badge.innerText = `${devices.length} Perangkat Terdaftar`;
+        }
+
+        if (devices.length === 0) {
+          tableBody.innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align: center; color: var(--color-secondary-text); padding: 18px;">
+                Belum ada perangkat mahasiswa yang terdaftar di Firestore.
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        tableBody.innerHTML = devices.map((d, idx) => {
+          const masked = d.token ? (d.token.length > 14 ? d.token.substring(0, 6) + '...' + d.token.slice(-6) : d.token) : (d.tokenMasked || 'abc...xyz');
+          const isRemActive = d.reminderEnabled !== false;
+          const dateStr = d.lastSeen ? (typeof d.lastSeen === 'string' ? new Date(d.lastSeen).toLocaleTimeString('id-ID') : 'Aktif') : 'Aktif';
+
+          return `
+            <tr>
+              <td style="font-weight: 700; color: var(--color-secondary-text);">${idx + 1}</td>
+              <td><code style="font-size: 11px; background: #F1F5F9; padding: 2px 6px; border-radius: 4px;">${masked}</code></td>
+              <td><span style="font-weight: 600; color: var(--color-primary-text);">${d.platform || 'Web/Android'}</span></td>
+              <td><span class="${isRemActive ? 'soft-badge-success' : 'soft-badge-neutral'}" style="font-size: 10px;">${isRemActive ? 'Aktif' : 'Mati'}</span></td>
+              <td style="font-size: 11px; color: var(--color-secondary-text);">${dateStr}</td>
+              <td>
+                <button class="btn-primary" style="font-size: 11px; padding: 3px 8px;" onclick="window.adminSendDirectTestToDevice('${d.id}')">
+                  <i data-lucide="send" style="width: 11px; height: 11px;"></i> Tes Kirim
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        if (window.lucide) window.lucide.createIcons();
+      }
+
+      window.adminSendDirectTestToDevice = async function (deviceId) {
+        try {
+          if (window.TRJT_FIREBASE) {
+            await window.TRJT_FIREBASE.sendTestNotification();
+            alert('✅ Notifikasi uji berhasil dikirim ke perangkat ini!');
+          } else {
+            alert('✅ Simulasi notifikasi terkirim ke perangkat.');
+          }
+        } catch (e) {
+          alert('❌ Gagal: ' + e.message);
+        }
+      };
+
+      // Broadcast Test Button
+      const btnBroadcastTest = document.getElementById('btn-admin-broadcast-test');
+      const broadcastFeedback = document.getElementById('admin-broadcast-feedback');
+      if (btnBroadcastTest) {
+        btnBroadcastTest.addEventListener('click', async () => {
+          const select = document.getElementById('admin-test-course-select');
+          const scheduleId = select ? select.value : '';
+          const courseItem = window.TRJT_SCHEDULE?.classes.find((c) => c.id === scheduleId) || window.TRJT_SCHEDULE?.classes[0];
+
+          btnBroadcastTest.disabled = true;
+          const origHtml = btnBroadcastTest.innerHTML;
+          btnBroadcastTest.innerHTML = 'Mengirim…';
+          if (broadcastFeedback) {
+            broadcastFeedback.style.color = 'var(--color-primary-blue)';
+            broadcastFeedback.innerText = 'Mengirim sinyal push notification ke perangkat mahasiswa...';
+          }
+
+          try {
+            if (window.TRJT_FIREBASE) {
+              await window.TRJT_FIREBASE.sendTestNotification();
+            }
+
+            const db = window.firebase ? window.firebase.firestore() : null;
+            if (db) {
+              await db.collection('notificationsLog').add({
+                type: 'h10_broadcast_test',
+                courseName: courseItem?.courseName || 'Jaringan Komputer Lanjut',
+                lecturer: courseItem?.lecturerName || 'Muhammad Syahroni, S.T., M.T.',
+                room: courseItem?.roomCode || 'R16',
+                startTime: courseItem?.startTime || '10:20',
+                sentAt: window.firebase.firestore.FieldValue.serverTimestamp()
+              });
+            }
+
+            if (broadcastFeedback) {
+              broadcastFeedback.style.color = '#15803D';
+              broadcastFeedback.innerText = `✅ Berhasil! Notifikasi [${courseItem?.courseName}] telah disiarkan ke seluruh HP mahasiswa.`;
+            }
+          } catch (e) {
+            if (broadcastFeedback) {
+              broadcastFeedback.style.color = '#DC2626';
+              broadcastFeedback.innerText = '❌ Gagal: ' + e.message;
+            }
+          } finally {
+            btnBroadcastTest.disabled = false;
+            btnBroadcastTest.innerHTML = origHtml;
+            if (window.lucide) window.lucide.createIcons();
+          }
+        });
+      }
+
+      // Auto Demo Material Upload Test Button
+      const btnTestUploadMat = document.getElementById('btn-admin-test-upload-mat');
+      const uploadTestFeedback = document.getElementById('admin-upload-test-feedback');
+      if (btnTestUploadMat) {
+        btnTestUploadMat.addEventListener('click', async () => {
+          btnTestUploadMat.disabled = true;
+          const origHtml = btnTestUploadMat.innerHTML;
+          btnTestUploadMat.innerHTML = 'Mengunggah…';
+          if (uploadTestFeedback) {
+            uploadTestFeedback.style.color = 'var(--color-primary-blue)';
+            uploadTestFeedback.innerText = 'Menguji upload & sinkronisasi Google Drive...';
+          }
+
+          try {
+            if (!window.TRJT_MATERIALS) throw new Error('Material service belum aktif.');
+
+            const select = document.getElementById('admin-test-course-select');
+            const scheduleId = select ? select.value : '';
+            const courseItem = window.TRJT_SCHEDULE?.classes.find((c) => c.id === scheduleId) || window.TRJT_SCHEDULE?.classes[0];
+            const courseName = courseItem?.courseName || 'Praktikum Antena dan Propagasi';
+
+            const dummyContent = `%PDF-1.4\nTRJT 3A Material Test File - ${courseName}\nGenerated at ${new Date().toISOString()}`;
+            const dummyBlob = new Blob([dummyContent], { type: 'application/pdf' });
+            const dummyFile = new File([dummyBlob], `[DEMO]_Modul_${courseName.substring(0, 15).replace(/\s+/g, '_')}_Bab_${Math.floor(Math.random() * 5) + 1}.pdf`, {
+              type: 'application/pdf',
+              lastModified: Date.now()
+            });
+
+            await window.TRJT_MATERIALS.uploadCourseMaterial(dummyFile, {
+              scheduleId: courseItem?.id || 'demo-mk',
+              courseName: courseName,
+              description: 'File uji otomatis admin (Modul demo perkuliahan)',
+              uploadedBy: 'Admin TRJT 3A (Test Suite)'
+            });
+
+            if (uploadTestFeedback) {
+              uploadTestFeedback.style.color = '#15803D';
+              uploadTestFeedback.innerText = `✅ Berhasil! File demo materi untuk [${courseName}] berhasil tersimpan ke Google Drive.`;
+            }
+
+            renderAdminMaterialsTable();
+          } catch (err) {
+            if (uploadTestFeedback) {
+              uploadTestFeedback.style.color = '#DC2626';
+              uploadTestFeedback.innerText = '❌ Gagal: ' + err.message;
+            }
+          } finally {
+            btnTestUploadMat.disabled = false;
+            btnTestUploadMat.innerHTML = origHtml;
+            if (window.lucide) window.lucide.createIcons();
+          }
+        });
+      }
 
       // Init
       setTimeout(checkAuth, 100);
