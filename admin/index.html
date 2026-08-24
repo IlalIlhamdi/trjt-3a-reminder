@@ -371,7 +371,12 @@
               Penyimpanan file materi langsung ke Google Drive admin (Folder utama: <strong>TRJT 3A — Semester 5</strong>)
             </p>
           </div>
-          <span id="drive-status-badge" class="soft-badge-neutral">Belum Terhubung</span>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <a href="https://drive.google.com/drive/folders/1W7F5rWsNNq-nsLUF1emnOj4eJsYSShzW?usp=drive_link" target="_blank" rel="noopener noreferrer" class="btn-secondary" style="font-size: 13px; padding: 6px 12px; text-decoration: none;">
+              <i data-lucide="external-link" style="width: 14px; height: 14px;"></i> Buka di Google Drive
+            </a>
+            <span id="drive-status-badge" class="soft-badge-success">Terhubung</span>
+          </div>
         </div>
 
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; background-color: var(--color-panel-bg); padding: 16px; border-radius: var(--radius-inner); border: 1px solid var(--color-border-subtle);">
@@ -710,7 +715,7 @@
 
         if (folderTextEl) {
           if (isConnected) {
-            folderTextEl.innerHTML = `Folder Utama: <strong>${driveStatus.rootFolderName || 'TRJT 3A — Semester 5'}</strong> (ID: <code>${driveStatus.rootFolderId || 'drive-root-sem5'}</code>)`;
+            folderTextEl.innerHTML = `Folder Utama: <strong>${driveStatus.rootFolderName || 'TRJT 3A — Semester 5'}</strong> (ID: <code>${driveStatus.rootFolderId || '1W7F5rWsNNq-nsLUF1emnOj4eJsYSShzW'}</code>) — <a href="https://drive.google.com/drive/folders/${driveStatus.rootFolderId || '1W7F5rWsNNq-nsLUF1emnOj4eJsYSShzW'}?usp=drive_link" target="_blank" rel="noopener noreferrer" style="color: var(--color-primary-blue); font-weight: 700; text-decoration: underline;">Buka di Google Drive ↗</a>`;
           } else {
             folderTextEl.innerText = "Klik 'Hubungkan Google Drive' untuk menghubungkan akun Drive admin.";
           }

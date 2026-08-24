@@ -20,26 +20,28 @@
     { id: 'jumat-metodologi-penelitian', name: 'Metodologi Penelitian', slug: 'metodologi-penelitian' }
   ];
 
-  // DIRECT DEFAULT CONFIGURATION (Ready out-of-the-box)
+  // DIRECT DEFAULT CONFIGURATION (Connected directly to admin's real Google Drive)
   const DEFAULT_DRIVE_CONFIG = {
     connected: true,
     adminEmail: 'ilalilhamdi0@gmail.com',
     rootFolderName: 'TRJT 3A — Semester 5',
-    rootFolderId: '1TRJT3A-Semester5-DriveRootFolderId',
+    rootFolderId: '1W7F5rWsNNq-nsLUF1emnOj4eJsYSShzW',
+    rootFolderLink: 'https://drive.google.com/drive/folders/1W7F5rWsNNq-nsLUF1emnOj4eJsYSShzW?usp=drive_link',
     initialized: true,
     foldersCount: 11,
     manualConfigured: true,
-    connectedAt: '2026-08-24T00:00:00.000Z'
+    connectedAt: new Date().toISOString()
   };
 
   const DEFAULT_COURSE_FOLDERS = OFFICIAL_COURSES.map((c) => ({
     id: c.slug,
     scheduleId: c.id,
     courseName: c.name,
-    driveFolderId: '1TRJT3A-Folder-' + c.slug,
-    rootFolderId: '1TRJT3A-Semester5-DriveRootFolderId',
+    driveFolderId: '1W7F5rWsNNq-nsLUF1emnOj4eJsYSShzW',
+    driveFolderLink: 'https://drive.google.com/drive/folders/1W7F5rWsNNq-nsLUF1emnOj4eJsYSShzW?usp=drive_link',
+    rootFolderId: '1W7F5rWsNNq-nsLUF1emnOj4eJsYSShzW',
     rootFolderName: 'TRJT 3A — Semester 5',
-    updatedAt: '2026-08-24T00:00:00.000Z'
+    updatedAt: new Date().toISOString()
   }));
 
   let cachedFolders = DEFAULT_COURSE_FOLDERS;
