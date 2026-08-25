@@ -1,14 +1,10 @@
-import { getMessaging, getFirestoreDb } from '../api/lib/firebase-admin-init.js';
+import { getMessaging, getFirestoreDb } from '../lib/firebase-admin-init.js';
 
 async function testSend() {
   const messaging = getMessaging();
   const db = getFirestoreDb();
 
-  console.log('Sending direct FCM test to iPhone tokens...');
-  const tokens = [
-    'f_ATOA79QENUwjxeWCmrSD:APA91bEq7Kx3c7H7iK3yP3B0xR8vC5n1s0e-X7wY9zT1u2v3w4x5y6z7a8b9c0d1e2f3g4h5i6j7k8l9m0n1o2p3q4r5s6t7u8v9w0x1y2z3a4b5c6d7e8f9g0h1i2', // placeholder or real from DB
-  ];
-
+  console.log('Sending direct FCM test to iPhone tokens with WebPush Urgency HIGH...');
   const snap = await db.collection('devices')
     .where('classId', '==', 'trjt-3a')
     .where('active', '==', true)
@@ -30,12 +26,27 @@ async function testSend() {
       const response = await messaging.send({
         token: item.token,
         notification: {
-          title: '🔔 Uji Notifikasi TRJT 3A',
-          body: 'Notifikasi otomatis kelas berhasil terhubung ke HP Anda!'
+          title: '🔔 Uji Notifikasi Langsung ke HP',
+          body: 'Notifikasi push TRJT 3A berhasil masuk ke iPhone Anda!'
         },
         data: {
           type: 'REMINDER_H10',
           time: new Date().toISOString()
+        },
+        webpush: {
+          headers: {
+            Urgency: 'high'
+          },
+          notification: {
+            title: '🔔 Uji Notifikasi Langsung ke HP',
+            body: 'Notifikasi push TRJT 3A berhasil masuk ke iPhone Anda!',
+            tag: 'trjt-urgent-test',
+            renotify: true,
+            requireInteraction: true
+          },
+          fcmOptions: {
+            link: './index.html'
+          }
         }
       });
       console.log(`✅ SUCCESS for ${item.platform}: messageId = ${response}`);

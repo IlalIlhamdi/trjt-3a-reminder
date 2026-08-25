@@ -34,6 +34,21 @@ export default async function handler(req, res) {
       type: 'TEST_NOTIFICATION',
       time: new Date().toISOString()
     },
+    webpush: {
+      headers: {
+        Urgency: 'high'
+      },
+      notification: {
+        title: '🔔 Uji Notifikasi Berhasil',
+        body: 'TRJT 3A Reminder siap mengingatkan jadwal kuliahmu.',
+        tag: 'trjt-test-notif',
+        renotify: true,
+        requireInteraction: true
+      },
+      fcmOptions: {
+        link: './index.html'
+      }
+    },
     token: token
   };
 

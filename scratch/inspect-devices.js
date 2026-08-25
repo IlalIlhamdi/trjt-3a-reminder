@@ -1,4 +1,4 @@
-import { getFirestoreDb } from '../api/lib/firebase-admin-init.js';
+import { getFirestoreDb } from '../lib/firebase-admin-init.js';
 
 async function check() {
   const db = getFirestoreDb();

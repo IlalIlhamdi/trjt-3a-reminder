@@ -81,6 +81,21 @@ export default async function handler(req, res) {
         startTime: startTime,
         targetUrl: './index.html'
       },
+      webpush: {
+        headers: {
+          Urgency: 'high'
+        },
+        notification: {
+          title: notificationTitle,
+          body: notificationBody,
+          tag: scheduleId || 'trjt-reminder',
+          renotify: true,
+          requireInteraction: true
+        },
+        fcmOptions: {
+          link: './index.html'
+        }
+      },
       tokens: tokens
     };
 
