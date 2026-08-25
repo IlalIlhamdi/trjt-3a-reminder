@@ -3,7 +3,7 @@
  * Path: /api/broadcast
  */
 
-import { getFirebaseAdmin, getFirestoreDb, getMessaging } from './lib/firebase-admin-init.js';
+import { getFirebaseAdmin, getFirestoreDb, getMessaging } from '../lib/firebase-admin-init.js';
 
 export default async function handler(req, res) {
   // CORS configuration
