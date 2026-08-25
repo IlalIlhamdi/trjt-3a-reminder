@@ -4,6 +4,8 @@
  * Path: /api/cron/class-reminders
  */
 
+import { runH10ReminderCheck } from '../lib/reminder-engine.js';
+
 export default async function handler(req, res) {
   // CORS configuration
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -31,38 +33,22 @@ export default async function handler(req, res) {
 
   const isDryRun = req.query.dryRun === 'true';
 
-  // Target Cloud Function HTTP Endpoint
-  const cloudFunctionUrl = process.env.REMINDER_FUNCTION_URL || 
-    'https://us-central1-trjt-3a-reminder.cloudfunctions.net/cronClassRemindersHttp';
-
   try {
-    const fetchUrl = new URL(cloudFunctionUrl);
-    fetchUrl.searchParams.set('secret', expectedSecret);
-    if (isDryRun) {
-      fetchUrl.searchParams.set('dryRun', 'true');
-    }
-
-    const response = await fetch(fetchUrl.toString(), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-cron-secret': expectedSecret,
-        'x-vercel-cron': '1'
-      }
+    const report = await runH10ReminderCheck({
+      dryRun: isDryRun
     });
 
-    const data = await response.json();
-    return res.status(response.status).json({
-      success: response.ok,
-      source: 'vercel-cron-proxy',
-      backendStatus: response.status,
-      data
+    return res.status(200).json({
+      success: true,
+      source: 'vercel-serverless-cron',
+      dryRun: isDryRun,
+      report
     });
   } catch (err) {
-    console.error('[VercelCronProxy Error]:', err);
-    return res.status(502).json({
+    console.error('[VercelCron Error]:', err);
+    return res.status(500).json({
       success: false,
-      error: 'Failed to reach Firebase Reminder Cloud Function: ' + err.message
+      error: 'Error executing H-10 class reminder: ' + err.message
     });
   }
 }

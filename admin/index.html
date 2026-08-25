@@ -1385,12 +1385,40 @@
             return;
           }
 
-          if (window.firebase && window.firebase.functions) {
-            const sendFn = window.firebase.functions().httpsCallable('sendTestNotificationToDevice');
-            const res = await sendFn({ token: targetToken });
-            alert(`✅ Sinyal Push FCM berhasil dikirim ke perangkat [${dev.platform}]!\nMessage ID: ${res.data?.messageId || 'OK'}`);
+          // 1. Try Vercel Serverless endpoint /api/send-direct
+          let sendSucceeded = false;
+          let resMsg = '';
+          try {
+            const resp = await fetch('/api/send-direct', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ token: targetToken })
+            });
+            const d = await resp.json();
+            if (resp.ok && d.success) {
+              sendSucceeded = true;
+              resMsg = d.messageId || 'OK';
+            }
+          } catch (apiErr) {
+            console.warn('Vercel direct send note:', apiErr.message);
+          }
+
+          // 2. Fallback to Cloud Functions callable
+          if (!sendSucceeded && window.firebase && window.firebase.functions) {
+            try {
+              const sendFn = window.firebase.functions().httpsCallable('sendTestNotificationToDevice');
+              const res = await sendFn({ token: targetToken });
+              sendSucceeded = true;
+              resMsg = res.data?.messageId || 'OK';
+            } catch (fnErr) {
+              console.warn('Cloud Functions direct send fallback note:', fnErr.message);
+            }
+          }
+
+          if (sendSucceeded) {
+            alert(`✅ Sinyal Push FCM berhasil dikirim ke perangkat [${dev.platform}]!\nMessage ID: ${resMsg}`);
           } else {
-            alert('Firebase Functions belum siap di browser admin ini.');
+            alert(`⚠️ Tidak dapat mengirim push ke [${dev.platform}]. Pastikan server backend Vercel aktif.`);
           }
         } catch (e) {
           alert('❌ Gagal mengirim push FCM: ' + e.message);
@@ -1417,8 +1445,28 @@
           try {
             let resData = null;
 
-            // 1. Call Backend FCM Multicast Endpoint to all active student devices
-            if (window.firebase && window.firebase.functions) {
+            // 1. Try Vercel Serverless /api/broadcast endpoint
+            try {
+              const bcastResp = await fetch('/api/broadcast', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  scheduleId: courseItem?.id || 'demo-broadcast',
+                  courseName: courseItem?.courseName || 'Jaringan Komputer Lanjut',
+                  lecturer: courseItem?.lecturerName || 'Muhammad Syahroni, S.T., M.T.',
+                  room: courseItem?.roomCode || 'R16',
+                  startTime: courseItem?.startTime || '10:20'
+                })
+              });
+              if (bcastResp.ok) {
+                resData = await bcastResp.json();
+              }
+            } catch (apiBcastErr) {
+              console.warn('Vercel /api/broadcast note:', apiBcastErr.message);
+            }
+
+            // 2. Fallback to Firebase Functions Callable
+            if (!resData && window.firebase && window.firebase.functions) {
               try {
                 const functions = window.firebase.functions();
                 const broadcastFn = functions.httpsCallable('broadcastNotificationToAllStudents');
@@ -1708,19 +1756,30 @@
         try {
           let report = null;
 
-          // Attempt 1: Call Firebase Functions onCall triggerClassReminderCheck
-          if (window.firebase && window.firebase.functions) {
+          // Attempt 1: Call Vercel Serverless /api/reminder-check endpoint
+          try {
+            const vResp = await fetch(`/api/reminder-check?dryRun=${isDryRun ? 'true' : 'false'}`);
+            if (vResp.ok) {
+              const vData = await vResp.json();
+              report = vData.report || vData;
+            }
+          } catch (vErr) {
+            console.warn('[Admin] Vercel /api/reminder-check note:', vErr.message);
+          }
+
+          // Attempt 2: Call Firebase Functions onCall triggerClassReminderCheck
+          if (!report && window.firebase && window.firebase.functions) {
             try {
               const functions = window.firebase.functions();
               const triggerFn = functions.httpsCallable('triggerClassReminderCheck');
               const res = await triggerFn({ dryRun: isDryRun });
               report = res.data?.report || res.data;
             } catch (fnErr) {
-              console.warn('[Admin] Functions onCall note, trying direct HTTP endpoint:', fnErr.message);
+              console.warn('[Admin] Functions onCall note:', fnErr.message);
             }
           }
 
-          // Attempt 2: Fallback to HTTPS endpoint or Vercel Cron route
+          // Attempt 3: Fallback to Cloud Functions HTTPS endpoint
           if (!report) {
             const endpointUrl = `https://us-central1-trjt-3a-reminder.cloudfunctions.net/cronClassRemindersHttp?secret=trjt3a-cron-secure-key-2026${isDryRun ? '&dryRun=true' : ''}`;
             const httpResp = await fetch(endpointUrl, { method: 'POST' });
