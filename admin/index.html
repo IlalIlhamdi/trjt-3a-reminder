@@ -1425,6 +1425,15 @@
         }
       };
 
+      function getApiBaseUrl() {
+        if (window.location.hostname.endsWith('vercel.app')) {
+          return '';
+        }
+        const custom = localStorage.getItem('trjt_vercel_url');
+        if (custom) return custom.trim().replace(/\/+$/, '');
+        return '';
+      }
+
       // Broadcast Test Button
       const btnBroadcastTest = document.getElementById('btn-admin-broadcast-test');
       const broadcastFeedback = document.getElementById('admin-broadcast-feedback');
@@ -1444,10 +1453,11 @@
 
           try {
             let resData = null;
+            const apiBase = getApiBaseUrl();
 
             // 1. Try Vercel Serverless /api/broadcast endpoint
             try {
-              const bcastResp = await fetch('/api/broadcast', {
+              const bcastResp = await fetch(`${apiBase}/api/broadcast`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -1460,6 +1470,9 @@
               });
               if (bcastResp.ok) {
                 resData = await bcastResp.json();
+              } else {
+                const errData = await bcastResp.json().catch(() => ({}));
+                console.warn('Vercel broadcast status:', bcastResp.status, errData);
               }
             } catch (apiBcastErr) {
               console.warn('Vercel /api/broadcast note:', apiBcastErr.message);
