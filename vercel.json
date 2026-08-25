@@ -1,53 +1,115 @@
 {
-  "cleanUrls": true,
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/broadcast.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/send-direct.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/reminder-check.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/cron/class-reminders.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "admin/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "assets/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "css/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "js/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "dev/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "manifest.json",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "favicon.svg",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "firebase-messaging-sw.js",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "sw.js",
+      "use": "@vercel/static"
+    }
+  ],
   "crons": [
     {
       "path": "/api/cron/class-reminders",
       "schedule": "* * * * *"
     }
   ],
-  "functions": {
-    "api/**/*.js": {
-      "memory": 1024,
-      "maxDuration": 15
-    }
-  },
-  "rewrites": [
+  "routes": [
     {
-      "source": "/admin",
-      "destination": "/admin/index.html"
+      "src": "/api/broadcast",
+      "dest": "/api/broadcast.js"
     },
     {
-      "source": "/dev/simulation",
-      "destination": "/dev/simulation.html"
+      "src": "/api/send-direct",
+      "dest": "/api/send-direct.js"
     },
     {
-      "source": "/dev",
-      "destination": "/dev/simulation.html"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/sw.js",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-cache, no-store, must-revalidate"
-        }
-      ]
+      "src": "/api/reminder-check",
+      "dest": "/api/reminder-check.js"
     },
     {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        }
-      ]
+      "src": "/api/cron/class-reminders",
+      "dest": "/api/cron/class-reminders.js"
+    },
+    {
+      "src": "/admin",
+      "dest": "/admin/index.html"
+    },
+    {
+      "src": "/dev/simulation",
+      "dest": "/dev/simulation.html"
+    },
+    {
+      "src": "/dev",
+      "dest": "/dev/simulation.html"
+    },
+    {
+      "src": "/sw.js",
+      "headers": {
+        "cache-control": "no-cache, no-store, must-revalidate"
+      },
+      "dest": "/sw.js"
+    },
+    {
+      "src": "/firebase-messaging-sw.js",
+      "headers": {
+        "cache-control": "no-cache, no-store, must-revalidate"
+      },
+      "dest": "/firebase-messaging-sw.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
     }
   ]
 }
