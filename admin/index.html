@@ -1388,8 +1388,9 @@
           // 1. Try Vercel Serverless endpoint /api/send-direct
           let sendSucceeded = false;
           let resMsg = '';
+          const apiBase = getApiBaseUrl();
           try {
-            const resp = await fetch('/api/send-direct', {
+            const resp = await fetch(`${apiBase}/api/send-direct`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ token: targetToken })
@@ -1398,6 +1399,8 @@
             if (resp.ok && d.success) {
               sendSucceeded = true;
               resMsg = d.messageId || 'OK';
+            } else {
+              resMsg = d.error || 'Server error';
             }
           } catch (apiErr) {
             console.warn('Vercel direct send note:', apiErr.message);
@@ -1416,9 +1419,9 @@
           }
 
           if (sendSucceeded) {
-            alert(`✅ Sinyal Push FCM berhasil dikirim ke perangkat [${dev.platform}]!\nMessage ID: ${resMsg}`);
+            alert(`✅ Sinyal Push FCM berhasil dikirim ke perangkat [${dev.platform}]!\n\nMessage ID: ${resMsg}\nStatus: DELIVERED TO FCM GATEWAY`);
           } else {
-            alert(`⚠️ Tidak dapat mengirim push ke [${dev.platform}]. Pastikan server backend Vercel aktif.`);
+            alert(`❌ Gagal mengirim push ke [${dev.platform}].\n\nDetail Error: ${resMsg || 'Tidak dapat terhubung ke server backend Vercel.'}`);
           }
         } catch (e) {
           alert('❌ Gagal mengirim push FCM: ' + e.message);
@@ -1513,17 +1516,26 @@
               }
             }));
 
-            if ('Notification' in window && Notification.permission === 'granted') {
-              new Notification(`🔔 Kelas 10 Menit Lagi: ${courseItem?.courseName}`, {
-                body: `Ruang: ${courseItem?.roomCode} | Dosen: ${courseItem?.lecturerName} | Jam: ${courseItem?.startTime}`,
-                icon: '../assets/icons/app-icon.svg'
-              });
-            }
+            const isSuccess = resData?.success === true;
+            const sentCount = resData?.recipientCount ?? 0;
+            const failCount = resData?.failureCount ?? 0;
+            const targetCount = resData?.targetDevices ?? 0;
 
-            const sentCount = resData?.recipientCount ?? resData?.targetDevices ?? 0;
-            if (broadcastFeedback) {
-              broadcastFeedback.style.color = '#15803D';
-              broadcastFeedback.innerText = `✅ Berhasil! Sinyal push notifikasi [${courseItem?.courseName}] telah disiarkan ke ${sentCount} perangkat mahasiswa terdaftar.`;
+            if (isSuccess && sentCount > 0) {
+              if (broadcastFeedback) {
+                broadcastFeedback.style.color = '#15803D';
+                broadcastFeedback.innerText = `✅ Berhasil! Sinyal push notifikasi [${courseItem?.courseName}] telah disiarkan ke ${sentCount} perangkat mahasiswa (Gagal: ${failCount}).`;
+              }
+            } else if (targetCount === 0 || sentCount === 0) {
+              if (broadcastFeedback) {
+                broadcastFeedback.style.color = '#D97706';
+                broadcastFeedback.innerText = `⚠️ Peringatan: Tidak ada perangkat mahasiswa dengan token FCM aktif yang terdaftar di database. Mahasiswa perlu membuka aplikasi di HP dan mengaktifkan notifikasi.`;
+              }
+            } else {
+              if (broadcastFeedback) {
+                broadcastFeedback.style.color = '#DC2626';
+                broadcastFeedback.innerText = `❌ Pengiriman broadcast gagal: ${resData?.error || resData?.message || 'Terjadi kesalahan pada server.'}`;
+              }
             }
           } catch (e) {
             if (broadcastFeedback) {

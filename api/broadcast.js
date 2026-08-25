@@ -22,8 +22,8 @@ export default async function handler(req, res) {
   const startTime = data.startTime || '10:20';
   const scheduleId = data.scheduleId || 'demo-broadcast';
 
-  const notificationTitle = `🔔 Uji Notifikasi: ${courseName}`;
-  const notificationBody = `Kuliah ${courseName} · Jam ${startTime.replace(':', '.')} · Ruang ${room}`;
+  const notificationTitle = `🔔 Pengingat Kuliah: ${courseName}`;
+  const notificationBody = `${courseName} · Jam ${startTime.replace(':', '.')} · Ruang ${room} (${lecturer})`;
 
   try {
     const adminInstance = getFirebaseAdmin();
@@ -37,7 +37,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // Query active registered devices
+    // Query active registered student devices
     const devicesSnapshot = await db.collection('devices')
       .where('classId', '==', 'trjt-3a')
       .where('active', '==', true)
@@ -47,23 +47,22 @@ export default async function handler(req, res) {
     const targetDevices = [];
     devicesSnapshot.forEach(doc => {
       const d = doc.data();
-      if (d.token && typeof d.token === 'string' && d.token.trim() !== '') {
-        if (!d.token.startsWith('web-local-') && !d.token.startsWith('dev_') && !d.token.startsWith('ios-dev-')) {
-          targetDevices.push({
-            docId: doc.id,
-            token: d.token,
-            platform: d.platform || 'Unknown'
-          });
-        }
+      // Only target student devices with real FCM tokens
+      if (d.role !== 'admin' && d.token && typeof d.token === 'string' && d.token.includes(':APA91b')) {
+        targetDevices.push({
+          docId: doc.id,
+          token: d.token,
+          platform: d.platform || 'Unknown'
+        });
       }
     });
 
     if (targetDevices.length === 0) {
       return res.status(200).json({
-        success: true,
+        success: false,
         recipientCount: 0,
         targetDevices: 0,
-        message: 'Tidak ada perangkat mahasiswa aktif dengan token FCM terdaftar.'
+        message: 'Tidak ada perangkat mahasiswa aktif dengan token FCM terdaftar di database.'
       });
     }
 
@@ -89,21 +88,33 @@ export default async function handler(req, res) {
     const successCount = response.successCount;
     const failureCount = response.failureCount;
     const invalidDocIds = [];
+    const detailedResults = [];
 
-    if (response.failureCount > 0) {
-      response.responses.forEach((resp, idx) => {
-        if (!resp.success && resp.error) {
-          const errorCode = resp.error.code;
-          if (
-            errorCode === 'messaging/registration-token-not-registered' ||
-            errorCode === 'messaging/invalid-registration-token' ||
-            errorCode === 'messaging/invalid-argument'
-          ) {
-            invalidDocIds.push(targetDevices[idx].docId);
-          }
+    response.responses.forEach((resp, idx) => {
+      const dev = targetDevices[idx];
+      if (resp.success) {
+        detailedResults.push({
+          platform: dev.platform,
+          status: 'DELIVERED',
+          messageId: resp.messageId
+        });
+      } else {
+        const errorCode = resp.error?.code || 'UNKNOWN';
+        detailedResults.push({
+          platform: dev.platform,
+          status: 'FAILED',
+          errorCode: errorCode,
+          errorMessage: resp.error?.message
+        });
+        if (
+          errorCode === 'messaging/registration-token-not-registered' ||
+          errorCode === 'messaging/invalid-registration-token' ||
+          errorCode === 'messaging/invalid-argument'
+        ) {
+          invalidDocIds.push(dev.docId);
         }
-      });
-    }
+      }
+    });
 
     // Clean invalid tokens in background
     if (invalidDocIds.length > 0) {
@@ -116,7 +127,7 @@ export default async function handler(req, res) {
 
     // Save log to Firestore
     await db.collection('notificationLogs').add({
-      type: 'admin_broadcast_test',
+      type: 'admin_broadcast_push',
       courseName,
       lecturer,
       room,
@@ -124,16 +135,20 @@ export default async function handler(req, res) {
       sentAt: adminInstance.firestore.FieldValue.serverTimestamp(),
       recipientCount: successCount,
       failureCount: failureCount,
-      success: true,
+      targetCount: targetDevices.length,
+      success: successCount > 0,
       source: 'vercel-serverless-broadcast'
     });
 
     return res.status(200).json({
-      success: true,
+      success: successCount > 0,
       recipientCount: successCount,
       failureCount: failureCount,
       targetDevices: targetDevices.length,
-      message: `Notifikasi berhasil disiarkan ke ${successCount} perangkat mahasiswa.`
+      detailedResults,
+      message: successCount > 0
+        ? `Notifikasi berhasil disiarkan ke ${successCount} perangkat mahasiswa.`
+        : `Gagal mengirim ke ${failureCount} perangkat target.`
     });
   } catch (err) {
     console.error('[Vercel Broadcast Error]:', err);

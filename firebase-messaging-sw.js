@@ -16,6 +16,8 @@ const firebaseConfig = {
   measurementId: "G-7B1BY95YZC"
 };
 
+let isMessagingInitialized = false;
+
 try {
   if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
@@ -43,33 +45,33 @@ try {
 
     return self.registration.showNotification(title, notificationOptions);
   });
+
+  isMessagingInitialized = true;
 } catch (e) {
   console.warn('[firebase-messaging-sw.js] Messaging init note:', e);
 }
 
-// Fallback push event handler for raw push payloads
+// Fallback push event handler only if Firebase SDK messaging failed to initialize
 self.addEventListener('push', (event) => {
-  if (!event.data) return;
+  if (isMessagingInitialized || !event.data) return;
 
   try {
     const data = event.data.json();
-    if (data.notification || data.data) {
-      const title = data.notification?.title || data.data?.title || 'TRJT 3A — Pengingat Kuliah';
-      const body = data.notification?.body || data.data?.body || 'Jadwal kuliah Anda akan segera dimulai.';
+    const title = data.notification?.title || data.data?.title || 'TRJT 3A — Pengingat Kuliah';
+    const body = data.notification?.body || data.data?.body || 'Jadwal kuliah Anda akan segera dimulai.';
 
-      const options = {
-        body: body,
-        vibrate: [200, 100, 200],
-        tag: data.data?.scheduleId || data.data?.type || 'trjt-class-reminder',
-        renotify: true,
-        data: {
-          url: './index.html',
-          ...data.data
-        }
-      };
+    const options = {
+      body: body,
+      vibrate: [200, 100, 200],
+      tag: data.data?.scheduleId || data.data?.type || 'trjt-class-reminder',
+      renotify: true,
+      data: {
+        url: './index.html',
+        ...data.data
+      }
+    };
 
-      event.waitUntil(self.registration.showNotification(title, options));
-    }
+    event.waitUntil(self.registration.showNotification(title, options));
   } catch (e) {
     const text = event.data.text();
     event.waitUntil(

@@ -160,23 +160,31 @@
     const platform = detectPlatform();
     const isReminderOn = localStorage.getItem('trjt_h10_enabled') !== 'false';
     const isSoundOn = localStorage.getItem('trjt_sound_enabled') !== 'false';
-    const token = currentFcmToken || localStorage.getItem('trjt_fcm_token') || deviceId;
+    const rawToken = currentFcmToken || localStorage.getItem('trjt_fcm_token');
+    const isReal = rawToken && rawToken.includes(':APA91b');
+    const token = isReal ? rawToken : null;
+    const isAdminPage = window.location.pathname.includes('/admin');
 
     if (db) {
       try {
-        await db.collection('devices').doc(deviceId).set({
+        const updateData = {
           id: deviceId,
-          token: token,
-          tokenMasked: maskToken(token),
           platform: platform,
           classId: 'trjt-3a',
+          role: isAdminPage ? 'admin' : 'student',
           reminderEnabled: isReminderOn,
           soundEnabled: isSoundOn,
           active: true,
           lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
-        console.log("📱 Registered device in Firestore:", platform, deviceId);
+        };
+        if (token) {
+          updateData.token = token;
+          updateData.tokenMasked = maskToken(token);
+          updateData.isRealFcm = true;
+        }
+        await db.collection('devices').doc(deviceId).set(updateData, { merge: true });
+        console.log("📱 Synced device state in Firestore:", platform, deviceId, isReal ? '(FCM Ready)' : '(Token Pending)');
       } catch (e) {
         console.warn("Auto register device note:", e.message);
       }
@@ -519,41 +527,51 @@
     }
 
     // Ensure service worker is ready
-    if ('serviceWorker' in navigator && !swRegistration) {
+    let swReg = swRegistration;
+    if ('serviceWorker' in navigator) {
       try {
-        swRegistration = await navigator.serviceWorker.ready;
+        swReg = await navigator.serviceWorker.ready;
       } catch (e) {
-        swRegistration = await navigator.serviceWorker.register('./firebase-messaging-sw.js').catch(() => null);
+        try {
+          swReg = await navigator.serviceWorker.register('./firebase-messaging-sw.js', { scope: './' });
+        } catch (swErr) {
+          console.warn("ServiceWorker register fallback note:", swErr.message);
+        }
       }
     }
 
-    let token = currentFcmToken;
+    let token = null;
 
     if (messaging) {
       try {
         const tokenOptions = {};
-        if (swRegistration) {
-          tokenOptions.serviceWorkerRegistration = swRegistration;
+        if (swReg) {
+          tokenOptions.serviceWorkerRegistration = swReg;
         }
         if (firebaseConfig.vapidKey) {
           tokenOptions.vapidKey = firebaseConfig.vapidKey;
         }
-        // 6s timeout for getToken on mobile network
+        // 25s timeout for mobile APNs / FCM handshake
         const tokenPromise = messaging.getToken(tokenOptions);
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('FCM token request timeout')), 6000));
-        token = await Promise.race([tokenPromise, timeoutPromise]);
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('FCM token request timeout (25s)')), 25000));
+        const acquiredToken = await Promise.race([tokenPromise, timeoutPromise]);
+        if (acquiredToken && typeof acquiredToken === 'string' && acquiredToken.trim() !== '') {
+          token = acquiredToken;
+        }
       } catch (tokenErr) {
-        console.warn("FCM getToken note (using fallback):", tokenErr.message);
+        console.warn("FCM getToken note:", tokenErr.message);
       }
     }
 
-    // Fallback: generate stable pseudo-device identifier if FCM cloud key is restricted or in iOS Safari
+    // Fallback: check stored token from previous successful session
     if (!token) {
-      token = localStorage.getItem('trjt_fcm_token') || ('ios-dev-' + (localStorage.getItem('trjt_device_uuid') || Math.random().toString(36).substring(2, 12)));
-      localStorage.setItem('trjt_device_uuid', token);
+      const stored = localStorage.getItem('trjt_fcm_token');
+      if (stored && stored.includes(':APA91b')) {
+        token = stored;
+      }
     }
 
-    if (token) {
+    if (token && typeof token === 'string' && token.includes(':APA91b')) {
       currentFcmToken = token;
       localStorage.setItem('trjt_fcm_token', token);
       localStorage.setItem('trjt_h10_enabled', reminderEnabled ? 'true' : 'false');
@@ -562,12 +580,15 @@
       if (db) {
         try {
           const docId = getStableDeviceId();
+          const isAdminPage = window.location.pathname.includes('/admin');
           await db.collection('devices').doc(docId).set({
             id: docId,
             token: token,
             tokenMasked: maskToken(token),
+            isRealFcm: true,
             platform: detectPlatform(),
             classId: 'trjt-3a',
+            role: isAdminPage ? 'admin' : 'student',
             reminderEnabled: reminderEnabled,
             soundEnabled: localStorage.getItem('trjt_sound_enabled') !== 'false',
             vibrationEnabled: localStorage.getItem('trjt_vibration_enabled') !== 'false',
@@ -584,7 +605,11 @@
       return token;
     }
 
-    return 'dev-ios-ready';
+    if (token) {
+      return token;
+    }
+
+    throw new Error('Token FCM belum berhasil dibuat oleh server Google Firebase. Pastikan koneksi internet stabil dan aplikasi dibuka dari Layar Utama iPhone.');
   }
 
   // Update Device Setting in Firestore (e.g. toggle reminder on/off)
