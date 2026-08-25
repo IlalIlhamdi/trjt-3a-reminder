@@ -7,26 +7,18 @@
       "schedule": "* * * * *"
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "source": "/admin",
+      "destination": "/admin/index.html"
     },
     {
-      "src": "/admin",
-      "dest": "/admin/index.html"
+      "source": "/dev/simulation",
+      "destination": "/dev/simulation.html"
     },
     {
-      "src": "/dev/simulation",
-      "dest": "/dev/simulation.html"
-    },
-    {
-      "src": "/dev",
-      "dest": "/dev/simulation.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
+      "source": "/dev",
+      "destination": "/dev/simulation.html"
     }
   ],
   "headers": [
