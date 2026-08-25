@@ -193,16 +193,93 @@
         </div>
       </div>
 
-      <!-- Section: Notification Diagnostics -->
+      <!-- Section: Reminder Diagnostics & Scheduler Monitor -->
+      <div class="admin-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h2 style="font-size: 1.125rem; font-weight: 700; color: var(--color-primary-text); display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="bell-ring" style="width: 20px; height: 20px; color: var(--color-primary-blue);"></i>
+              Reminder Diagnostics & Scheduler Monitor
+            </h2>
+            <p style="font-size: 13px; color: var(--color-secondary-text); margin-top: 2px;">
+              Status server-side scheduler H-10, heartbeat real-time, audit perangkat aktif, dan eksekusi manual/dry-run
+            </p>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <button id="btn-trigger-dry-run" class="btn-secondary" style="font-size: 13px; padding: 7px 14px;">
+              <i data-lucide="play-circle" style="width: 14px; height: 14px;"></i> Mode Dry Run
+            </button>
+            <button id="btn-trigger-reminder-check" class="btn-primary" style="font-size: 13px; padding: 7px 14px;">
+              <i data-lucide="zap" style="width: 14px; height: 14px;"></i> Jalankan Reminder Check Sekarang
+            </button>
+          </div>
+        </div>
+
+        <!-- Real-Time Scheduler Diagnostics Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; background-color: var(--color-panel-bg); padding: 16px; border-radius: var(--radius-inner); border: 1px solid var(--color-border-subtle);">
+          <div>
+            <span style="font-size: 11px; font-weight: 600; color: var(--color-secondary-text); text-transform: uppercase;">Status Scheduler</span>
+            <div id="sched-diag-status" style="margin-top: 4px;">
+              <span class="soft-badge-neutral" style="font-size: 12px;">Memeriksa...</span>
+            </div>
+          </div>
+
+          <div>
+            <span style="font-size: 11px; font-weight: 600; color: var(--color-secondary-text); text-transform: uppercase;">Last Run (WIB)</span>
+            <div id="sched-diag-last-run" style="font-size: 13px; font-weight: 700; color: var(--color-primary-text); margin-top: 4px;">-</div>
+          </div>
+
+          <div>
+            <span style="font-size: 11px; font-weight: 600; color: var(--color-secondary-text); text-transform: uppercase;">Next Expected Run</span>
+            <div id="sched-diag-next-run" style="font-size: 13px; font-weight: 700; color: var(--color-primary-blue); margin-top: 4px;">-</div>
+          </div>
+
+          <div>
+            <span style="font-size: 11px; font-weight: 600; color: var(--color-secondary-text); text-transform: uppercase;">Perangkat Aktif (FCM)</span>
+            <div id="sched-diag-active-devices" style="font-size: 14px; font-weight: 700; color: #15803D; margin-top: 4px;">0 Perangkat</div>
+          </div>
+
+          <div style="grid-column: 1 / -1; border-top: 1px solid var(--color-border-subtle); padding-top: 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px;">
+            <div>
+              <span style="font-size: 11px; font-weight: 600; color: var(--color-secondary-text); text-transform: uppercase;">Reminder Berikutnya</span>
+              <div id="sched-diag-next-candidate" style="font-size: 13px; font-weight: 600; color: var(--color-deep-blue); margin-top: 3px;">Tidak ada kuliah terdekat hari ini</div>
+            </div>
+
+            <div>
+              <span style="font-size: 11px; font-weight: 600; color: var(--color-secondary-text); text-transform: uppercase;">Last Reminder Broadcast</span>
+              <div id="sched-diag-last-log" style="font-size: 13px; font-weight: 600; color: var(--color-secondary-text); margin-top: 3px;">Belum ada log pengiriman</div>
+            </div>
+
+            <div>
+              <span style="font-size: 11px; font-weight: 600; color: var(--color-secondary-text); text-transform: uppercase;">Konfigurasi Zona & Toleransi</span>
+              <div style="font-size: 12px; font-weight: 600; color: var(--color-secondary-text); margin-top: 3px;">
+                <span class="soft-badge-info" style="font-size: 11px;">Asia/Jakarta (WIB)</span>
+                <span class="soft-badge-neutral" style="font-size: 11px; margin-left: 4px;">Toleransi H-10 (0 &lt; t &le; 10m)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dry Run & Manual Trigger Result Box -->
+        <div id="sched-diag-output-card" style="display: none; background-color: #0F172A; color: #E2E8F0; padding: 16px; border-radius: var(--radius-inner); font-family: monospace; font-size: 12px; line-height: 1.6; max-height: 280px; overflow-y: auto;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid #334155; padding-bottom: 6px;">
+            <span id="sched-output-title" style="color: #38BDF8; font-weight: 700;">OUTPUT HASIL EKSEKUSI</span>
+            <button type="button" onclick="document.getElementById('sched-diag-output-card').style.display='none'" style="background: transparent; border: none; color: #94A3B8; cursor: pointer; font-size: 12px;">Tutup [✕]</button>
+          </div>
+          <pre id="sched-output-content" style="margin: 0; white-space: pre-wrap; word-break: break-word;"></pre>
+        </div>
+      </div>
+
+      <!-- Section: Device Push Diagnostics (Local Browser) -->
       <div class="admin-card">
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
           <div>
             <h2 style="font-size: 1.125rem; font-weight: 700; color: var(--color-primary-text); display: flex; align-items: center; gap: 8px;">
               <i data-lucide="activity" style="width: 20px; height: 20px; color: var(--color-primary-blue);"></i>
-              Notification Diagnostics
+              Local Device Push Integrity
             </h2>
             <p style="font-size: 13px; color: var(--color-secondary-text); margin-top: 2px;">
-              Status push notification & integritas Firebase Cloud Messaging (FCM) pada perangkat ini
+              Status push notification & integritas Firebase Cloud Messaging (FCM) pada browser admin ini
             </p>
           </div>
           <button id="btn-admin-test-notif" class="btn-primary" style="font-size: 13px; padding: 6px 14px;">
@@ -234,10 +311,6 @@
           <div>
             <span style="font-size: 11px; font-weight: 600; color: var(--color-secondary-text); text-transform: uppercase;">Platform</span>
             <div id="admin-diag-platform" style="font-size: 14px; font-weight: 700; color: var(--color-primary-text); margin-top: 2px;">-</div>
-          </div>
-          <div style="grid-column: 1 / -1;">
-            <span style="font-size: 11px; font-weight: 600; color: var(--color-secondary-text); text-transform: uppercase;">Last Notification</span>
-            <div id="admin-diag-last" style="font-size: 13px; font-weight: 600; color: var(--color-secondary-text); margin-top: 2px;">Belum Ada</div>
           </div>
         </div>
       </div>
@@ -642,6 +715,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
   <script src="../js/firebase-config.js"></script>
 
@@ -1295,44 +1369,31 @@
       };
 
       window.adminSendDirectTestToDevice = async function (deviceId) {
+        const db = window.firebase ? window.firebase.firestore() : null;
+        if (!db) return;
         try {
-          // 1. Play chime audio
-          if (window.TRJT_FIREBASE) {
-            window.TRJT_FIREBASE.playNotificationChime();
+          const doc = await db.collection('devices').doc(deviceId).get();
+          if (!doc.exists) {
+            alert('Perangkat tidak ditemukan di database.');
+            return;
+          }
+          const dev = doc.data();
+          const targetToken = dev.token;
+
+          if (!targetToken || targetToken.startsWith('web-local-') || targetToken.startsWith('dev_') || targetToken.startsWith('ios-dev-')) {
+            alert(`⚠️ Perangkat [${dev.platform}] belum memiliki Token FCM Asli dari Google/Apple (Token saat ini: ${dev.tokenMasked || targetToken}).\n\nUntuk menerima Push saat app ditutup, perangkat membutuhkan token FCM Web Push yang valid (menggunakan VAPID Key di Firebase Console).`);
+            return;
           }
 
-          // 2. Local Native Notification
-          if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification('🔔 Uji Notifikasi Berhasil (Admin Direct)', {
-              body: 'TRJT 3A Reminder siap mengingatkan jadwal perkuliahan Anda.',
-              icon: '../assets/icons/app-icon.svg',
-              vibrate: [200, 100, 200]
-            });
+          if (window.firebase && window.firebase.functions) {
+            const sendFn = window.firebase.functions().httpsCallable('sendTestNotificationToDevice');
+            const res = await sendFn({ token: targetToken });
+            alert(`✅ Sinyal Push FCM berhasil dikirim ke perangkat [${dev.platform}]!\nMessage ID: ${res.data?.messageId || 'OK'}`);
+          } else {
+            alert('Firebase Functions belum siap di browser admin ini.');
           }
-
-          // 3. Dispatch push event to update notification list
-          window.dispatchEvent(new CustomEvent('trjt:push-notification', {
-            detail: {
-              title: '🔔 Uji Notifikasi Berhasil (Admin Direct)',
-              courseName: 'TRJT 3A Class Reminder',
-              lecturer: 'Admin Portal',
-              startTime: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.'),
-              room: 'Online'
-            }
-          }));
-
-          // 4. Send via Firebase Messaging if connected
-          if (window.TRJT_FIREBASE) {
-            try {
-              await window.TRJT_FIREBASE.sendTestNotification();
-            } catch (fcmErr) {
-              console.warn('FCM direct test note:', fcmErr);
-            }
-          }
-
-          alert('✅ Notifikasi uji coba berhasil dikirim ke perangkat ini (Audio & Pop-up aktif)!');
         } catch (e) {
-          alert('❌ Gagal: ' + e.message);
+          alert('❌ Gagal mengirim push FCM: ' + e.message);
         }
       };
 
@@ -1354,16 +1415,33 @@
           }
 
           try {
-            // 1. Send via Firebase Messaging if available
-            if (window.TRJT_FIREBASE) {
+            let resData = null;
+
+            // 1. Call Backend FCM Multicast Endpoint to all active student devices
+            if (window.firebase && window.firebase.functions) {
               try {
-                await window.TRJT_FIREBASE.sendTestNotification();
-              } catch (fcmErr) {
-                console.warn('FCM test notification note:', fcmErr);
+                const functions = window.firebase.functions();
+                const broadcastFn = functions.httpsCallable('broadcastNotificationToAllStudents');
+                const callRes = await broadcastFn({
+                  scheduleId: courseItem?.id || 'demo-broadcast',
+                  courseName: courseItem?.courseName || 'Jaringan Komputer Lanjut',
+                  lecturer: courseItem?.lecturerName || 'Muhammad Syahroni, S.T., M.T.',
+                  room: courseItem?.roomCode || 'R16',
+                  startTime: courseItem?.startTime || '10:20'
+                });
+                resData = callRes.data;
+              } catch (fnErr) {
+                console.warn('Backend broadcast callable note:', fnErr.message);
               }
             }
 
-            // 2. Trigger Foreground Event & Local Native Notification
+            // 2. Play Chime & Show Local Notification for Admin
+            if (window.TRJT_FIREBASE) {
+              try {
+                window.TRJT_FIREBASE.playNotificationChime();
+              } catch (e) {}
+            }
+
             window.dispatchEvent(new CustomEvent('trjt:push-notification', {
               detail: {
                 title: '🔔 Pengingat Kuliah (Admin Broadcast)',
@@ -1381,26 +1459,10 @@
               });
             }
 
-            // 3. Log to Firestore if permitted
-            const db = window.firebase ? window.firebase.firestore() : null;
-            if (db) {
-              try {
-                await db.collection('notificationsLog').add({
-                  type: 'h10_broadcast_test',
-                  courseName: courseItem?.courseName || 'Jaringan Komputer Lanjut',
-                  lecturer: courseItem?.lecturerName || 'Muhammad Syahroni, S.T., M.T.',
-                  room: courseItem?.roomCode || 'R16',
-                  startTime: courseItem?.startTime || '10:20',
-                  sentAt: window.firebase.firestore.FieldValue.serverTimestamp()
-                });
-              } catch (logErr) {
-                console.warn('Firestore log write note (local dispatch succeeded):', logErr.message);
-              }
-            }
-
+            const sentCount = resData?.recipientCount ?? resData?.targetDevices ?? 0;
             if (broadcastFeedback) {
               broadcastFeedback.style.color = '#15803D';
-              broadcastFeedback.innerText = `✅ Berhasil! Notifikasi [${courseItem?.courseName}] telah disiarkan ke seluruh perangkat mahasiswa.`;
+              broadcastFeedback.innerText = `✅ Berhasil! Sinyal push notifikasi [${courseItem?.courseName}] telah disiarkan ke ${sentCount} perangkat mahasiswa terdaftar.`;
             }
           } catch (e) {
             if (broadcastFeedback) {
@@ -1468,6 +1530,276 @@
           }
         });
       }
+
+      // -----------------------------------------------------------------------
+      // --- Reminder Scheduler Monitor & Diagnostics Controller ---
+      // -----------------------------------------------------------------------
+      let schedulerStatusUnsubscribe = null;
+      let notificationLogUnsubscribe = null;
+
+      function setupReminderSchedulerMonitor() {
+        const db = window.firebase ? window.firebase.firestore() : null;
+        if (!db) return;
+
+        // 1. Live Heartbeat Listener on systemStatus/reminderScheduler
+        if (schedulerStatusUnsubscribe) {
+          try { schedulerStatusUnsubscribe(); } catch (e) {}
+        }
+
+        schedulerStatusUnsubscribe = db.collection('systemStatus').doc('reminderScheduler')
+          .onSnapshot((doc) => {
+            const statusEl = document.getElementById('sched-diag-status');
+            const lastRunEl = document.getElementById('sched-diag-last-run');
+            const nextRunEl = document.getElementById('sched-diag-next-run');
+            const devicesEl = document.getElementById('sched-diag-active-devices');
+            const nextCandEl = document.getElementById('sched-diag-next-candidate');
+
+            if (!doc.exists) {
+              if (statusEl) statusEl.innerHTML = '<span class="soft-badge-neutral" style="font-size: 12px;">Belum Pernah Dijalankan</span>';
+              if (lastRunEl) lastRunEl.innerText = 'Belum ada data run';
+              if (nextRunEl) nextRunEl.innerText = 'Menunggu scheduler';
+              return;
+            }
+
+            const data = doc.data();
+
+            // Status Badge
+            if (statusEl) {
+              if (data.status === 'active') {
+                statusEl.innerHTML = '<span class="soft-badge-success" style="font-size: 12px;">● Aktif (Normal)</span>';
+              } else if (data.status === 'idle') {
+                statusEl.innerHTML = '<span class="soft-badge-info" style="font-size: 12px;">● Siaga (Weekend/Libur)</span>';
+              } else if (data.status === 'error') {
+                statusEl.innerHTML = `<span class="soft-badge-danger" style="font-size: 12px;" title="${data.lastError || ''}">● Bermasalah</span>`;
+              } else {
+                statusEl.innerHTML = '<span class="soft-badge-neutral" style="font-size: 12px;">Menunggu Eksekusi</span>';
+              }
+            }
+
+            // Last Run Timestamp
+            let lastRunDate = null;
+            if (data.lastRunAt?.toDate) {
+              lastRunDate = data.lastRunAt.toDate();
+            } else if (data.lastRunAt) {
+              lastRunDate = new Date(data.lastRunAt);
+            }
+
+            if (lastRunEl) {
+              if (lastRunDate) {
+                const dateStr = lastRunDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+                const timeStr = lastRunDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                lastRunEl.innerText = `${dateStr} · ${timeStr} WIB`;
+              } else if (data.jakartaTime) {
+                lastRunEl.innerText = data.jakartaTime;
+              } else {
+                lastRunEl.innerText = 'Baru saja';
+              }
+            }
+
+            // Next Expected Run (Cadence: Every 1 Minute)
+            if (nextRunEl) {
+              const nextRunTime = lastRunDate ? new Date(lastRunDate.getTime() + 60000) : new Date(Date.now() + 60000);
+              nextRunEl.innerText = nextRunTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB (Interval: 1m)';
+            }
+
+            // Active Devices Count
+            if (devicesEl && data.activeDevicesCount !== undefined) {
+              devicesEl.innerText = `${data.activeDevicesCount} Perangkat Mahasiswa`;
+            }
+
+            // Next Candidate Class
+            if (nextCandEl) {
+              if (data.nextCandidate) {
+                const c = data.nextCandidate;
+                nextCandEl.innerHTML = `<strong>${c.courseName}</strong> · ${c.startTime.replace(':', '.')} (${c.room}) &rarr; <span style="color: var(--color-primary-blue);">Kirim ${c.expectedReminderTime?.replace(':', '.') || 'H-10'}</span>`;
+              } else {
+                nextCandEl.innerText = data.message || 'Semua jadwal perkuliahan hari ini telah selesai.';
+              }
+            }
+          }, (err) => {
+            console.warn('[Admin] Scheduler heartbeat listener notice:', err.message);
+          });
+
+        // 2. Live Notification Logs Listener (Last Sent Reminder)
+        if (notificationLogUnsubscribe) {
+          try { notificationLogUnsubscribe(); } catch (e) {}
+        }
+
+        notificationLogUnsubscribe = db.collection('notificationLogs')
+          .orderBy('sentAt', 'desc')
+          .limit(1)
+          .onSnapshot((snapshot) => {
+            const lastLogEl = document.getElementById('sched-diag-last-log');
+            if (!lastLogEl) return;
+
+            if (snapshot.empty) {
+              lastLogEl.innerText = 'Belum ada riwayat reminder terkirim.';
+              return;
+            }
+
+            const doc = snapshot.docs[0];
+            const data = doc.data();
+            let sentTimeStr = '';
+            if (data.sentAt?.toDate) {
+              sentTimeStr = data.sentAt.toDate().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            }
+            lastLogEl.innerHTML = `<span style="color: #15803D; font-weight: 700;">Terkirim:</span> ${data.courseName || 'Kuliah'} (${data.recipientCount || 0} target) ${sentTimeStr ? '· ' + sentTimeStr : ''}`;
+          }, (e) => {
+            console.warn('[Admin] Notification log listener note:', e.message);
+          });
+
+        // 3. Update Local Browser Push Diagnostics
+        updateLocalDeviceDiagnostics();
+      }
+
+      function updateLocalDeviceDiagnostics() {
+        if (!window.TRJT_FIREBASE) return;
+        const st = window.TRJT_FIREBASE.getNotificationStatus();
+
+        const permEl = document.getElementById('admin-diag-permission');
+        const swEl = document.getElementById('admin-diag-sw');
+        const tokEl = document.getElementById('admin-diag-token');
+        const regEl = document.getElementById('admin-diag-registered');
+        const remEl = document.getElementById('admin-diag-reminder');
+        const platEl = document.getElementById('admin-diag-platform');
+
+        if (permEl) {
+          permEl.innerHTML = `<span class="${st.badgeClass}">${st.status}</span>`;
+        }
+        if (swEl) {
+          swEl.innerHTML = st.swActive ? '<span style="color: #15803D;">Aktif & Terdaftar</span>' : '<span style="color: var(--color-warning);">Belum Aktif</span>';
+        }
+        if (tokEl) {
+          tokEl.innerText = st.tokenMasked || 'Belum Ada';
+        }
+        if (regEl) {
+          regEl.innerHTML = st.tokenFull ? '<span style="color: #15803D;">Terdaftar di Firestore</span>' : '<span style="color: var(--color-secondary-text);">-</span>';
+        }
+        if (remEl) {
+          remEl.innerHTML = st.reminderEnabled ? '<span style="color: #15803D;">Aktif (H-10)</span>' : '<span style="color: var(--color-secondary-text);">Nonaktif</span>';
+        }
+        if (platEl) {
+          platEl.innerText = st.platform || 'Desktop Browser';
+        }
+      }
+
+      // Handler: Trigger Reminder Check (Manual Run / Dry Run)
+      async function executeReminderCheckBackend(isDryRun = false) {
+        const outputCard = document.getElementById('sched-diag-output-card');
+        const outputTitle = document.getElementById('sched-output-title');
+        const outputContent = document.getElementById('sched-output-content');
+        const btnManual = document.getElementById('btn-trigger-reminder-check');
+        const btnDryRun = document.getElementById('btn-trigger-dry-run');
+
+        const activeBtn = isDryRun ? btnDryRun : btnManual;
+        const origBtnHtml = activeBtn ? activeBtn.innerHTML : '';
+
+        if (activeBtn) {
+          activeBtn.disabled = true;
+          activeBtn.innerHTML = '<i data-lucide="loader" style="width: 14px; height: 14px; animation: spin 1s linear infinite;"></i> Memproses…';
+        }
+
+        if (outputCard) {
+          outputCard.style.display = 'block';
+          if (outputTitle) outputTitle.innerText = isDryRun ? '🔍 HASIL SIMULASI (DRY RUN)' : '⚡ HASIL EKSEKUSI REMINDER CHECK';
+          if (outputContent) outputContent.innerText = 'Mengirim permintaan ke server-side scheduler engine...';
+        }
+
+        try {
+          let report = null;
+
+          // Attempt 1: Call Firebase Functions onCall triggerClassReminderCheck
+          if (window.firebase && window.firebase.functions) {
+            try {
+              const functions = window.firebase.functions();
+              const triggerFn = functions.httpsCallable('triggerClassReminderCheck');
+              const res = await triggerFn({ dryRun: isDryRun });
+              report = res.data?.report || res.data;
+            } catch (fnErr) {
+              console.warn('[Admin] Functions onCall note, trying direct HTTP endpoint:', fnErr.message);
+            }
+          }
+
+          // Attempt 2: Fallback to HTTPS endpoint or Vercel Cron route
+          if (!report) {
+            const endpointUrl = `https://us-central1-trjt-3a-reminder.cloudfunctions.net/cronClassRemindersHttp?secret=trjt3a-cron-secure-key-2026${isDryRun ? '&dryRun=true' : ''}`;
+            const httpResp = await fetch(endpointUrl, { method: 'POST' });
+            const httpData = await httpResp.json();
+            report = httpData.report || httpData;
+          }
+
+          // Format output report
+          if (outputContent && report) {
+            const formatted = {
+              status: isDryRun ? 'DRY_RUN_COMPLETED' : 'EXECUTION_SUCCESS',
+              waktuJakarta: report.jakarta_now,
+              hariAkademik: report.day,
+              totalJadwalHariIni: (report.effective_schedules || []).length,
+              kandidatH10Cocok: (report.reminder_candidates || []).length,
+              perangkatMahasiswaAktif: report.devices_count,
+              notifikasiTerkirim: report.send_success,
+              notifikasiGagal: report.send_failed,
+              duplikasiDilewati: report.duplicate_skipped,
+              pembatalanDilewati: report.cancelled_skipped,
+              kandidatMataKuliah: (report.effective_schedules || []).map(s => ({
+                mataKuliah: s.courseName,
+                jamMasuk: s.effectiveStartTime,
+                ruangan: s.effectiveRoomCode,
+                dosen: s.effectiveLecturer,
+                menitHinggaMulai: s.minutesUntilClass,
+                masukWindowH10: s.shouldSend ? 'YA' : 'TIDAK',
+                dibatalkan: s.isCancelled ? 'YA' : 'TIDAK'
+              })),
+              reminderBerikutnya: report.next_candidate
+            };
+            outputContent.innerText = JSON.stringify(formatted, null, 2);
+          }
+        } catch (err) {
+          if (outputContent) {
+            outputContent.innerText = `❌ Terjadi kesalahan saat menjalankan engine:\n${err.message}`;
+          }
+        } finally {
+          if (activeBtn) {
+            activeBtn.disabled = false;
+            activeBtn.innerHTML = origBtnHtml;
+          }
+          if (window.lucide) window.lucide.createIcons();
+        }
+      }
+
+      // Bind Diagnostics Buttons
+      const btnManualCheck = document.getElementById('btn-trigger-reminder-check');
+      if (btnManualCheck) {
+        btnManualCheck.addEventListener('click', () => executeReminderCheckBackend(false));
+      }
+
+      const btnDryRunCheck = document.getElementById('btn-trigger-dry-run');
+      if (btnDryRunCheck) {
+        btnDryRunCheck.addEventListener('click', () => executeReminderCheckBackend(true));
+      }
+
+      const btnAdminTestNotif = document.getElementById('btn-admin-test-notif');
+      if (btnAdminTestNotif) {
+        btnAdminTestNotif.addEventListener('click', async () => {
+          btnAdminTestNotif.disabled = true;
+          try {
+            if (window.TRJT_FIREBASE) {
+              await window.TRJT_FIREBASE.sendTestNotification();
+              updateLocalDeviceDiagnostics();
+              alert('✅ Notifikasi uji coba admin & nada lonceng berhasil dikirim!');
+            }
+          } catch (e) {
+            alert('⚠️ Gagal: ' + e.message);
+          } finally {
+            btnAdminTestNotif.disabled = false;
+          }
+        });
+      }
+
+      // Setup Diagnostics on Init
+      window.addEventListener('load', () => {
+        setTimeout(setupReminderSchedulerMonitor, 300);
+      });
 
       // Init
       setTimeout(checkAuth, 100);

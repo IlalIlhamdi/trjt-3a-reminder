@@ -1,7 +1,17 @@
 {
   "version": 2,
   "cleanUrls": true,
+  "crons": [
+    {
+      "path": "/api/cron/class-reminders",
+      "schedule": "* * * * *"
+    }
+  ],
   "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
     {
       "src": "/admin",
       "dest": "/admin/index.html"

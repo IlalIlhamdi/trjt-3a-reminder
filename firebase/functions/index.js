@@ -316,125 +316,89 @@ exports.disconnectGoogleDrive = functions.https.onCall(async (data, context) => 
 });
 
 // -----------------------------------------------------------------------------
-// 3. Cron Job: H-10 Class Reminder Scheduler (from Phase 1)
+// 3. Cron Job: H-10 Class Reminder Scheduler (Production Engine)
 // -----------------------------------------------------------------------------
+const { runClassReminderCheck, getJakartaNow } = require('./reminder-engine');
+
+// Pub/Sub Scheduled Function (Runs Every 1 Minute in Asia/Jakarta Timezone)
 exports.checkH10ClassReminder = functions.pubsub
   .schedule('* * * * *')
   .timeZone('Asia/Jakarta')
   .onRun(async (context) => {
-    const now = new Date();
-    const jakartaFormatter = new Intl.DateTimeFormat('en-US', {
-      timeZone: 'Asia/Jakarta',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    });
-    const parts = jakartaFormatter.formatToParts(now);
-    const partMap = {};
-    parts.forEach(p => { partMap[p.type] = p.value; });
-
-    const currentYear = partMap.year;
-    const currentMonth = partMap.month;
-    const currentDay = partMap.day;
-    const currentHour = parseInt(partMap.hour, 10);
-    const currentMinute = parseInt(partMap.minute, 10);
-    const currentTotalMinutes = currentHour * 60 + currentMinute;
-    const todayDateStr = `${currentYear}-${currentMonth}-${currentDay}`;
-    const localDayIndex = new Date(`${todayDateStr}T12:00:00+07:00`).getDay();
-
-    if (localDayIndex < 1 || localDayIndex > 5) {
+    try {
+      const result = await runClassReminderCheck(db, { dryRun: false });
+      return result;
+    } catch (error) {
+      console.error('[checkH10ClassReminder Fatal]:', error);
       return null;
     }
-
-    try {
-      const scheduleSnapshot = await db.collection('schedules')
-        .where('classId', '==', 'trjt-3a')
-        .where('dayOfWeek', '==', localDayIndex)
-        .where('active', '==', true)
-        .get();
-
-      if (scheduleSnapshot.empty) return null;
-
-      for (const doc of scheduleSnapshot.docs) {
-        const schedule = doc.data();
-        const [startH, startM] = schedule.startTime.split(':').map(Number);
-        const classStartMinutes = startH * 60 + startM;
-        const minutesUntilClass = classStartMinutes - currentTotalMinutes;
-
-        if (minutesUntilClass === 10 || minutesUntilClass === 9) {
-          const deduplicationKey = `${doc.id}_${todayDateStr}_reminder10`;
-          const logRef = db.collection('notificationLogs').doc(deduplicationKey);
-          const logDoc = await logRef.get();
-
-          if (logDoc.exists) continue;
-
-          const overrideDoc = await db.collection('scheduleOverrides')
-            .where('scheduleId', '==', doc.id)
-            .where('date', '==', todayDateStr)
-            .get();
-
-          let roomCode = schedule.roomCode;
-          if (!overrideDoc.empty) {
-            const overrideData = overrideDoc.docs[0].data();
-            if (overrideData.cancelled) continue;
-            if (overrideData.newRoomCode) roomCode = overrideData.newRoomCode;
-          }
-
-          const lecturer = schedule.lecturerName || 'Dosen Pengampu';
-          const notificationTitle = '🔔 Kelas 10 Menit Lagi';
-          const notificationBody = `${schedule.courseName} · ${schedule.startTime.replace(':', '.')} · ${roomCode}`;
-
-          const devicesSnapshot = await db.collection('devices')
-            .where('classId', '==', 'trjt-3a')
-            .where('active', '==', true)
-            .where('reminderEnabled', '==', true)
-            .get();
-
-          const targetTokens = [];
-          devicesSnapshot.forEach((deviceDoc) => {
-            const data = deviceDoc.data();
-            if (data.token && !data.token.startsWith('web-local-') && !data.token.startsWith('web-dev-')) {
-              targetTokens.push(data.token);
-            }
-          });
-
-          if (targetTokens.length > 0) {
-            await admin.messaging().sendEachForMulticast({
-              notification: { title: notificationTitle, body: notificationBody },
-              data: {
-                type: 'REMINDER_H10',
-                scheduleId: doc.id,
-                courseName: schedule.courseName,
-                lecturer: lecturer,
-                room: roomCode,
-                startTime: schedule.startTime
-              },
-              tokens: targetTokens
-            });
-          }
-
-          await logRef.set({
-            scheduleId: doc.id,
-            courseName: schedule.courseName,
-            sentAt: admin.firestore.FieldValue.serverTimestamp(),
-            targetDate: todayDateStr,
-            recipientCount: targetTokens.length,
-            success: true
-          });
-        }
-      }
-    } catch (error) {
-      console.error('[H-10 Scheduler Error]:', error);
-    }
-
-    return null;
   });
 
+// HTTPS onRequest Endpoint for Vercel Cron or External Cron Services (cron-job.org / Cloud Scheduler / GitHub Actions)
+exports.cronClassRemindersHttp = functions.https.onRequest(async (req, res) => {
+  // CORS & Allowed Methods
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-cron-secret, x-vercel-cron');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(204).send('');
+  }
+
+  // Security Verification: CRON_SECRET or Vercel Cron Header
+  const expectedSecret = process.env.CRON_SECRET || (functions.config().cron ? functions.config().cron.secret : 'trjt3a-cron-secure-key-2026');
+  const authHeader = req.headers.authorization || '';
+  const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : '';
+  const providedSecret = req.query.secret || req.headers['x-cron-secret'] || bearerToken;
+  const isVercelCron = req.headers['x-vercel-cron'] === '1';
+
+  // Allow if valid secret, Vercel cron header, or in local development emulator
+  const isAuthorized = isVercelCron || providedSecret === expectedSecret || process.env.FUNCTIONS_EMULATOR === 'true';
+
+  if (!isAuthorized) {
+    return res.status(401).json({
+      success: false,
+      error: 'Unauthorized: Invalid or missing CRON_SECRET.'
+    });
+  }
+
+  const isDryRun = req.query.dryRun === 'true' || req.body?.dryRun === true;
+
+  try {
+    const report = await runClassReminderCheck(db, { dryRun: isDryRun });
+    return res.status(200).json({
+      success: true,
+      message: isDryRun ? 'Dry run simulation completed' : 'Class reminder check executed successfully',
+      report
+    });
+  } catch (error) {
+    console.error('[cronClassRemindersHttp Error]:', error);
+    return res.status(500).json({
+      success: false,
+      error: error.message || 'Internal server error during reminder check'
+    });
+  }
+});
+
+// HTTPS onCall Endpoint for Admin Portal (Manual Check & Dry Run)
+exports.triggerClassReminderCheck = functions.https.onCall(async (data, context) => {
+  const isDryRun = !!(data && data.dryRun);
+
+  try {
+    const report = await runClassReminderCheck(db, { dryRun: isDryRun });
+    return {
+      success: true,
+      dryRun: isDryRun,
+      report
+    };
+  } catch (error) {
+    console.error('[triggerClassReminderCheck Error]:', error);
+    throw new functions.https.HttpsError('internal', error.message || 'Gagal menjalankan pemeriksaan pengingat.');
+  }
+});
+
 // -----------------------------------------------------------------------------
-// 4. Test Notification Endpoint
+// 4. Test & Broadcast Notification Endpoints
 // -----------------------------------------------------------------------------
 exports.sendTestNotificationToDevice = functions.https.onCall(async (data, context) => {
   const token = data.token;
@@ -460,4 +424,122 @@ exports.sendTestNotificationToDevice = functions.https.onCall(async (data, conte
   } catch (error) {
     throw new functions.https.HttpsError('internal', error.message);
   }
+});
+
+// Broadcast Real Push Notification to All Active Student Devices
+exports.broadcastNotificationToAllStudents = functions.https.onCall(async (data, context) => {
+  const courseName = data.courseName || 'Jaringan Komputer Lanjut';
+  const lecturer = data.lecturer || 'Muhammad Syahroni, S.T., M.T.';
+  const room = data.room || 'R16';
+  const startTime = data.startTime || '10:20';
+  const scheduleId = data.scheduleId || 'demo-schedule';
+
+  const notificationTitle = `🔔 Uji Notifikasi: ${courseName}`;
+  const notificationBody = `Kuliah ${courseName} · Jam ${startTime.replace(':', '.')} · Ruang ${room}`;
+
+  // Query all active registered student devices
+  const devicesSnapshot = await db.collection('devices')
+    .where('classId', '==', 'trjt-3a')
+    .where('active', '==', true)
+    .where('reminderEnabled', '==', true)
+    .get();
+
+  const targetDevices = [];
+  devicesSnapshot.forEach(doc => {
+    const d = doc.data();
+    if (d.token && typeof d.token === 'string' && d.token.trim() !== '') {
+      if (!d.token.startsWith('web-local-') && !d.token.startsWith('dev_') && !d.token.startsWith('ios-dev-')) {
+        targetDevices.push({
+          docId: doc.id,
+          token: d.token,
+          platform: d.platform || 'Unknown'
+        });
+      }
+    }
+  });
+
+  if (targetDevices.length === 0) {
+    return {
+      success: true,
+      recipientCount: 0,
+      targetDevices: 0,
+      message: 'Tidak ada perangkat mahasiswa aktif dengan token FCM terdaftar.'
+    };
+  }
+
+  const tokens = targetDevices.map(d => d.token);
+  let successCount = 0;
+  let failureCount = 0;
+  const invalidDocIds = [];
+
+  try {
+    const multicastPayload = {
+      notification: {
+        title: notificationTitle,
+        body: notificationBody
+      },
+      data: {
+        type: 'REMINDER_H10',
+        scheduleId: scheduleId,
+        courseName: courseName,
+        lecturer: lecturer,
+        room: room,
+        startTime: startTime,
+        targetUrl: './index.html'
+      },
+      tokens: tokens
+    };
+
+    const response = await admin.messaging().sendEachForMulticast(multicastPayload);
+    successCount = response.successCount;
+    failureCount = response.failureCount;
+
+    if (response.failureCount > 0) {
+      response.responses.forEach((resp, idx) => {
+        if (!resp.success && resp.error) {
+          const errorCode = resp.error.code;
+          if (
+            errorCode === 'messaging/registration-token-not-registered' ||
+            errorCode === 'messaging/invalid-registration-token' ||
+            errorCode === 'messaging/invalid-argument'
+          ) {
+            invalidDocIds.push(targetDevices[idx].docId);
+          }
+        }
+      });
+    }
+  } catch (err) {
+    console.error('[broadcastNotification Error]:', err);
+    throw new functions.https.HttpsError('internal', err.message);
+  }
+
+  // Clean invalid tokens in background
+  if (invalidDocIds.length > 0) {
+    try {
+      const batch = db.batch();
+      invalidDocIds.forEach(id => batch.update(db.collection('devices').doc(id), { active: false }));
+      await batch.commit();
+    } catch (e) {}
+  }
+
+  // Save log
+  await db.collection('notificationLogs').add({
+    type: 'admin_broadcast_test',
+    courseName,
+    lecturer,
+    room,
+    startTime,
+    sentAt: admin.firestore.FieldValue.serverTimestamp(),
+    recipientCount: successCount,
+    failureCount: failureCount,
+    success: true
+  });
+
+  return {
+    success: true,
+    recipientCount: successCount,
+    failureCount: failureCount,
+    targetDevices: targetDevices.length,
+    message: `Notifikasi berhasil disiarkan ke ${successCount} perangkat mahasiswa.`
+  };
 });

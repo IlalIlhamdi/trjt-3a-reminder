@@ -31,12 +31,9 @@ try {
 
     const notificationOptions = {
       body: body,
-      icon: './assets/icons/app-icon.svg',
-      badge: './assets/icons/app-icon.svg',
       vibrate: [200, 100, 200],
-      tag: payload.data?.type || 'trjt-class-reminder',
+      tag: payload.data?.scheduleId || payload.data?.type || 'trjt-class-reminder',
       renotify: true,
-      requireInteraction: true,
       data: {
         url: './index.html',
         scheduleId: payload.data?.scheduleId,
@@ -56,17 +53,14 @@ self.addEventListener('push', (event) => {
 
   try {
     const data = event.data.json();
-    // If it's standard FCM notification, it may already be handled by onBackgroundMessage
     if (data.notification || data.data) {
       const title = data.notification?.title || data.data?.title || 'TRJT 3A — Pengingat Kuliah';
       const body = data.notification?.body || data.data?.body || 'Jadwal kuliah Anda akan segera dimulai.';
 
       const options = {
         body: body,
-        icon: './assets/icons/app-icon.svg',
-        badge: './assets/icons/app-icon.svg',
         vibrate: [200, 100, 200],
-        tag: data.data?.type || 'trjt-class-reminder',
+        tag: data.data?.scheduleId || data.data?.type || 'trjt-class-reminder',
         renotify: true,
         data: {
           url: './index.html',
@@ -81,8 +75,6 @@ self.addEventListener('push', (event) => {
     event.waitUntil(
       self.registration.showNotification('TRJT 3A Reminder', {
         body: text,
-        icon: './assets/icons/app-icon.svg',
-        badge: './assets/icons/app-icon.svg',
         vibrate: [200, 100, 200],
         data: { url: './index.html' }
       })

@@ -29,7 +29,7 @@
     selectedWeeklyDayId: 1, // Default Senin (1)
     notifications: loadInitialNotifications(),
     settings: {
-      h10Alert: localStorage.getItem('trjt_h10_enabled') === 'true',
+      h10Alert: localStorage.getItem('trjt_h10_enabled') !== 'false',
       soundEnabled: localStorage.getItem('trjt_sound_enabled') !== 'false',
       vibrationEnabled: localStorage.getItem('trjt_vibration_enabled') !== 'false'
     }

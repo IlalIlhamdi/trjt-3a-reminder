@@ -14,7 +14,8 @@
     storageBucket: "trjt-3a-reminder.firebasestorage.app",
     messagingSenderId: "1050622500629",
     appId: "1:1050622500629:web:871c2db97dc9bf1d72531c",
-    measurementId: "G-7B1BY95YZC"
+    measurementId: "G-7B1BY95YZC",
+    vapidKey: "BOBR9L0vvT0RQhhEB9V8lsouP6zzCpAZBQPj8vw3u2bRzkYIq0tdJ5aN50W6MFl4K-wOWLwz3dmyARaOSs2-UqM"
   };
 
   let isFirebaseReady = false;
@@ -497,12 +498,20 @@
   // Request Notification Permission & Register FCM Token
   async function requestNotificationPermissionAndToken(reminderEnabled = true) {
     if (!('Notification' in window)) {
-      throw new Error('Peramban ini tidak mendukung notifikasi.');
+      throw new Error('Peramban ini belum mendukung notifikasi Web. Pada iPhone, pastikan Anda telah memilih "Tambahkan ke Layar Utama" di Safari (Share ⬆️ -> Add to Home Screen).');
     }
 
-    const permission = await Notification.requestPermission();
+    let permission = Notification.permission;
+    if (permission !== 'granted') {
+      try {
+        permission = await Notification.requestPermission();
+      } catch (pErr) {
+        permission = await new Promise((resolve) => Notification.requestPermission(resolve));
+      }
+    }
+
     if (permission === 'denied') {
-      throw new Error('Izin notifikasi diblokir oleh peramban. Silakan buka pengaturan izin browser Anda.');
+      throw new Error('Izin notifikasi diblokir. Silakan buka Pengaturan iPhone -> Safari / TRJT 3A -> Pemberitahuan -> Izinkan.');
     }
 
     if (permission !== 'granted') {
@@ -526,9 +535,12 @@
         if (swRegistration) {
           tokenOptions.serviceWorkerRegistration = swRegistration;
         }
-        // Strict 2.5s timeout for getToken so iOS Safari never hangs
+        if (firebaseConfig.vapidKey) {
+          tokenOptions.vapidKey = firebaseConfig.vapidKey;
+        }
+        // 6s timeout for getToken on mobile network
         const tokenPromise = messaging.getToken(tokenOptions);
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('FCM token request timeout')), 2500));
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('FCM token request timeout')), 6000));
         token = await Promise.race([tokenPromise, timeoutPromise]);
       } catch (tokenErr) {
         console.warn("FCM getToken note (using fallback):", tokenErr.message);
@@ -617,6 +629,23 @@
 
   // Send Direct Test Notification to this specific device
   async function sendTestNotification() {
+    // 0. Ensure Notification Permission is requested directly inside user gesture (Crucial for iOS)
+    if (!('Notification' in window)) {
+      throw new Error('Peramban ini belum mendukung Web Notification. Di iPhone, pastikan Anda telah memilih "Tambahkan ke Layar Utama" (Share ⬆️ -> Add to Home Screen) dan membukanya dari ikon Layar Utama.');
+    }
+
+    if (Notification.permission !== 'granted') {
+      let perm = 'default';
+      try {
+        perm = await Notification.requestPermission();
+      } catch (pErr) {
+        perm = await new Promise((resolve) => Notification.requestPermission(resolve));
+      }
+      if (perm !== 'granted') {
+        throw new Error('Izin notifikasi belum disetujui. Buka Pengaturan iPhone -> TRJT 3A / Safari -> Izinkan Pemberitahuan.');
+      }
+    }
+
     // 1. Play audio chime immediately (must be inside user gesture call stack for iOS)
     playNotificationChime();
 
@@ -631,22 +660,32 @@
     lastNotificationTime = new Date().toISOString();
     localStorage.setItem('trjt_last_notif_time', lastNotificationTime);
 
-    // 3. Dispatch native Service Worker Notification or window Notification
+    // 3. Dispatch native Service Worker Notification
     let notificationDispatched = false;
 
     if ('serviceWorker' in navigator) {
       try {
-        const reg = await navigator.serviceWorker.ready;
+        let reg = swRegistration || (await navigator.serviceWorker.getRegistration());
+        if (!reg) {
+          reg = await navigator.serviceWorker.ready;
+        }
         if (reg && reg.showNotification) {
-          await reg.showNotification(title, {
+          const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+          const notifOptions = {
             body: body,
-            icon: './assets/icons/app-icon.svg',
-            badge: './assets/icons/app-icon.svg',
             vibrate: [200, 100, 200],
             tag: 'trjt-test-notif',
             renotify: true,
             data: { url: './index.html', type: 'test' }
-          });
+          };
+          
+          // Only add SVG icon on non-iOS browsers (iOS WebKit rejects SVG icons)
+          if (!isIOS) {
+            notifOptions.icon = './assets/icons/app-icon.svg';
+            notifOptions.badge = './assets/icons/app-icon.svg';
+          }
+
+          await reg.showNotification(title, notifOptions);
           notificationDispatched = true;
         }
       } catch (swNotifErr) {
@@ -654,14 +693,17 @@
       }
     }
 
-    if (!notificationDispatched && 'Notification' in window && Notification.permission === 'granted') {
+    if (!notificationDispatched && Notification.permission === 'granted') {
       try {
-        new Notification(title, {
-          body: body,
-          icon: './assets/icons/app-icon.svg',
-          vibrate: [200, 100, 200]
-        });
-        notificationDispatched = true;
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        if (!isIOS) {
+          new Notification(title, {
+            body: body,
+            icon: './assets/icons/app-icon.svg',
+            vibrate: [200, 100, 200]
+          });
+          notificationDispatched = true;
+        }
       } catch (nativeErr) {
         console.warn("Native Notification error:", nativeErr);
       }
