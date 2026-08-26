@@ -13,6 +13,20 @@
     this.isSimulated = function () { return false; };
   })();
 
+  // --- Version check & Cache Storage Auto-Purge ---
+  const CURRENT_APP_VERSION = '4.2';
+  try {
+    const savedVer = localStorage.getItem('trjt_app_version');
+    if (savedVer !== CURRENT_APP_VERSION) {
+      if ('caches' in window) {
+        caches.keys().then((names) => {
+          names.forEach((name) => caches.delete(name));
+        });
+      }
+      localStorage.setItem('trjt_app_version', CURRENT_APP_VERSION);
+    }
+  } catch (e) {}
+
   // --- Helper to load persisted notifications ---
   function loadInitialNotifications() {
     try {
