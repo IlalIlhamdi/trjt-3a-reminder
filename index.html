@@ -276,6 +276,32 @@
             <!-- Dynamically populated by evaluateScheduleState() -->
           </div>
 
+          <!-- Quick Directory Glass Pill Bar (Slidable Segmented Navigation) -->
+          <div class="quick-pill-capsule-container">
+            <div class="quick-pill-scroll-track">
+              <button class="quick-pill-item active" onclick="switchTab('jadwal')" data-quick="jadwal">
+                <i data-lucide="calendar"></i>
+                <span>Jadwal</span>
+              </button>
+              <button class="quick-pill-item" onclick="openPiketModal()" data-quick="kelompok">
+                <i data-lucide="users"></i>
+                <span>Kelompok</span>
+              </button>
+              <button class="quick-pill-item" onclick="openPiketModal()" data-quick="piket">
+                <i data-lucide="shield-check"></i>
+                <span>Piket</span>
+              </button>
+              <button class="quick-pill-item" onclick="openMahasiswaModal()" data-quick="mahasiswa">
+                <i data-lucide="file-text"></i>
+                <span>Mahasiswa</span>
+              </button>
+              <button class="quick-pill-item" onclick="switchTab('dosen')" data-quick="dosen">
+                <i data-lucide="user-plus"></i>
+                <span>Dosen</span>
+              </button>
+            </div>
+          </div>
+
           <!-- Section: Jadwal Hari Ini -->
           <div style="margin-top: 4px;">
             <div class="section-header-row">
@@ -317,6 +343,32 @@
           <div class="view-title-row">
             <h2 class="view-page-title">Jadwal mingguan</h2>
             <span class="badge-semester">Semester 5</span>
+          </div>
+
+          <!-- Quick Directory Glass Pill Bar (Slidable Segmented Navigation) -->
+          <div class="quick-pill-capsule-container" style="margin-top: 10px; margin-bottom: 12px;">
+            <div class="quick-pill-scroll-track">
+              <button class="quick-pill-item active" onclick="switchTab('jadwal')" data-quick="jadwal">
+                <i data-lucide="calendar"></i>
+                <span>Jadwal</span>
+              </button>
+              <button class="quick-pill-item" onclick="openPiketModal()" data-quick="kelompok">
+                <i data-lucide="users"></i>
+                <span>Kelompok</span>
+              </button>
+              <button class="quick-pill-item" onclick="openPiketModal()" data-quick="piket">
+                <i data-lucide="shield-check"></i>
+                <span>Piket</span>
+              </button>
+              <button class="quick-pill-item" onclick="openMahasiswaModal()" data-quick="mahasiswa">
+                <i data-lucide="file-text"></i>
+                <span>Mahasiswa</span>
+              </button>
+              <button class="quick-pill-item" onclick="switchTab('dosen')" data-quick="dosen">
+                <i data-lucide="user-plus"></i>
+                <span>Dosen</span>
+              </button>
+            </div>
           </div>
 
           <!-- Segmented Day Selector Capsule (Sen 24, Sel 25, Rab 26, Kam 27, Jum 28) -->
@@ -861,19 +913,56 @@
     </div>
   </div>
 
+  <!-- ==========================================
+       MODAL 5: DAFTAR MAHASISWA TRJT 3A
+       ========================================== -->
+  <div id="modal-mahasiswa-list" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-sheet">
+      <div class="modal-drag-handle"></div>
+      
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="brand-logo-box">
+            <i data-lucide="graduation-cap" style="width: 20px; height: 20px;"></i>
+          </div>
+          <div>
+            <h2 style="font-size: 15px; font-weight: 700; color: var(--color-primary-navy); line-height: 1.25;">Daftar Mahasiswa TRJT 3A</h2>
+            <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 2px;">17 Mahasiswa Aktif · Semester 5</p>
+          </div>
+        </div>
+        <button id="btn-close-mahasiswa-modal" class="btn-close-modal" onclick="closeMahasiswaModal()" aria-label="Tutup">
+          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+        </button>
+      </div>
+
+      <div class="modal-body" style="padding: 16px 20px 24px 20px; display: flex; flex-direction: column; gap: 10px;">
+        <!-- Search Input -->
+        <div style="position: relative;">
+          <i data-lucide="search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--color-text-muted);"></i>
+          <input type="text" id="mahasiswa-search-input" placeholder="Cari nama mahasiswa atau kelompok..." style="width: 100%; padding: 10px 14px 10px 38px; border-radius: 12px; background: var(--color-surface-glass); border: 1px solid var(--color-border-subtle); color: var(--color-text-primary); font-family: inherit; font-size: 13px; outline: none; box-sizing: border-box;">
+        </div>
+
+        <!-- Mahasiswa Cards List Container -->
+        <div id="mahasiswa-list-container" style="display: flex; flex-direction: column; gap: 8px; max-height: 55vh; overflow-y: auto; padding-right: 2px;">
+          <!-- Dynamically populated by renderMahasiswaModal() -->
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Firebase App & Services (v10 compat SDK) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
-  <script src="./js/firebase-config.js?v=4.7"></script>
+  <script src="./js/firebase-config.js?v=4.8"></script>
 
   <!-- Application Scripts -->
-  <script src="./js/time-provider.js?v=4.7"></script>
-  <script src="./js/data.js?v=4.7"></script>
-  <script src="./js/drive-service.js?v=4.7"></script>
-  <script src="./js/material-service.js?v=4.7"></script>
-  <script src="./js/app.js?v=4.7"></script>
+  <script src="./js/time-provider.js?v=4.8"></script>
+  <script src="./js/data.js?v=4.8"></script>
+  <script src="./js/drive-service.js?v=4.8"></script>
+  <script src="./js/material-service.js?v=4.8"></script>
+  <script src="./js/app.js?v=4.8"></script>
 </body>
 </html>

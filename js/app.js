@@ -14,7 +14,7 @@
   })();
 
   // --- Version check & Cache Storage Auto-Purge ---
-  const CURRENT_APP_VERSION = '4.7';
+  const CURRENT_APP_VERSION = '4.8';
   try {
     const savedVer = localStorage.getItem('trjt_app_version');
     if (savedVer !== CURRENT_APP_VERSION) {
@@ -1287,6 +1287,24 @@
         renderDosenList(e.target.value);
       });
     }
+
+    // Mahasiswa modal & search handlers
+    const searchMahasiswa = document.getElementById('mahasiswa-search-input');
+    if (searchMahasiswa) {
+      searchMahasiswa.addEventListener('input', (e) => {
+        renderMahasiswaModal(e.target.value);
+      });
+    }
+
+    const btnCloseMahasiswa = document.getElementById('btn-close-mahasiswa-modal');
+    if (btnCloseMahasiswa) btnCloseMahasiswa.addEventListener('click', closeMahasiswaModal);
+
+    const modalMahasiswa = document.getElementById('modal-mahasiswa-list');
+    if (modalMahasiswa) {
+      modalMahasiswa.addEventListener('click', (e) => {
+        if (e.target === modalMahasiswa) closeMahasiswaModal();
+      });
+    }
   }
 
   // --- HTML sanitization helper ---
@@ -1443,6 +1461,126 @@
   window.openPiketModal = openPiketModal;
   window.closePiketModal = closePiketModal;
   window.renderPiketModal = renderPiketModal;
+
+  // --- Mahasiswa (Student Directory) System ---
+  let activeMahasiswaSearch = '';
+
+  function getAllMahasiswaList() {
+    const piketList = window.TRJT_PIKET || (window.TRJT_SCHEDULE && window.TRJT_SCHEDULE.piket) || [];
+    const students = [];
+    let counter = 1;
+    piketList.forEach((group) => {
+      group.members.forEach((name) => {
+        students.push({
+          no: counter++,
+          name: name,
+          groupName: group.groupName,
+          groupRoman: group.groupRoman,
+          dayName: group.dayName
+        });
+      });
+    });
+    return students;
+  }
+
+  function renderMahasiswaModal(query = activeMahasiswaSearch) {
+    activeMahasiswaSearch = query;
+    const container = document.getElementById('mahasiswa-list-container');
+    if (!container) return;
+
+    const list = getAllMahasiswaList();
+    const q = (query || '').toLowerCase().trim();
+    const filtered = list.filter((s) => {
+      if (!q) return true;
+      return s.name.toLowerCase().includes(q) || s.groupName.toLowerCase().includes(q) || s.dayName.toLowerCase().includes(q);
+    });
+
+    if (filtered.length === 0) {
+      container.innerHTML = `
+        <div style="padding: 20px; text-align: center; color: var(--color-text-secondary); font-size: 13px;">
+          Mahasiswa tidak ditemukan dengan kata kunci "${escapeHtml(query)}".
+        </div>
+      `;
+    } else {
+      container.innerHTML = filtered.map((s) => {
+        const initials = s.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+        return `
+          <div class="mahasiswa-card-item">
+            <div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1;">
+              <div class="piket-avatar-dot" style="width: 32px; height: 32px; font-size: 12px; font-weight: 800; border-radius: 10px; background: var(--color-very-light-blue); color: var(--color-primary-blue); display: flex; align-items: center; justify-content: center;">
+                ${initials}
+              </div>
+              <div style="display: flex; flex-direction: column; min-width: 0; flex: 1;">
+                <span style="font-size: 13.5px; font-weight: 700; color: var(--color-primary-navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  ${escapeHtml(s.name)}
+                </span>
+                <span style="font-size: 11.5px; color: var(--color-text-secondary);">
+                  TRJT 3A · No. Urut ${s.no}
+                </span>
+              </div>
+            </div>
+            <span class="piket-day-chip" style="font-size: 11px; padding: 3px 8px; border-radius: 6px; background: rgba(47, 128, 237, 0.08); border: 1px solid rgba(191, 219, 254, 0.8); color: var(--color-primary-blue); font-weight: 700; white-space: nowrap;">
+              ${s.groupName}
+            </span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  function openMahasiswaModal() {
+    activeMahasiswaSearch = '';
+    const searchInput = document.getElementById('mahasiswa-search-input');
+    if (searchInput) searchInput.value = '';
+    renderMahasiswaModal('');
+    const modal = document.getElementById('modal-mahasiswa-list');
+    if (modal) {
+      modal.classList.add('is-open');
+      modal.style.display = 'flex';
+    }
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  function closeMahasiswaModal() {
+    const modal = document.getElementById('modal-mahasiswa-list');
+    if (modal) {
+      modal.classList.remove('is-open');
+      modal.style.display = 'none';
+    }
+  }
+
+  function setupDragScroll() {
+    document.querySelectorAll('.quick-pill-scroll-track').forEach((slider) => {
+      let isDown = false;
+      let startX;
+      let scrollLeft;
+
+      slider.addEventListener('mousedown', (e) => {
+        isDown = true;
+        startX = e.pageX - slider.offsetLeft;
+        scrollLeft = slider.scrollLeft;
+      });
+      slider.addEventListener('mouseleave', () => {
+        isDown = false;
+      });
+      slider.addEventListener('mouseup', () => {
+        isDown = false;
+      });
+      slider.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - slider.offsetLeft;
+        const walk = (x - startX) * 2;
+        slider.scrollLeft = scrollLeft - walk;
+      });
+    });
+  }
+
+  window.openMahasiswaModal = openMahasiswaModal;
+  window.closeMahasiswaModal = closeMahasiswaModal;
+  window.renderMahasiswaModal = renderMahasiswaModal;
 
   // --- Theme Management System (Terang, Gelap, Sistem) ---
   function applyTheme(themeName = state.settings.theme || 'light') {
@@ -1830,6 +1968,7 @@
     renderDosenList();
     renderSettingsUI();
     renderPiketBadge();
+    setupDragScroll();
     tick();
 
     setInterval(tick, 1000);

@@ -2145,4 +2145,141 @@ input:checked + .slider::before {
   border-top-color: rgba(255, 255, 255, 0.08);
 }
 
+/* ==========================================================================
+   QUICK DIRECTORY GLASS PILL BAR (SLIDABLE SEGMENTED PILL)
+   ========================================================================== */
+.quick-pill-capsule-container {
+  width: 100%;
+  margin-top: 14px;
+  margin-bottom: 6px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  border-radius: var(--radius-full);
+  padding: 5px 6px;
+  box-shadow: 0 10px 30px rgba(15, 61, 145, 0.08), inset 0 1px 1px rgba(255, 255, 255, 1);
+  box-sizing: border-box;
+}
+
+.quick-pill-scroll-track {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+  padding: 2px;
+  -webkit-overflow-scrolling: touch;
+  cursor: grab;
+  user-select: none;
+}
+
+.quick-pill-scroll-track:active {
+  cursor: grabbing;
+}
+
+.quick-pill-scroll-track::-webkit-scrollbar {
+  display: none;
+}
+
+.quick-pill-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 7px 16px;
+  border-radius: var(--radius-full);
+  min-width: 68px;
+  background: transparent;
+  border: none;
+  color: var(--color-primary-navy);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.quick-pill-item i {
+  width: 18px;
+  height: 18px;
+  color: var(--color-primary-navy);
+  transition: all var(--transition-fast);
+}
+
+.quick-pill-item:hover:not(.active) {
+  background: rgba(235, 244, 254, 0.8);
+  color: var(--color-primary-blue);
+}
+
+.quick-pill-item:hover:not(.active) i {
+  color: var(--color-primary-blue);
+}
+
+.quick-pill-item:active {
+  transform: scale(0.95);
+}
+
+.quick-pill-item.active {
+  background: linear-gradient(135deg, #184576, #0F2E52);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(24, 69, 118, 0.35);
+}
+
+.quick-pill-item.active i {
+  color: #FFFFFF;
+}
+
+/* Dark mode for quick pill capsule */
+[data-theme="dark"] .quick-pill-capsule-container {
+  background: linear-gradient(145deg, rgba(20, 32, 54, 0.9) 0%, rgba(14, 23, 40, 0.92) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 24px -6px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .quick-pill-item {
+  color: #94A3B8;
+}
+
+[data-theme="dark"] .quick-pill-item i {
+  color: #94A3B8;
+}
+
+[data-theme="dark"] .quick-pill-item.active {
+  background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+}
+
+[data-theme="dark"] .quick-pill-item.active i {
+  color: #FFFFFF;
+}
+
+.mahasiswa-card-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  background: rgba(244, 248, 254, 0.7);
+  border: 1px solid rgba(220, 235, 252, 0.8);
+  border-radius: 12px;
+  transition: all var(--transition-fast);
+}
+
+.mahasiswa-card-item:hover {
+  background: #FFFFFF;
+  border-color: rgba(191, 219, 254, 0.9);
+}
+
+[data-theme="dark"] .mahasiswa-card-item {
+  background: rgba(24, 38, 64, 0.7);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+
 
