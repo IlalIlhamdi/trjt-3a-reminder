@@ -310,13 +310,80 @@ const TRJT_SCHEDULE = {
       time: 'Kemarin, 16.45',
       read: true
     }
+  ],
+
+  // ==========================================
+  // DAFTAR DOSEN PENGAMPU TRJT 3A (SEMESTER 5)
+  // ==========================================
+  dosen: [
+    {
+      no: 1,
+      initial: "IS",
+      name: "Ipan Suandi, S.T., M.T.",
+      nip: "198005102005011002",
+      courses: [
+        "Praktikum Antena dan Propagasi",
+        "Antena dan Propagasi"
+      ]
+    },
+    {
+      no: 2,
+      initial: "MS",
+      name: "Muhammad Syahroni, S.T., M.T.",
+      nip: "197210262006041001",
+      courses: [
+        "Jaringan Komputer Lanjut",
+        "Praktikum Jaringan Komputer Lanjut"
+      ]
+    },
+    {
+      no: 3,
+      initial: "RS",
+      name: "Rachmawati, S.T., M.Eng.",
+      nip: "197908262003122001",
+      courses: [
+        "Praktikum Sistem Komunikasi Satelit dan Radar",
+        "Sistem Komunikasi Satelit dan Radar"
+      ]
+    },
+    {
+      no: 4,
+      initial: "AF",
+      name: "Anita Fauziah, SST., M.T.",
+      nip: "197201291998032001",
+      courses: [
+        "Teknik Instalasi Fiber Optik",
+        "Praktikum Teknik Instalasi Fiber Optik"
+      ]
+    },
+    {
+      no: 5,
+      initial: "YS",
+      name: "Yassir, S.T., M.Eng.Sc.",
+      nip: "198004192003121002",
+      courses: [
+        "Praktikum Sistem Komunikasi Seluler",
+        "Sistem Komunikasi Seluler"
+      ]
+    },
+    {
+      no: 6,
+      initial: "DN",
+      name: "Dr. Nelly Safitri, SST., M.Eng.Sc.",
+      nip: "NIP Belum Tercatat",
+      courses: [
+        "Metodologi Penelitian"
+      ]
+    }
   ]
 };
 
 const TRJT_PIKET = TRJT_SCHEDULE.piket;
+const TRJT_DOSEN = TRJT_SCHEDULE.dosen;
 
 window.roomMap = roomMap;
 window.lecturerMap = lecturerMap;
 window.TRJT_SCHEDULE = TRJT_SCHEDULE;
 window.TRJT_PIKET = TRJT_PIKET;
+window.TRJT_DOSEN = TRJT_DOSEN;
 

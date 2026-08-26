@@ -14,7 +14,7 @@
   })();
 
   // --- Version check & Cache Storage Auto-Purge ---
-  const CURRENT_APP_VERSION = '4.5';
+  const CURRENT_APP_VERSION = '4.6';
   try {
     const savedVer = localStorage.getItem('trjt_app_version');
     if (savedVer !== CURRENT_APP_VERSION) {
@@ -955,6 +955,8 @@
       renderWeeklySchedule();
     } else if (tabId === 'notifikasi') {
       renderNotifications();
+    } else if (tabId === 'dosen') {
+      renderDosenList();
     } else if (tabId === 'pengaturan') {
       renderSettingsUI();
     }
@@ -1271,6 +1273,14 @@
         if (e.target === modalTheme) closeThemeModal();
       });
     }
+
+    // Dosen search input listener
+    const searchDosen = document.getElementById('dosen-search-input');
+    if (searchDosen) {
+      searchDosen.addEventListener('input', (e) => {
+        renderDosenList(e.target.value);
+      });
+    }
   }
 
   // --- HTML sanitization helper ---
@@ -1516,6 +1526,94 @@
     } catch (e) {}
   }
 
+  // --- Dosen (Lecturers Directory) Controller ---
+  let activeDosenSearch = '';
+
+  function renderDosenList(query = activeDosenSearch) {
+    activeDosenSearch = query;
+    const container = document.getElementById('dosen-cards-container');
+    if (!container) return;
+
+    const dosenList = window.TRJT_DOSEN || (window.TRJT_SCHEDULE && window.TRJT_SCHEDULE.dosen) || [];
+
+    const q = (query || '').toLowerCase().trim();
+    const filtered = dosenList.filter((d) => {
+      if (!q) return true;
+      const matchName = (d.name || '').toLowerCase().includes(q);
+      const matchNip = (d.nip || '').toLowerCase().includes(q);
+      const matchInitial = (d.initial || '').toLowerCase().includes(q);
+      const matchCourses = (d.courses || []).some(c => (c || '').toLowerCase().includes(q));
+      return matchName || matchNip || matchInitial || matchCourses;
+    });
+
+    if (filtered.length === 0) {
+      container.innerHTML = `
+        <div class="hero-glass-card" style="padding: 24px; text-align: center; align-items: center; gap: 8px;">
+          <i data-lucide="search-x" style="width: 28px; height: 28px; color: var(--color-text-muted);"></i>
+          <p style="font-weight: 700; font-size: 14px; color: var(--color-primary-navy);">Dosen tidak ditemukan</p>
+          <p style="font-size: 12px; color: var(--color-text-secondary);">Tidak ada dosen atau mata kuliah yang cocok dengan kata kunci "${escapeHtml(query)}".</p>
+        </div>
+      `;
+    } else {
+      container.innerHTML = filtered.map((d) => {
+        return `
+          <div class="dosen-glass-card">
+            <div class="dosen-card-top">
+              <div class="dosen-avatar-squircle">${d.initial}</div>
+              <div class="dosen-info-wrap">
+                <h3 class="dosen-name-heading">${escapeHtml(d.name)}</h3>
+                <span class="dosen-nip-badge">
+                  <i data-lucide="id-card"></i>
+                  <span>NIP: ${escapeHtml(d.nip)}</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="dosen-courses-section">
+              <span class="dosen-courses-label">Mata Kuliah Diampu:</span>
+              <div class="dosen-courses-pills">
+                ${d.courses.map((courseName) => `
+                  <span class="dosen-course-pill" onclick="handleDosenCourseClick('${escapeHtml(courseName).replace(/'/g, "\\'")}', '${escapeHtml(d.name).replace(/'/g, "\\'")}')">
+                    <i data-lucide="book-open"></i>
+                    <span>${escapeHtml(courseName)}</span>
+                  </span>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  function handleDosenCourseClick(courseName, lecturerName) {
+    if (window.TRJT_SCHEDULE && window.TRJT_SCHEDULE.classes) {
+      const matchedClass = window.TRJT_SCHEDULE.classes.find(
+        (c) => c.courseName.toLowerCase() === courseName.toLowerCase()
+      );
+      if (matchedClass) {
+        window.openCourseMaterialsModal(
+          matchedClass.id,
+          matchedClass.courseName,
+          getLecturerDisplay(matchedClass.lecturerName, matchedClass.lecturerCode, matchedClass.courseName),
+          matchedClass.roomCode
+        );
+        return;
+      }
+    }
+    window.openCourseMaterialsModal(
+      'mat-' + courseName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+      courseName,
+      lecturerName,
+      'Lab / Ruang Kuliah'
+    );
+  }
+
+  window.renderDosenList = renderDosenList;
+  window.handleDosenCourseClick = handleDosenCourseClick;
+
   // --- Course Materials Modal & Controller System ---
   let activeMaterialCourse = null;
   let activeMaterialFilter = 'all';
@@ -1723,6 +1821,7 @@
 
     renderWeeklySchedule();
     renderNotifications();
+    renderDosenList();
     renderSettingsUI();
     renderPiketBadge();
     tick();

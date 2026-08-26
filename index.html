@@ -396,7 +396,34 @@
         </section>
 
         <!-- ==========================================
-             VIEW 4: PENGATURAN (SETTINGS)
+             VIEW 4: DOSEN (LECTURERS DIRECTORY)
+             ========================================== -->
+        <section id="view-dosen" class="view-section">
+          
+          <!-- Header with Subtitle & Badge -->
+          <div class="view-title-row">
+            <div>
+              <h2 class="view-page-title">Dosen Pengampu</h2>
+              <p class="notif-subtitle-text" style="margin-top: 2px;">Semester 5 · TRJT 3A TA 2026/2027</p>
+            </div>
+            <span class="badge-semester" style="background: rgba(47, 128, 237, 0.1); color: var(--color-primary-blue);">6 Dosen</span>
+          </div>
+
+          <!-- Search Input for Lecturers -->
+          <div style="margin-top: 14px; margin-bottom: 12px; position: relative;">
+            <i data-lucide="search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--color-text-muted);"></i>
+            <input type="text" id="dosen-search-input" placeholder="Cari nama dosen, NIP, atau mata kuliah..." style="width: 100%; padding: 11px 14px 11px 40px; border-radius: 14px; background: var(--color-surface-glass); border: 1px solid var(--color-border-subtle); color: var(--color-text-primary); font-family: inherit; font-size: 13px; outline: none; box-sizing: border-box;">
+          </div>
+
+          <!-- Dosen Cards List Container -->
+          <div id="dosen-cards-container" class="weekly-cards-list">
+            <!-- Dynamically populated by renderDosenList() -->
+          </div>
+
+        </section>
+
+        <!-- ==========================================
+             VIEW 5: PENGATURAN (SETTINGS)
              ========================================== -->
         <section id="view-pengaturan" class="view-section">
           
@@ -571,6 +598,13 @@
             <span id="nav-notif-dot" class="nav-badge-dot"></span>
           </div>
           <span class="nav-label">Notifikasi</span>
+        </button>
+
+        <button class="nav-item" data-tab="dosen" aria-label="Dosen">
+          <div class="nav-icon-wrap">
+            <i data-lucide="graduation-cap" style="width: 20px; height: 20px;"></i>
+          </div>
+          <span class="nav-label">Dosen</span>
         </button>
 
         <button class="nav-item" data-tab="pengaturan" aria-label="Pengaturan">
@@ -832,13 +866,13 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
-  <script src="./js/firebase-config.js?v=4.5"></script>
+  <script src="./js/firebase-config.js?v=4.6"></script>
 
   <!-- Application Scripts -->
-  <script src="./js/time-provider.js?v=4.5"></script>
-  <script src="./js/data.js?v=4.5"></script>
-  <script src="./js/drive-service.js?v=4.5"></script>
-  <script src="./js/material-service.js?v=4.5"></script>
-  <script src="./js/app.js?v=4.5"></script>
+  <script src="./js/time-provider.js?v=4.6"></script>
+  <script src="./js/data.js?v=4.6"></script>
+  <script src="./js/drive-service.js?v=4.6"></script>
+  <script src="./js/material-service.js?v=4.6"></script>
+  <script src="./js/app.js?v=4.6"></script>
 </body>
 </html>
