@@ -1,6 +1,7 @@
 /**
- * TRJT 3A REMINDER — Core Application Controller v2.2
+ * TRJT 3A REMINDER — Core Application Controller v4.0
  * Production Mode: Clean Asia/Jakarta Time Provider & Official Schedule Engine
+ * Glassmorphism White-Blue UI Architecture
  */
 
 (function () {
@@ -28,6 +29,7 @@
     currentTab: 'beranda',
     selectedWeeklyDayId: 1, // Default Senin (1)
     notifications: loadInitialNotifications(),
+    notifFilter: 'all', // 'all' or 'unread'
     settings: {
       h10Alert: localStorage.getItem('trjt_h10_enabled') !== 'false',
       soundEnabled: localStorage.getItem('trjt_sound_enabled') !== 'false',
@@ -233,13 +235,29 @@
     };
   }
 
-  // --- Production UI Renderers ---
+  // --- Production UI Renderers (Glassmorphism White-Blue UI) ---
   function renderHeader(data) {
     if (!data) return;
     const greetingEl = document.getElementById('header-greeting');
     const dateEl = document.getElementById('header-date');
-    if (greetingEl) greetingEl.innerHTML = `${getGreeting(data.now.getHours())}`;
+    const chipContainer = document.getElementById('beranda-status-chip-container');
+
+    if (greetingEl) greetingEl.innerText = getGreeting(data.now.getHours());
     if (dateEl) dateEl.innerText = formatFormattedDate(data.now);
+
+    if (chipContainer) {
+      if (data.inProgressClass) {
+        chipContainer.innerHTML = `<span class="status-pill-chip in-progress"><i data-lucide="play" style="width: 12px; height: 12px;"></i> Sedang berlangsung</span>`;
+      } else if (data.isH10) {
+        chipContainer.innerHTML = `<span class="status-pill-chip starting-soon"><i data-lucide="bell" style="width: 12px; height: 12px;"></i> 10 menit lagi</span>`;
+      } else if (data.totalCount > 0 && data.completedCount === data.totalCount) {
+        chipContainer.innerHTML = `<span class="status-pill-chip"><i data-lucide="check" style="width: 12px; height: 12px;"></i> Semua kelas hari ini selesai</span>`;
+      } else if (data.nextUpcomingClass) {
+        chipContainer.innerHTML = `<span class="status-pill-chip in-progress"><i data-lucide="clock" style="width: 12px; height: 12px;"></i> Belum dimulai</span>`;
+      } else {
+        chipContainer.innerHTML = `<span class="status-pill-chip neutral"><i data-lucide="calendar" style="width: 12px; height: 12px;"></i> Libur / Tidak ada kelas</span>`;
+      }
+    }
   }
 
   function renderHeroCard(data) {
@@ -250,38 +268,30 @@
     if (data.inProgressClass) {
       const item = data.inProgressClass;
       heroContainer.innerHTML = `
-        <div class="hero-class-card state-in-progress">
-          <div class="hero-card-header">
-            <div class="hero-label-badge in-progress">
-              <span class="pulse-indicator"></span>
-              Sedang berlangsung
+        <div class="hero-glass-card">
+          <div class="hero-tag-row" style="color: var(--color-success-text);">
+            <i data-lucide="play-circle"></i>
+            <span>SEDANG BERLANGSUNG</span>
+          </div>
+
+          <div class="hero-time-row">
+            <div class="hero-clock-circle" style="background: var(--color-success-bg); border-color: var(--color-success-border); color: var(--color-success-text);">
+              <i data-lucide="clock" style="width: 20px; height: 20px;"></i>
             </div>
-            <span class="room-badge">${item.roomCode}</span>
+            <span class="hero-time-text">${item.startTime.replace(':', '.')} – ${item.endTime.replace(':', '.')}</span>
           </div>
 
           <div>
-            <h2 class="hero-subject-name">${item.courseName}</h2>
-            <div class="hero-lecturer-name">
-              <i data-lucide="user-round" style="width: 14px; height: 14px;"></i>
-              ${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}
+            <h2 class="hero-course-title">${item.courseName}</h2>
+            <div class="hero-meta-row" style="margin-top: 6px;">
+              <i data-lucide="landmark"></i>
+              <span>${getRoomDisplay(item.roomCode, item.roomName)} • ${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}</span>
             </div>
           </div>
 
-          <div class="hero-pill-bar">
-            <div class="pill-item">
-              <i data-lucide="clock" style="width: 13px; height: 13px;"></i>
-              ${item.startTime.replace(':', '.')} – ${item.endTime.replace(':', '.')}
-            </div>
-            <span class="pill-divider"></span>
-            <div class="pill-item">
-              <i data-lucide="map-pin" style="width: 13px; height: 13px;"></i>
-              ${getRoomDisplay(item.roomCode, item.roomName)}
-            </div>
-          </div>
-
-          <div class="hero-countdown-panel">
-            <div class="countdown-sub-label">Selesai dalam</div>
-            <div class="countdown-digits-text">${formatCountdown(data.countdownMs)}</div>
+          <div class="hero-countdown-wrap">
+            <div class="hero-countdown-label">Selesai dalam</div>
+            <div class="hero-countdown-digits">${formatCountdown(data.countdownMs)}</div>
             <div class="hero-progress-track">
               <div class="hero-progress-bar" style="width: ${data.progressPercent}%"></div>
             </div>
@@ -297,109 +307,80 @@
       const isH10 = data.isH10;
 
       heroContainer.innerHTML = `
-        <div class="hero-class-card ${isH10 ? 'state-h10' : ''}">
-          <div class="hero-card-header">
-            <div class="hero-label-badge ${isH10 ? 'h10' : ''}">
-              ${isH10 ? '<i data-lucide="bell" style="width: 13px; height: 13px;"></i> 10 menit lagi' : 'Kelas berikutnya'}
+        <div class="hero-glass-card">
+          <div class="hero-tag-row">
+            <i data-lucide="calendar"></i>
+            <span>KELAS BERIKUTNYA</span>
+          </div>
+
+          <div class="hero-time-row">
+            <div class="hero-clock-circle">
+              <i data-lucide="clock" style="width: 20px; height: 20px;"></i>
             </div>
-            <span class="room-badge">${item.roomCode}</span>
+            <span class="hero-time-text">${daysMap[data.dayIndex]} • ${item.startTime.replace(':', '.')}</span>
           </div>
 
           <div>
-            <h2 class="hero-subject-name">${item.courseName}</h2>
-            <div class="hero-lecturer-name">
-              <i data-lucide="user-round" style="width: 14px; height: 14px;"></i>
-              ${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}
+            <h2 class="hero-course-title">${item.courseName}</h2>
+            <div class="hero-meta-row" style="margin-top: 6px;">
+              <i data-lucide="landmark"></i>
+              <span>${getRoomDisplay(item.roomCode, item.roomName)} • ${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}</span>
             </div>
           </div>
 
-          <div class="hero-pill-bar">
-            <div class="pill-item">
-              <i data-lucide="clock" style="width: 13px; height: 13px;"></i>
-              ${item.startTime.replace(':', '.')} – ${item.endTime.replace(':', '.')}
-            </div>
-            <span class="pill-divider"></span>
-            <div class="pill-item">
-              <i data-lucide="map-pin" style="width: 13px; height: 13px;"></i>
-              ${getRoomDisplay(item.roomCode, item.roomName)}
-            </div>
-          </div>
-
-          <div class="hero-countdown-panel">
-            <div class="countdown-sub-label">Mulai dalam</div>
-            <div class="countdown-digits-text">${formatCountdown(data.countdownMs)}</div>
+          <div class="hero-reminder-badge">
+            <i data-lucide="bell"></i>
+            <span>${isH10 ? 'Mulai dalam ' + formatCountdown(data.countdownMs) : 'Pengingat 10 menit aktif'}</span>
           </div>
         </div>
       `;
       return;
     }
 
-    // Case 3 (B): All Classes Finished Today (e.g. 2 of 2 Completed)
-    if (data.totalCount > 0 && data.completedCount === data.totalCount) {
+    // Case 3: All Classes Finished Today or Weekend -> Show Next Academic Day Class
+    if (data.nextDayUpcomingClass) {
+      const item = data.nextDayUpcomingClass;
       heroContainer.innerHTML = `
-        <div class="empty-state-card" style="padding: 16px 14px; gap: 8px;">
-          <div class="empty-icon-circle success" style="width: 44px; height: 44px; margin-bottom: 0;">
-            <i data-lucide="check-circle-2" style="width: 24px; height: 24px; color: var(--color-status-in-progress);"></i>
+        <div class="hero-glass-card" onclick="document.querySelector('[data-tab=jadwal]').click()" style="cursor: pointer;">
+          <div class="hero-tag-row">
+            <i data-lucide="calendar"></i>
+            <span>KELAS BERIKUTNYA</span>
           </div>
-          <h2 class="empty-title" style="font-size: 16px; margin: 0;">Semua kelas hari ini selesai</h2>
-          ${
-            data.nextDayUpcomingClass
-              ? `
-            <div class="nested-highlight-card" style="margin-top: 4px; padding: 10px 12px;" onclick="document.querySelector('[data-tab=jadwal]').click()">
-              <div class="nested-content">
-                <span class="nested-badge">Kelas berikutnya</span>
-                <span class="nested-time">${data.nextDayName} · ${data.nextDayUpcomingClass.startTime.replace(':', '.')}</span>
-                <span class="nested-subject">${data.nextDayUpcomingClass.courseName}</span>
-                <span class="nested-meta">${data.nextDayUpcomingClass.roomCode} · ${getLecturerDisplay(data.nextDayUpcomingClass.lecturerName, data.nextDayUpcomingClass.lecturerCode, data.nextDayUpcomingClass.courseName)}</span>
-              </div>
+
+          <div class="hero-time-row">
+            <div class="hero-clock-circle">
+              <i data-lucide="clock" style="width: 20px; height: 20px;"></i>
             </div>
-          `
-              : ''
-          }
+            <span class="hero-time-text">${data.nextDayName} • ${item.startTime.replace(':', '.')}</span>
+          </div>
+
+          <div>
+            <h2 class="hero-course-title">${item.courseName}</h2>
+            <div class="hero-meta-row" style="margin-top: 6px;">
+              <i data-lucide="landmark"></i>
+              <span>${getRoomDisplay(item.roomCode, item.roomName)} • ${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}</span>
+            </div>
+          </div>
+
+          <div class="hero-reminder-badge">
+            <i data-lucide="bell"></i>
+            <span>Pengingat 10 menit aktif</span>
+          </div>
         </div>
       `;
       return;
     }
 
-    // Case 4 (A): No Classes Today (Weekend or Academic Holiday)
+    // Case 4: Complete Holiday
     heroContainer.innerHTML = `
-      <div class="empty-state-card" style="padding: 18px 14px; gap: 8px;">
-        <div class="empty-icon-circle" style="width: 44px; height: 44px; margin-bottom: 0;">
-          <i data-lucide="calendar" style="width: 24px; height: 24px; color: var(--color-primary-blue);"></i>
+      <div class="hero-glass-card" style="text-align: center; align-items: center;">
+        <div class="hero-clock-circle" style="width: 46px; height: 46px;">
+          <i data-lucide="coffee" style="width: 24px; height: 24px;"></i>
         </div>
-        <h2 class="empty-title" style="font-size: 16px; margin: 0;">Tidak ada kelas hari ini</h2>
-        <p class="empty-desc" style="font-size: 12px; margin: 0; color: var(--color-secondary-text);">
-          Nikmati waktu luangmu. Jadwal berikutnya sudah kami siapkan.
-        </p>
-        ${
-          data.nextDayUpcomingClass
-            ? `
-          <div class="nested-highlight-card" style="margin-top: 4px; padding: 10px 12px;" onclick="document.querySelector('[data-tab=jadwal]').click()">
-            <div class="nested-content">
-              <span class="nested-badge">Kelas berikutnya</span>
-              <span class="nested-time">${data.nextDayName} · ${data.nextDayUpcomingClass.startTime.replace(':', '.')}</span>
-              <span class="nested-subject">${data.nextDayUpcomingClass.courseName}</span>
-              <span class="nested-meta">${data.nextDayUpcomingClass.roomCode} · ${getLecturerDisplay(data.nextDayUpcomingClass.lecturerName, data.nextDayUpcomingClass.lecturerCode, data.nextDayUpcomingClass.courseName)}</span>
-            </div>
-          </div>
-        `
-            : ''
-        }
+        <h2 class="hero-course-title">Tidak ada agenda kuliah</h2>
+        <p style="font-size: 13px; color: var(--color-text-secondary);">Nikmati waktu istirahatmu. Jadwal perkuliahan telah siap di menu Jadwal.</p>
       </div>
     `;
-  }
-
-  function renderQuickStats(data) {
-    if (!data) return;
-    const totalEl = document.getElementById('quick-stat-total');
-    const completedEl = document.getElementById('quick-stat-completed');
-    if (totalEl) totalEl.innerText = `${data.totalCount} Kelas`;
-    if (completedEl) {
-      completedEl.innerText = `${data.completedCount} / ${data.totalCount}`;
-      completedEl.style.color = (data.completedCount > 0 && data.completedCount === data.totalCount) 
-        ? 'var(--color-status-in-progress)' 
-        : 'var(--color-primary-blue)';
-    }
   }
 
   function renderTodayTimeline(data) {
@@ -408,9 +389,9 @@
 
     if (data.todayClasses.length === 0) {
       timelineContainer.innerHTML = `
-        <div class="empty-state-card" style="padding: 24px; box-shadow: var(--shadow-subtle);">
-          <i data-lucide="coffee" style="width: 26px; height: 26px; color: var(--color-secondary-text);"></i>
-          <p style="font-size: var(--font-size-body); color: var(--color-secondary-text); margin-top: 4px;">Tidak ada agenda perkuliahan hari ini.</p>
+        <div class="hero-glass-card" style="padding: 20px; text-align: center; align-items: center; gap: 6px;">
+          <i data-lucide="coffee" style="width: 24px; height: 24px; color: var(--color-text-muted);"></i>
+          <p style="font-size: 13px; color: var(--color-text-secondary); margin-top: 4px;">Tidak ada agenda perkuliahan hari ini.</p>
         </div>
       `;
       return;
@@ -425,57 +406,72 @@
         const isActive = currentMinutes >= startMin && currentMinutes < endMin;
         const isPast = currentMinutes >= endMin;
 
-        let statusClass = '';
-        let statusBadge = '';
+        let circleClass = '';
+        let iconName = 'clock';
 
         if (isActive) {
-          statusClass = 'is-ongoing';
-          statusBadge = `<span class="timeline-status-tag ongoing">● Berlangsung</span>`;
+          circleClass = 'ongoing';
+          iconName = 'play';
         } else if (isPast) {
-          statusClass = 'is-finished';
-          statusBadge = `<span class="timeline-status-tag finished">Selesai</span>`;
-        } else {
-          statusBadge = `<span class="timeline-status-tag upcoming">Akan datang</span>`;
+          circleClass = 'finished';
+          iconName = 'check';
         }
 
-        const cleanRoomName = item.roomName 
-          ? item.roomName.split('(')[0].replace('Gedung III Teknik Elektro Lt. 2', 'Gd. III Lt. 2').trim()
-          : '';
-
         return `
-          <div class="timeline-item">
-            <div class="timeline-time-block">
-              <span class="timeline-time-start">${item.startTime.replace(':', '.')}</span>
-              <span class="timeline-time-end">${item.endTime.replace(':', '.')}</span>
-            </div>
-            <div class="timeline-card ${statusClass}">
-              <div class="timeline-card-header">
-                <h3 class="timeline-subject">${item.courseName}</h3>
-                ${statusBadge}
+          <div class="today-class-card" onclick="window.openCourseMaterialsModal('${item.id}', '${item.courseName.replace(/'/g, "\\'")}', '${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName).replace(/'/g, "\\'")}', '${item.roomCode}')">
+            <div class="today-card-left">
+              <div class="today-status-circle ${circleClass}">
+                <i data-lucide="${iconName}" style="width: 16px; height: 16px;"></i>
               </div>
-              <div class="timeline-lecturer">
-                <i data-lucide="user-round" style="width: 13px; height: 13px;"></i>
-                <span>${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}</span>
-              </div>
-              <div class="timeline-card-bottom">
-                <span class="room-badge" title="${item.roomName ? item.roomName : item.roomCode}">
-                  <i data-lucide="map-pin" style="width: 11px; height: 11px;"></i>
-                  ${item.roomCode}${cleanRoomName ? ` · ${cleanRoomName}` : ''}
-                </span>
-                <button class="btn-course-material" onclick="window.openCourseMaterialsModal('${item.id}', '${item.courseName.replace(/'/g, "\\'")}', '${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName).replace(/'/g, "\\'")}', '${item.roomCode}')">
-                  <i data-lucide="folder" style="width: 12px; height: 12px;"></i> Materi
-                </button>
+              <div class="today-card-info">
+                <span class="today-card-time">${item.startTime.replace(':', '.')} – ${item.endTime.replace(':', '.')}</span>
+                <span class="today-card-title">${item.courseName}</span>
               </div>
             </div>
+            <i data-lucide="chevron-right" class="today-card-chevron"></i>
           </div>
         `;
       })
       .join('');
   }
 
+  function renderWeeklyDaySelector() {
+    const now = timeProvider.now();
+    const currentDayOfWeek = now.getDay(); // 0: Minggu, 1: Senin, ..., 5: Jumat
+    
+    // Calculate date of Monday of this week
+    const mondayDate = new Date(now);
+    const diffToMonday = (currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek);
+    mondayDate.setDate(now.getDate() + diffToMonday);
+
+    // Update numbers 1..5 for Sen, Sel, Rab, Kam, Jum
+    for (let dayId = 1; dayId <= 5; dayId++) {
+      const d = new Date(mondayDate);
+      d.setDate(mondayDate.getDate() + (dayId - 1));
+      const numEl = document.getElementById(`day-num-${dayId}`);
+      if (numEl) {
+        numEl.innerText = d.getDate();
+      }
+    }
+
+    // Update active day class
+    document.querySelectorAll('.day-btn-item').forEach((btn) => {
+      const dId = parseInt(btn.getAttribute('data-day'), 10);
+      if (btn.classList) {
+        if (dId === state.selectedWeeklyDayId) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      }
+    });
+  }
+
   function renderWeeklySchedule() {
     const listContainer = document.getElementById('weekly-cards-container');
     if (!listContainer || !window.TRJT_SCHEDULE) return;
+
+    renderWeeklyDaySelector();
 
     const dayClasses = window.TRJT_SCHEDULE.classes
       .filter((c) => c.dayOfWeek === state.selectedWeeklyDayId)
@@ -483,10 +479,10 @@
 
     if (dayClasses.length === 0) {
       listContainer.innerHTML = `
-        <div class="empty-state-card" style="padding: 24px 16px;">
-          <i data-lucide="sun" style="width: 28px; height: 28px; color: var(--color-primary-blue);"></i>
-          <p style="font-weight: 700; font-size: 14px; color: var(--color-primary-text);">Tidak ada jadwal kuliah</p>
-          <p style="font-size: 12px; color: var(--color-secondary-text);">Hari ini libur / tidak ada agenda perkuliahan.</p>
+        <div class="hero-glass-card" style="padding: 24px; text-align: center; align-items: center; gap: 8px;">
+          <i data-lucide="sun" style="width: 32px; height: 32px; color: var(--color-primary-blue);"></i>
+          <p style="font-weight: 700; font-size: 15px; color: var(--color-primary-navy);">Tidak ada jadwal kuliah</p>
+          <p style="font-size: 13px; color: var(--color-text-secondary);">Hari ini libur / tidak ada agenda perkuliahan.</p>
         </div>
       `;
       return;
@@ -494,29 +490,35 @@
 
     listContainer.innerHTML = dayClasses
       .map((item) => {
+        const cleanRoomName = item.roomName 
+          ? item.roomName.split('(')[0].replace('Gedung III Teknik Elektro Lt. 2', 'Gd. III Teknik Elektro Lt. 2').trim()
+          : 'Gd. III Teknik Elektro';
+
         return `
-          <div class="schedule-card">
-            <div class="schedule-card-top">
-              <span class="schedule-time-label">
-                <i data-lucide="clock" style="width: 13px; height: 13px;"></i>
+          <div class="schedule-glass-card">
+            <div class="schedule-meta-bar">
+              <span class="meta-chip-item">
+                <i data-lucide="clock"></i>
                 ${item.startTime.replace(':', '.')} – ${item.endTime.replace(':', '.')}
               </span>
-              <span class="room-badge">
-                <i data-lucide="map-pin" style="width: 11px; height: 11px;"></i>
+              <span class="meta-chip-item">
+                <i data-lucide="door-closed"></i>
                 ${item.roomCode}
+              </span>
+              <span class="meta-chip-item">
+                <i data-lucide="landmark"></i>
+                ${cleanRoomName}
               </span>
             </div>
             
-            <h3 class="schedule-course-title" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${item.courseName}</h3>
+            <h3 class="schedule-subject-heading">${item.courseName}</h3>
             
-            <div class="schedule-lecturer-name">
-              <i data-lucide="user-round" style="width: 13px; height: 13px;"></i>
-              <span>${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}</span>
-            </div>
-
-            <div class="schedule-card-bottom" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px;">
-              <span style="font-size: 11px; color: #475569; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: calc(100% - 80px);">${item.roomName ? item.roomName.replace('Gedung III Teknik Elektro Lt. 2', 'Gd. III Teknik Elektro Lt. 2') : 'Gedung III Teknik Elektro Lt. 2'}</span>
-              <button class="btn-course-material" onclick="window.openCourseMaterialsModal('${item.id}', '${item.courseName.replace(/'/g, "\\'")}', '${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName).replace(/'/g, "\\'")}', '${item.roomCode}')">
+            <div class="schedule-lecturer-row">
+              <div class="schedule-lecturer-info">
+                <i data-lucide="user"></i>
+                <span>${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}</span>
+              </div>
+              <button class="btn-schedule-mat" onclick="window.openCourseMaterialsModal('${item.id}', '${item.courseName.replace(/'/g, "\\'")}', '${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName).replace(/'/g, "\\'")}', '${item.roomCode}')">
                 <i data-lucide="folder" style="width: 12px; height: 12px;"></i> Materi
               </button>
             </div>
@@ -528,49 +530,48 @@
 
   function renderNotifications() {
     const container = document.getElementById('notif-list-container');
-    const badgeEl = document.getElementById('notif-unread-count-badge');
     const headerDot = document.getElementById('header-unread-dot');
     const navDot = document.getElementById('nav-notif-dot');
-    const markAllReadBtn = document.getElementById('btn-mark-all-read');
-    const clearAllBtn = document.getElementById('btn-clear-all-notifs');
     if (!container) return;
 
     const unreadCount = state.notifications.filter((n) => !n.read).length;
-    if (badgeEl) {
-      if (unreadCount > 0) {
-        badgeEl.innerText = `${unreadCount} belum dibaca`;
-        badgeEl.style.display = 'inline-block';
-      } else {
-        badgeEl.style.display = 'none';
-      }
+    if (headerDot) headerDot.style.display = unreadCount > 0 ? 'block' : 'none';
+    if (navDot) navDot.style.display = unreadCount > 0 ? 'block' : 'none';
+
+    // Update filter pills active class
+    const filterAllBtn = document.getElementById('filter-notif-all');
+    const filterUnreadBtn = document.getElementById('filter-notif-unread');
+    if (filterAllBtn && filterAllBtn.classList) {
+      if (state.notifFilter === 'all') filterAllBtn.classList.add('active');
+      else filterAllBtn.classList.remove('active');
     }
-    if (markAllReadBtn) {
-      markAllReadBtn.style.display = (unreadCount > 0) ? 'inline-flex' : 'none';
-    }
-    if (clearAllBtn) {
-      clearAllBtn.style.display = (state.notifications.length > 0) ? 'inline-flex' : 'none';
-    }
-    if (headerDot) {
-      headerDot.style.display = unreadCount > 0 ? 'block' : 'none';
-    }
-    if (navDot) {
-      navDot.style.display = unreadCount > 0 ? 'block' : 'none';
+    if (filterUnreadBtn && filterUnreadBtn.classList) {
+      if (state.notifFilter === 'unread') filterUnreadBtn.classList.add('active');
+      else filterUnreadBtn.classList.remove('active');
     }
 
-    if (state.notifications.length === 0) {
+    const filteredNotifs = state.notifFilter === 'unread'
+      ? state.notifications.filter((n) => !n.read)
+      : state.notifications;
+
+    if (filteredNotifs.length === 0) {
       container.innerHTML = `
-        <div class="empty-state-card" style="padding: 32px 16px;">
-          <div class="empty-icon-circle" style="width: 44px; height: 44px;">
-            <i data-lucide="bell-off" style="width: 22px; height: 22px; color: var(--color-muted-text);"></i>
+        <div class="hero-glass-card" style="padding: 32px 20px; text-align: center; align-items: center; gap: 8px;">
+          <div class="hero-clock-circle" style="width: 44px; height: 44px;">
+            <i data-lucide="bell-off" style="width: 22px; height: 22px; color: var(--color-text-muted);"></i>
           </div>
-          <p style="font-weight: 600; font-size: 14px; color: var(--color-primary-text); margin-top: 8px;">Belum ada notifikasi</p>
-          <p style="font-size: 12px; color: var(--color-secondary-text); margin-top: 2px;">Pemberitahuan pengingat kelas dan informasi perkuliahan TRJT 3A akan tampil di sini.</p>
+          <p style="font-weight: 700; font-size: 15px; color: var(--color-primary-navy); margin-top: 6px;">
+            ${state.notifFilter === 'unread' ? 'Semua notifikasi telah dibaca' : 'Belum ada notifikasi'}
+          </p>
+          <p style="font-size: 12.5px; color: var(--color-text-secondary);">
+            ${state.notifFilter === 'unread' ? 'Bagus! Kotak masuk Anda bersih.' : 'Pemberitahuan pengingat kelas dan informasi perkuliahan TRJT 3A akan tampil di sini.'}
+          </p>
         </div>
       `;
       return;
     }
 
-    container.innerHTML = state.notifications
+    container.innerHTML = filteredNotifs
       .map((item, index) => {
         const isH10 = item.type === 'h10';
         const isCancel = item.type === 'cancel';
@@ -578,55 +579,47 @@
         const isMat = item.type === 'material';
         const isTest = item.type === 'test';
 
-        let typeClass = 'type-h10';
-        let iconName = 'bell';
-        let categoryLabel = 'Pengingat kelas';
+        let circleColor = 'blue';
+        let iconName = 'clock';
+        let categoryTitle = 'Pengingat 10 menit';
 
         if (isTest) {
-          typeClass = 'type-h10';
+          circleColor = 'blue';
           iconName = 'bell-ring';
-          categoryLabel = 'Uji notifikasi';
+          categoryTitle = 'Uji notifikasi';
         } else if (isCancel) {
-          typeClass = 'type-cancel';
+          circleColor = 'red';
           iconName = 'alert-triangle';
-          categoryLabel = 'Dibatalkan';
+          categoryTitle = 'Dibatalkan';
         } else if (isRoom) {
-          typeClass = 'type-info';
-          iconName = 'map-pin';
-          categoryLabel = 'Perubahan ruangan';
+          circleColor = 'green';
+          iconName = 'calendar';
+          categoryTitle = 'Perubahan jadwal';
         } else if (isMat) {
-          typeClass = 'type-info';
+          circleColor = 'blue';
           iconName = 'folder';
-          categoryLabel = 'Materi baru';
+          categoryTitle = 'Materi baru';
+        } else if (!isH10) {
+          circleColor = 'orange';
+          iconName = 'megaphone';
+          categoryTitle = item.title || 'Pengumuman penting TRJT 3A';
         }
 
-        const title = item.subject || item.title || 'Pengingat perkuliahan';
-        const desc = item.desc || (isH10 ? 'Dimulai 10 menit lagi' : (isTest ? 'Perangkat ini siap menerima pengingat kelas.' : ''));
-        const info = item.meta ? item.meta : (item.lecturer ? item.lecturer : '');
+        const desc = item.desc || (isH10 ? `${item.subject || 'Perkuliahan'} dimulai pukul ${item.meta ? item.meta.split('·')[0].trim() : 'segera'}.` : (isTest ? 'Perangkat ini siap menerima pengingat kelas.' : 'Informasi terbaru kelas tersedia.'));
+        const timeFooter = item.time ? (item.time.includes('•') ? item.time : (item.time.includes('Kemarin') ? item.time : `Hari ini • ${item.time}`)) : 'Baru saja';
 
         return `
-          <div class="notif-card ${item.read ? 'read' : 'unread'}" data-index="${index}">
-            <div class="notif-circle-icon ${typeClass}">
-              <i data-lucide="${iconName}" style="width: 18px; height: 18px;"></i>
+          <div class="notif-card ${item.read ? 'read' : 'unread'}" data-id="${item.id || index}">
+            <div class="notif-cat-circle ${circleColor}">
+              <i data-lucide="${iconName}" style="width: 20px; height: 20px;"></i>
             </div>
-            <div class="notif-body">
-              <div class="notif-top-row">
-                <span class="notif-badge-tag ${typeClass}">
-                  ${categoryLabel}
-                </span>
-                <div style="display: flex; align-items: center; gap: 6px;">
-                  <span class="notif-time-text">
-                    ${!item.read ? '<span class="unread-indicator-dot"></span>' : ''}
-                    ${item.time}
-                  </span>
-                  <button class="btn-delete-single-notif" onclick="window.deleteSingleNotification('${item.id || index}', event)" title="Hapus pesan ini" aria-label="Hapus notifikasi">
-                    <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i>
-                  </button>
-                </div>
+            <div class="notif-card-body">
+              <div class="notif-card-title-row">
+                <span class="notif-title-text">${categoryTitle}</span>
+                ${!item.read ? '<span class="unread-blue-dot"></span>' : ''}
               </div>
-              <h3 class="notif-course-title">${title}</h3>
-              ${desc ? `<div class="notif-desc-text">${desc}</div>` : ''}
-              ${info ? `<div class="notif-info-line">${info}</div>` : ''}
+              <p class="notif-desc-content">${desc}</p>
+              <span class="notif-time-footer">${timeFooter}</span>
             </div>
           </div>
         `;
@@ -634,17 +627,16 @@
       .join('');
 
     container.querySelectorAll('.notif-card').forEach((card) => {
-      card.addEventListener('click', (e) => {
-        if (e.target.closest('.btn-delete-single-notif')) return;
-        const idx = card.getAttribute('data-index');
-        if (idx !== null && state.notifications[idx]) {
-          const notif = state.notifications[idx];
+      card.addEventListener('click', () => {
+        const id = card.getAttribute('data-id');
+        const notif = state.notifications.find((n, idx) => n.id === id || String(idx) === id);
+        if (notif) {
           notif.read = true;
           saveNotificationsState();
           renderNotifications();
           if (window.lucide) window.lucide.createIcons();
 
-          // Quick open course materials if course matches
+          // Open related materials modal if course match
           if (notif.subject && window.TRJT_SCHEDULE) {
             const matchedClass = window.TRJT_SCHEDULE.classes.find(
               (c) => c.courseName.toLowerCase() === notif.subject.toLowerCase()
@@ -662,25 +654,6 @@
       });
     });
   }
-
-  window.deleteSingleNotification = function (idOrIndex, e) {
-    if (e) e.stopPropagation();
-    state.notifications = state.notifications.filter((n, idx) => n.id !== idOrIndex && String(idx) !== String(idOrIndex));
-    saveNotificationsState();
-    renderNotifications();
-    showToast('🗑️ Pesan notifikasi dihapus', 'info');
-    if (window.lucide) window.lucide.createIcons();
-  };
-
-  window.clearAllNotifications = function () {
-    if (state.notifications.length === 0) return;
-    if (!confirm('Apakah Anda yakin ingin menghapus semua riwayat notifikasi?')) return;
-    state.notifications = [];
-    saveNotificationsState();
-    renderNotifications();
-    showToast('🗑️ Semua riwayat notifikasi telah dihapus', 'info');
-    if (window.lucide) window.lucide.createIcons();
-  };
 
   async function processH10Reminder(scheduleData) {
     if (!scheduleData) return;
@@ -723,6 +696,7 @@
   async function triggerH10Notification(courseName, roomCode, startTime, lecturerName, courseId, reminderKey) {
     const formattedLecturer = getLecturerDisplay(lecturerName, null, courseName);
     const nowObj = timeProvider ? timeProvider.now() : new Date();
+    const dayName = daysMap[nowObj.getDay()];
     const timeFormatted = nowObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.');
 
     const notifId = reminderKey ? `notif-h10-${reminderKey.replace(/\|/g, '_')}` : `notif-${Date.now()}`;
@@ -733,11 +707,12 @@
       const newNotif = {
         id: notifId,
         type: 'h10',
-        title: 'Kelas 10 Menit Lagi',
+        title: 'Pengingat 10 menit',
         subject: courseName,
+        desc: `${courseName} dimulai pukul ${startTime}.`,
         lecturer: formattedLecturer,
         meta: `${(startTime || '').replace(':', '.')} · ${roomCode || ''}`,
-        time: timeFormatted,
+        time: `${dayName} • ${(startTime || '').replace(':', '.')}`,
         read: false
       };
       state.notifications.unshift(newNotif);
@@ -859,107 +834,49 @@
 
   // --- Dynamic Honest Settings & Diagnostics Renderer ---
   function renderSettingsUI() {
-    if (!window.TRJT_FIREBASE) return;
-    const notifStatus = window.TRJT_FIREBASE.getNotificationStatus();
-
-    // 1. Honest Notification Status Badge & Text (User-Friendly)
     const badgeEl = document.getElementById('badge-notif-status');
-    const descEl = document.getElementById('desc-notif-status');
-    if (badgeEl) {
-      if (notifStatus.code === 'active') {
-        badgeEl.className = 'soft-badge-success';
-        badgeEl.innerText = 'Aktif & Siap';
-      } else {
-        badgeEl.className = 'soft-badge-warning';
-        badgeEl.innerHTML = '<span style="cursor: pointer;">Coba perbaiki</span>';
-      }
-    }
-    if (descEl) {
-      descEl.innerText = (notifStatus.code === 'active')
-        ? 'Perangkat terhubung dan siap menerima pengingat perkuliahan.'
-        : 'Aplikasi belum dapat menerima pengingat di perangkat ini.';
-    }
-
-    // 2. Switches synchronization
-    const switchH10 = document.getElementById('switch-h10');
-    if (switchH10) {
-      const isBlocked = notifStatus.code === 'blocked' || (('Notification' in window) && Notification.permission === 'denied');
-      if (isBlocked) {
-        switchH10.checked = false;
-        switchH10.disabled = true;
-      } else {
-        switchH10.checked = state.settings.h10Alert;
-        switchH10.disabled = false;
-      }
-    }
-
     const switchSound = document.getElementById('switch-sound');
-    if (switchSound) {
-      switchSound.checked = localStorage.getItem('trjt_sound_enabled') !== 'false';
-    }
+    const switchVibration = document.getElementById('switch-vibration');
+    const switchH10 = document.getElementById('switch-h10');
 
-    // 3. System Status Badges
-    const fcmBadge = document.getElementById('badge-fcm-status');
-    if (fcmBadge) {
-      if (notifStatus.code === 'active') {
-        fcmBadge.className = 'soft-badge-success';
-        fcmBadge.innerText = 'Aktif & Siap';
-      } else if (notifStatus.code === 'blocked') {
-        fcmBadge.className = 'soft-badge-danger';
-        fcmBadge.innerText = 'Izin Ditolak';
+    // 1. Permission status badge
+    if (badgeEl) {
+      if ('Notification' in window) {
+        if (Notification.permission === 'granted') {
+          badgeEl.className = 'settings-value-badge';
+          badgeEl.innerText = 'Diizinkan';
+        } else if (Notification.permission === 'denied') {
+          badgeEl.className = 'settings-value-badge';
+          badgeEl.style.background = 'var(--color-danger-bg)';
+          badgeEl.style.borderColor = 'var(--color-danger-border)';
+          badgeEl.style.color = 'var(--color-danger-text)';
+          badgeEl.innerText = 'Ditolak';
+        } else {
+          badgeEl.className = 'settings-value-badge';
+          badgeEl.style.background = 'var(--color-very-light-blue)';
+          badgeEl.style.borderColor = '#BFDBFE';
+          badgeEl.style.color = 'var(--color-primary-blue)';
+          badgeEl.innerText = 'Belum diminta';
+        }
       } else {
-        fcmBadge.className = 'soft-badge-neutral';
-        fcmBadge.innerText = 'Siap Digunakan';
+        badgeEl.innerText = 'Tidak didukung';
       }
     }
 
-    const swBadge = document.getElementById('badge-sw-status');
-    if (swBadge) {
-      if ('serviceWorker' in navigator) {
-        swBadge.className = 'soft-badge-success';
-        swBadge.innerText = 'Aktif';
-      } else {
-        swBadge.className = 'soft-badge-neutral';
-        swBadge.innerText = 'Tidak Didukung';
-      }
-    }
+    // 2. Switches
+    if (switchSound) switchSound.checked = state.settings.soundEnabled;
+    if (switchVibration) switchVibration.checked = state.settings.vibrationEnabled;
+    if (switchH10) switchH10.checked = state.settings.h10Alert;
 
-    // iOS Safari PWA helper tip
-    const iosTip = document.getElementById('ios-pwa-tip');
-    if (iosTip) {
-      const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-      iosTip.style.display = (isIos && !isStandalone) ? 'flex' : 'none';
-    }
-
-    // 4. Diagnostics Table
-    const diagPerm = document.getElementById('diag-permission');
-    const diagSw = document.getElementById('diag-sw');
-    const diagToken = document.getElementById('diag-token');
-    const diagPlatform = document.getElementById('diag-platform');
-    const diagLast = document.getElementById('diag-last-notif');
-
-    if (diagPerm) {
-      const perm = notifStatus.permission;
-      diagPerm.innerText = perm === 'granted' ? 'Disetujui (Granted)' : (perm === 'denied' ? 'Diblokir (Denied)' : 'Belum Ditentukan (Default)');
-      diagPerm.style.color = perm === 'granted' ? '#15803D' : (perm === 'denied' ? '#DC2626' : '#64748B');
-    }
-    if (diagSw) {
-      diagSw.innerText = 'serviceWorker' in navigator ? 'Terdaftar (Active Scope)' : 'Tidak Didukung';
-    }
-    if (diagToken) {
-      diagToken.innerText = notifStatus.tokenMasked || 'Belum Dibuat';
-    }
-    if (diagPlatform) {
-      diagPlatform.innerText = notifStatus.platform || 'Web';
-    }
-    if (diagLast) {
-      if (notifStatus.lastNotification) {
-        const d = new Date(notifStatus.lastNotification);
-        diagLast.innerText = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' (' + d.toLocaleDateString('id-ID') + ')';
-      } else {
-        diagLast.innerText = 'Belum Ada';
-      }
+    // Diagnostics if present
+    if (window.TRJT_FIREBASE) {
+      const notifStatus = window.TRJT_FIREBASE.getNotificationStatus();
+      const diagPerm = document.getElementById('diag-permission');
+      const diagSw = document.getElementById('diag-sw');
+      const diagToken = document.getElementById('diag-token');
+      if (diagPerm) diagPerm.innerText = notifStatus.permission;
+      if (diagSw) diagSw.innerText = notifStatus.swActive ? 'Aktif' : 'Tidak aktif';
+      if (diagToken) diagToken.innerText = notifStatus.tokenMasked || '-';
     }
   }
 
@@ -967,10 +884,12 @@
     state.currentTab = tabId;
 
     document.querySelectorAll('.nav-item').forEach((btn) => {
-      if (btn.getAttribute('data-tab') === tabId) {
-        btn.classList.add('active');
+      const isCurrent = btn.getAttribute('data-tab') === tabId;
+      btn.classList.toggle('active', isCurrent);
+      if (isCurrent) {
+        btn.setAttribute('aria-current', 'page');
       } else {
-        btn.classList.remove('active');
+        btn.removeAttribute('aria-current');
       }
     });
 
@@ -986,11 +905,6 @@
     const headerBell = document.getElementById('btn-header-bell');
     if (headerBell) {
       headerBell.style.display = (tabId === 'notifikasi') ? 'none' : 'inline-flex';
-    }
-
-    const greetingWrap = document.querySelector('.header-greeting-wrap');
-    if (greetingWrap) {
-      greetingWrap.style.display = (tabId === 'beranda') ? 'flex' : 'none';
     }
 
     if (tabId === 'jadwal') {
@@ -1014,16 +928,34 @@
       });
     });
 
-    // Weekly Segmented Control
-    document.querySelectorAll('.segmented-btn').forEach((btn) => {
+    // Weekly Day Selector Capsule Buttons (Sen, Sel, Rab, Kam, Jum)
+    document.querySelectorAll('.day-btn-item').forEach((btn) => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.segmented-btn').forEach((b) => b.classList.remove('active'));
+        document.querySelectorAll('.day-btn-item').forEach((b) => b.classList.remove('active'));
         btn.classList.add('active');
         state.selectedWeeklyDayId = parseInt(btn.getAttribute('data-day'), 10);
         renderWeeklySchedule();
         if (window.lucide) window.lucide.createIcons();
       });
     });
+
+    // Notification Filter Pills
+    const filterAllBtn = document.getElementById('filter-notif-all');
+    const filterUnreadBtn = document.getElementById('filter-notif-unread');
+    if (filterAllBtn) {
+      filterAllBtn.addEventListener('click', () => {
+        state.notifFilter = 'all';
+        renderNotifications();
+        if (window.lucide) window.lucide.createIcons();
+      });
+    }
+    if (filterUnreadBtn) {
+      filterUnreadBtn.addEventListener('click', () => {
+        state.notifFilter = 'unread';
+        renderNotifications();
+        if (window.lucide) window.lucide.createIcons();
+      });
+    }
 
     // Mark all notifications read
     const markAllReadBtn = document.getElementById('btn-mark-all-read');
@@ -1037,87 +969,60 @@
       });
     }
 
-    // Clear all notifications
-    const clearAllNotifsBtn = document.getElementById('btn-clear-all-notifs');
-    if (clearAllNotifsBtn) {
-      clearAllNotifsBtn.addEventListener('click', () => {
-        window.clearAllNotifications();
-      });
-    }
-
-    // Row Notification Status click to request/fix
+    // Row Notification Status click to request/fix permission
     const rowNotifStatus = document.getElementById('row-notif-status');
     if (rowNotifStatus) {
       rowNotifStatus.addEventListener('click', async () => {
-        if (window.TRJT_FIREBASE) {
-          const status = window.TRJT_FIREBASE.getNotificationStatus();
-          if (status.code !== 'active') {
-            try {
-              await window.TRJT_FIREBASE.requestNotificationPermission(true);
-              showToast('✅ Notifikasi berhasil diaktifkan!', 'success');
-              renderSettingsUI();
-            } catch (err) {
-              showToast('⚠️ ' + err.message, 'error');
+        try {
+          if ('Notification' in window) {
+            const perm = await Notification.requestPermission();
+            if (perm === 'granted') {
+              showToast('✅ Izin notifikasi berhasil diberikan!', 'success');
+            } else if (perm === 'denied') {
+              showToast('⚠️ Izin notifikasi diblokir pada browser.', 'error');
             }
           }
+          if (window.TRJT_FIREBASE && window.TRJT_FIREBASE.requestNotificationPermission) {
+            await window.TRJT_FIREBASE.requestNotificationPermission(true).catch(() => {});
+          }
+          renderSettingsUI();
+        } catch (err) {
+          showToast('⚠️ ' + err.message, 'error');
         }
       });
     }
 
-    // Toggle: Pengingat H-10 Menit
-    const switchH10 = document.getElementById('switch-h10');
-    if (switchH10) {
-      switchH10.addEventListener('change', async (e) => {
-        const isChecked = e.target.checked;
-        state.settings.h10Alert = isChecked;
-        localStorage.setItem('trjt_h10_enabled', isChecked ? 'true' : 'false');
-
-        if (isChecked) {
-          try {
-            if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
-              await Notification.requestPermission();
-            }
-            if (window.TRJT_FIREBASE) {
-              await window.TRJT_FIREBASE.updateDeviceSetting('reminderEnabled', true);
-              if (window.TRJT_FIREBASE.requestNotificationPermission) {
-                window.TRJT_FIREBASE.requestNotificationPermission(true).catch(() => {});
-              }
-            }
-            showToast('✅ Pengingat H-10 berhasil diaktifkan', 'success');
-          } catch (err) {
-            console.warn('H-10 permission request note:', err);
-            showToast('ℹ️ Pengingat H-10 diaktifkan', 'info');
-          }
-        } else {
-          if (window.TRJT_FIREBASE) {
-            await window.TRJT_FIREBASE.updateDeviceSetting('reminderEnabled', false);
-          }
-          showToast('ℹ️ Pengingat H-10 dinonaktifkan', 'info');
-        }
-
-        renderSettingsUI();
-        if (window.lucide) window.lucide.createIcons();
-      });
-    }
-
-    // Toggle: Suara & Getar
+    // Toggle: Suara Alarm
     const switchSound = document.getElementById('switch-sound');
     if (switchSound) {
       switchSound.addEventListener('change', (e) => {
         const isChecked = e.target.checked;
         state.settings.soundEnabled = isChecked;
-        state.settings.vibrationEnabled = isChecked;
         localStorage.setItem('trjt_sound_enabled', isChecked ? 'true' : 'false');
-        localStorage.setItem('trjt_vibration_enabled', isChecked ? 'true' : 'false');
-
         if (window.TRJT_FIREBASE) {
           window.TRJT_FIREBASE.updateDeviceSetting('soundEnabled', isChecked);
-          window.TRJT_FIREBASE.updateDeviceSetting('vibrationEnabled', isChecked);
-          if (isChecked) {
+          if (isChecked && typeof window.TRJT_FIREBASE.playNotificationChime === 'function') {
             window.TRJT_FIREBASE.playNotificationChime();
           }
         }
-        showToast(isChecked ? '🔊 Efek suara & getar diaktifkan' : '🔇 Efek suara & getar dimatikan', 'info');
+        showToast(isChecked ? '🔊 Suara alarm diaktifkan' : '🔇 Suara alarm dimatikan', 'info');
+      });
+    }
+
+    // Toggle: Getar
+    const switchVibration = document.getElementById('switch-vibration');
+    if (switchVibration) {
+      switchVibration.addEventListener('change', (e) => {
+        const isChecked = e.target.checked;
+        state.settings.vibrationEnabled = isChecked;
+        localStorage.setItem('trjt_vibration_enabled', isChecked ? 'true' : 'false');
+        if (window.TRJT_FIREBASE) {
+          window.TRJT_FIREBASE.updateDeviceSetting('vibrationEnabled', isChecked);
+        }
+        if (isChecked && 'vibrate' in navigator) {
+          try { navigator.vibrate(200); } catch (err) {}
+        }
+        showToast(isChecked ? '📳 Getar diaktifkan' : '📴 Getar dimatikan', 'info');
       });
     }
 
@@ -1156,78 +1061,13 @@
       });
     }
 
-    // Diagnostics Toggle
-    const btnToggleDiag = document.getElementById('btn-toggle-diagnostics');
-    const panelDiag = document.getElementById('panel-diagnostics');
-    if (btnToggleDiag && panelDiag) {
-      btnToggleDiag.addEventListener('click', () => {
-        const isHidden = panelDiag.style.display === 'none' || panelDiag.style.display === '';
-        panelDiag.style.display = isHidden ? 'flex' : 'none';
-        renderSettingsUI();
-        if (window.lucide) window.lucide.createIcons();
+    // Row About App
+    const rowAbout = document.getElementById('row-about-app');
+    if (rowAbout) {
+      rowAbout.addEventListener('click', () => {
+        showToast('ℹ️ TRJT 3A Reminder v4.0 (Semester 5 TA 2026/2027)', 'info');
       });
     }
-
-    // Listen to Push Notification event (Foreground & Test Dispatch)
-    window.addEventListener('trjt:push-notification', (event) => {
-      const detail = event.detail || {};
-      const isTest = detail.type === 'test' || (detail.title && detail.title.toLowerCase().includes('uji'));
-      const timeFormatted = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.');
-
-      if (isTest) {
-        // Find existing test notif to merge
-        const existingTestIdx = state.notifications.findIndex((n) => n.type === 'test' || (n.title && n.title.toLowerCase().includes('uji')));
-        if (existingTestIdx !== -1) {
-          const prev = state.notifications[existingTestIdx];
-          const count = (prev.testCount || 1) + 1;
-          prev.testCount = count;
-          prev.subject = 'Notifikasi berhasil diterima';
-          prev.desc = 'Perangkat ini siap menerima pengingat kelas.';
-          prev.meta = `Uji notifikasi TRJT 3A · ${count} kali`;
-          prev.time = timeFormatted;
-          prev.read = false;
-          state.notifications.splice(existingTestIdx, 1);
-          state.notifications.unshift(prev);
-        } else {
-          state.notifications.unshift({
-            id: `notif-test-${Date.now()}`,
-            type: 'test',
-            testCount: 1,
-            title: 'Uji notifikasi',
-            subject: 'Notifikasi berhasil diterima',
-            desc: 'Perangkat ini siap menerima pengingat kelas.',
-            meta: 'Uji notifikasi TRJT 3A · 1 kali',
-            time: timeFormatted,
-            read: false
-          });
-        }
-      } else {
-        const newNotif = {
-          id: `notif-${Date.now()}`,
-          type: detail.type || 'h10',
-          title: detail.title || 'Pengingat kelas',
-          subject: detail.courseName || detail.title || 'TRJT 3A Notification',
-          desc: detail.body || (detail.type === 'h10' ? 'Dimulai 10 menit lagi' : ''),
-          lecturer: detail.lecturer || '',
-          meta: detail.startTime && detail.room ? `${detail.startTime.replace(':', '.')} · ${detail.room}` : (detail.room || ''),
-          time: timeFormatted,
-          read: false
-        };
-        state.notifications.unshift(newNotif);
-      }
-
-      saveNotificationsState();
-      renderNotifications();
-      renderSettingsUI();
-      if (window.lucide) window.lucide.createIcons();
-    });
-
-    // Realtime Material Updates
-    window.addEventListener('trjt:materials-updated', () => {
-      if (activeMaterialCourse) {
-        renderCourseMaterialsList();
-      }
-    });
 
     // Material Modal Close
     const btnCloseMat = document.getElementById('btn-close-materials-modal');
@@ -1240,10 +1080,10 @@
       });
     }
 
-    // Material Category Pills
-    document.querySelectorAll('#modal-course-materials .filter-pill').forEach((pill) => {
+    // Material Category Filter Pills
+    document.querySelectorAll('#modal-course-materials .filter-glass-pill').forEach((pill) => {
       pill.addEventListener('click', () => {
-        document.querySelectorAll('#modal-course-materials .filter-pill').forEach((p) => p.classList.remove('active'));
+        document.querySelectorAll('#modal-course-materials .filter-glass-pill').forEach((p) => p.classList.remove('active'));
         pill.classList.add('active');
         activeMaterialFilter = pill.getAttribute('data-filter') || 'all';
         renderCourseMaterialsList();
@@ -1341,7 +1181,6 @@
         } finally {
           if (submitBtn) {
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i data-lucide="cloud-upload" style="width: 18px; height: 18px;"></i> <span>Simpan ke Google Drive</span>';
           }
           if (statusText) statusText.style.display = 'none';
           if (window.lucide) window.lucide.createIcons();
@@ -1370,7 +1209,6 @@
     if (metaEl) metaEl.innerText = `${lecturer || 'Dosen Pengampu'} · Ruang ${room || '-'}`;
     if (searchInput) searchInput.value = '';
 
-    // Update Drive button link to open this specific course's Google Drive folder
     const btnDriveFolder = document.getElementById('btn-open-course-drive-folder');
     if (btnDriveFolder && window.TRJT_DRIVE) {
       const folderInfo = await window.TRJT_DRIVE.getFolderForCourse(courseName || scheduleId);
@@ -1381,16 +1219,14 @@
       }
     }
 
-    document.querySelectorAll('#modal-course-materials .filter-pill').forEach((pill) => {
+    document.querySelectorAll('#modal-course-materials .filter-glass-pill').forEach((pill) => {
       if (pill.getAttribute('data-filter') === 'all') pill.classList.add('active');
       else pill.classList.remove('active');
     });
 
     await renderCourseMaterialsList();
 
-    if (modal) {
-      modal.classList.add('is-open');
-    }
+    if (modal) modal.classList.add('is-open');
     if (window.lucide) window.lucide.createIcons();
   }
 
@@ -1449,56 +1285,37 @@
       const icon = isPhoto ? 'image' : (m.fileExtension === 'pdf' ? 'file-text' : (['doc', 'docx'].includes(m.fileExtension) ? 'file-edit' : (['xls', 'xlsx'].includes(m.fileExtension) ? 'file-spreadsheet' : 'file')));
       
       const thumbHtml = m.thumbnailUrl 
-        ? `<img src="${m.thumbnailUrl}" class="material-thumb-img" alt="${m.fileName}">`
-        : `<i data-lucide="${icon}" style="width: 24px; height: 24px; color: var(--color-primary-blue);"></i>`;
+        ? `<img src="${m.thumbnailUrl}" style="width: 100%; height: 100%; object-fit: cover;" alt="${m.fileName}">`
+        : `<i data-lucide="${icon}" style="width: 22px; height: 22px; color: var(--color-primary-blue);"></i>`;
 
       const dateStr = m.uploadedAt 
         ? (typeof m.uploadedAt === 'string' ? new Date(m.uploadedAt).toLocaleDateString('id-ID') : 'Baru saja')
         : 'Baru saja';
 
       return `
-        <div class="material-card">
-          <div class="material-thumb-box">
+        <div class="today-class-card" style="padding: 12px 14px;">
+          <div style="width: 42px; height: 42px; border-radius: 10px; background: var(--color-very-light-blue); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
             ${thumbHtml}
           </div>
-          <div class="material-info">
-            <h4 class="material-filename">${m.fileName}</h4>
-            <div class="material-meta-row">
-              <span><i data-lucide="hard-drive" style="width: 11px; height: 11px; vertical-align: middle;"></i> ${m.fileSize || '1 MB'}</span>
+          <div style="flex: 1; min-width: 0;">
+            <h4 style="font-size: 13.5px; font-weight: 700; color: var(--color-primary-navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${m.fileName}</h4>
+            <div style="display: flex; gap: 6px; font-size: 11px; color: var(--color-text-secondary); margin-top: 2px;">
+              <span>${m.fileSize || '1 MB'}</span>
               <span>·</span>
-              <span><i data-lucide="calendar" style="width: 11px; height: 11px; vertical-align: middle;"></i> ${dateStr}</span>
+              <span>${dateStr}</span>
               <span>·</span>
-              <span style="color: var(--color-deep-blue); font-weight: 600;">${m.uploadedBy || 'Mahasiswa'}</span>
-            </div>
-            ${m.description ? `<div class="material-note">${m.description}</div>` : ''}
-            <div class="material-actions-row">
-              <button type="button" class="btn-mat-action btn-mat-open" onclick="window.TRJT_MATERIALS.openOrDownloadMaterial('${m.id}')">
-                <i data-lucide="external-link" style="width: 12px; height: 12px;"></i> Buka File
-              </button>
-              <button class="btn-mat-action btn-mat-delete" onclick="window.confirmDeleteMaterial('${m.id}')" title="Hapus materi">
-                <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
-              </button>
+              <span style="color: var(--color-primary-blue); font-weight: 600;">${m.uploadedBy || 'Mahasiswa'}</span>
             </div>
           </div>
+          <button type="button" class="btn-schedule-mat" onclick="window.TRJT_MATERIALS.openOrDownloadMaterial('${m.id}')" style="padding: 6px 10px;">
+            <i data-lucide="external-link" style="width: 12px; height: 12px;"></i> Buka
+          </button>
         </div>
       `;
     }).join('');
 
     if (window.lucide) window.lucide.createIcons();
   }
-
-  window.confirmDeleteMaterial = async function (materialId) {
-    if (!confirm('Apakah Anda yakin ingin menghapus file materi ini?')) return;
-    try {
-      if (window.TRJT_MATERIALS) {
-        await window.TRJT_MATERIALS.deleteCourseMaterial(materialId);
-        showToast('🗑️ Materi berhasil dihapus', 'info');
-        renderCourseMaterialsList();
-      }
-    } catch (e) {
-      showToast('❌ Gagal menghapus: ' + e.message, 'error');
-    }
-  };
 
   function openUploadModal() {
     if (!activeMaterialCourse) return;
@@ -1515,10 +1332,7 @@
     if (form) form.reset();
     if (previewBox) previewBox.style.display = 'none';
     if (statusText) statusText.style.display = 'none';
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i data-lucide="cloud-upload" style="width: 18px; height: 18px;"></i> <span>Simpan ke Google Drive</span>';
-    }
+    if (submitBtn) submitBtn.disabled = true;
 
     if (modal) modal.classList.add('is-open');
     if (window.lucide) window.lucide.createIcons();
@@ -1547,7 +1361,7 @@
         const url = URL.createObjectURL(file);
         previewIcon.innerHTML = `<img src="${url}" style="width: 100%; height: 100%; object-fit: cover;">`;
       } else {
-        previewIcon.innerHTML = `<i data-lucide="file-text" style="width: 22px; height: 22px; color: var(--color-primary-blue);"></i>`;
+        previewIcon.innerHTML = `<i data-lucide="file-text" style="width: 20px; height: 20px; color: var(--color-primary-blue);"></i>`;
       }
     }
 
@@ -1565,7 +1379,6 @@
 
     renderHeader(scheduleData);
     renderHeroCard(scheduleData);
-    renderQuickStats(scheduleData);
     renderTodayTimeline(scheduleData);
 
     if (window.lucide) {
@@ -1578,11 +1391,6 @@
 
     const todayDay = timeProvider.now().getDay();
     state.selectedWeeklyDayId = (todayDay >= 1 && todayDay <= 5) ? todayDay : 1;
-    const initialBtn = document.querySelector(`.segmented-btn[data-day="${state.selectedWeeklyDayId}"]`);
-    if (initialBtn) {
-      document.querySelectorAll('.segmented-btn').forEach((b) => b.classList.remove('active'));
-      initialBtn.classList.add('active');
-    }
 
     renderWeeklySchedule();
     renderNotifications();
@@ -1590,15 +1398,6 @@
     tick();
 
     setInterval(tick, 1000);
-
-    setTimeout(() => {
-      const splash = document.getElementById('app-splash');
-      if (splash) {
-        splash.style.opacity = '0';
-        splash.style.visibility = 'hidden';
-        setTimeout(() => splash.remove(), 450);
-      }
-    }, 600);
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./firebase-messaging-sw.js').catch(() => {

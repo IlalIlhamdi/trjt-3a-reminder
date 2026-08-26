@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#FFFFFF">
+  <meta name="theme-color" content="#F4F8FE">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="description" content="TRJT 3A Reminder - Jadwal Kuliah & Personal Class Assistant Minimalis Modern">
@@ -32,12 +32,12 @@
   <div class="app-viewport">
     <div class="app-container">
 
-      <!-- App Header (Ultra-compact sticky topbar) -->
+      <!-- App Header (Pristine Glass Topbar) -->
       <header class="app-header">
         <div class="header-top">
-          <a href="./admin/index.html" class="brand-badge" style="text-decoration: none;" title="Masuk ke Portal Admin TRJT 3A">
+          <a href="./admin/index.html" class="brand-badge" title="Masuk ke Portal Admin TRJT 3A">
             <div class="brand-logo-box">
-              <img src="./assets/icons/trjt-logo.svg" alt="TRJT Logo" style="width: 100%; height: 100%; object-fit: contain;">
+              <i data-lucide="calendar" style="width: 22px; height: 22px;"></i>
             </div>
             <div class="brand-text-wrap">
               <span class="brand-title">TRJT 3A</span>
@@ -56,14 +56,19 @@
       <main class="main-content">
 
         <!-- ==========================================
-             VIEW 1: BERANDA (HOME)
+             VIEW 1: BERANDA (HOME DASHBOARD)
              ========================================== -->
         <section id="view-beranda" class="view-section active">
 
-          <!-- Greeting Section (Inside normal scrollable flow, no emoji) -->
-          <div class="beranda-greeting-wrap">
-            <h1 id="header-greeting" class="greeting-text">Selamat malam</h1>
-            <p id="header-date" class="greeting-date">Senin, 24 Agustus 2026</p>
+          <!-- Greeting & Status Row -->
+          <div class="beranda-greeting-row">
+            <div class="greeting-text-wrap">
+              <h1 id="header-greeting" class="greeting-heading">Selamat sore</h1>
+              <p id="header-date" class="greeting-date">Rabu, 26 Agustus 2026</p>
+            </div>
+            <div id="beranda-status-chip-container">
+              <!-- Dynamically populated status chip -->
+            </div>
           </div>
 
           <!-- Hero Next Class / Status Card Container -->
@@ -71,17 +76,14 @@
             <!-- Dynamically populated by evaluateScheduleState() -->
           </div>
 
-          <!-- Section: Jadwal Hari Ini (Vertical Timeline) -->
+          <!-- Section: Jadwal Hari Ini -->
           <div style="margin-top: 4px;">
-            <div class="section-header">
-              <h2 class="section-title">Jadwal hari ini</h2>
-              <span class="section-action-link" onclick="document.querySelector('[data-tab=jadwal]').click()">
-                Lihat jadwal <i data-lucide="chevron-right" style="width: 15px; height: 15px;"></i>
-              </span>
+            <div class="section-header-row">
+              <h2 class="section-main-title">Jadwal hari ini</h2>
             </div>
 
-            <div id="today-timeline-container" class="timeline-list" style="margin-top: 12px;">
-              <!-- Dynamically populated -->
+            <div id="today-timeline-container" class="today-cards-list">
+              <!-- Dynamically populated by renderTodayTimeline() -->
             </div>
           </div>
 
@@ -92,18 +94,34 @@
              ========================================== -->
         <section id="view-jadwal" class="view-section">
           
-          <div class="section-header">
-            <h2 class="section-title">Jadwal mingguan</h2>
-            <span class="soft-badge-info" style="font-size: 11px;">Semester 5</span>
+          <!-- Title & Semester Badge -->
+          <div class="view-title-row">
+            <h2 class="view-page-title">Jadwal mingguan</h2>
+            <span class="badge-semester">Semester 5</span>
           </div>
 
-          <!-- Segmented Day Control: Sen, Sel, Rab, Kam, Jum -->
-          <div class="segmented-control">
-            <button class="segmented-btn active" data-day="1">Sen</button>
-            <button class="segmented-btn" data-day="2">Sel</button>
-            <button class="segmented-btn" data-day="3">Rab</button>
-            <button class="segmented-btn" data-day="4">Kam</button>
-            <button class="segmented-btn" data-day="5">Jum</button>
+          <!-- Segmented Day Selector Capsule (Sen 24, Sel 25, Rab 26, Kam 27, Jum 28) -->
+          <div id="weekly-day-selector" class="day-selector-capsule">
+            <button class="day-btn-item active" data-day="1">
+              <span class="day-label-text">Sen</span>
+              <span class="day-num-text" id="day-num-1">24</span>
+            </button>
+            <button class="day-btn-item" data-day="2">
+              <span class="day-label-text">Sel</span>
+              <span class="day-num-text" id="day-num-2">25</span>
+            </button>
+            <button class="day-btn-item" data-day="3">
+              <span class="day-label-text">Rab</span>
+              <span class="day-num-text" id="day-num-3">26</span>
+            </button>
+            <button class="day-btn-item" data-day="4">
+              <span class="day-label-text">Kam</span>
+              <span class="day-num-text" id="day-num-4">27</span>
+            </button>
+            <button class="day-btn-item" data-day="5">
+              <span class="day-label-text">Jum</span>
+              <span class="day-num-text" id="day-num-5">28</span>
+            </button>
           </div>
 
           <!-- Weekly Cards Container -->
@@ -118,27 +136,23 @@
              ========================================== -->
         <section id="view-notifikasi" class="view-section">
           
-          <div class="notif-header-wrap">
-            <div class="notif-header-top">
-              <div class="notif-title-group">
-                <h2 class="section-title">Notifikasi</h2>
-                <span id="notif-unread-count-badge" class="notif-count-badge" style="display: none;">0 belum dibaca</span>
-              </div>
-              <div class="notif-actions-group">
-                <button id="btn-mark-all-read" class="btn-notif-action" title="Tandai semua telah dibaca">
-                  <i data-lucide="check-check" style="width: 13px; height: 13px;"></i>
-                  <span>Tandai dibaca</span>
-                </button>
-                <button id="btn-clear-all-notifs" class="btn-notif-action danger" title="Hapus semua riwayat notifikasi">
-                  <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i>
-                  <span>Hapus semua</span>
-                </button>
-              </div>
+          <!-- Header with Subtitle & Mark as Read -->
+          <div class="notif-header-box">
+            <div class="notif-top-action-row">
+              <h2 class="view-page-title">Notifikasi</h2>
+              <button id="btn-mark-all-read" class="btn-mark-read-link">Tandai dibaca</button>
             </div>
-            <p class="notif-subtitle">Pengingat jadwal dan informasi perkuliahan TRJT 3A</p>
+            <p class="notif-subtitle-text">Kotak masuk pengingat kelas</p>
           </div>
 
-          <div id="notif-list-container" class="notif-list" style="margin-top: 8px;">
+          <!-- Filter Pills: Semua & Belum dibaca -->
+          <div class="filter-pills-bar">
+            <button class="filter-glass-pill active" id="filter-notif-all" data-filter="all">Semua</button>
+            <button class="filter-glass-pill" id="filter-notif-unread" data-filter="unread">Belum dibaca</button>
+          </div>
+
+          <!-- Notifications List Container -->
+          <div id="notif-list-container" class="notif-cards-list">
             <!-- Dynamically populated -->
           </div>
 
@@ -149,166 +163,146 @@
              ========================================== -->
         <section id="view-pengaturan" class="view-section">
           
-          <div class="section-header">
-            <h2 class="section-title">Pengaturan</h2>
-            <span class="soft-badge-neutral" style="font-size: 11px;">v1.0.0</span>
+          <!-- Title & Subtitle -->
+          <div class="notif-header-box">
+            <h2 class="view-page-title">Pengaturan</h2>
+            <p class="notif-subtitle-text">Atur pengalaman pengingat kelas</p>
           </div>
 
-          <!-- Class Profile Card -->
-          <div class="settings-card" style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; margin-top: 8px;">
-            <div class="brand-logo-box" style="width: 44px; height: 44px; border-radius: 12px; padding: 4px; flex-shrink: 0;">
-              <img src="./assets/icons/trjt-logo.svg" alt="TRJT Logo">
-            </div>
-            <div style="min-width: 0;">
-              <h3 style="font-size: 14.5px; font-weight: 700; color: #0F172A; line-height: 1.25;">TRJT 3A — Semester 5</h3>
-              <p style="font-size: 12px; color: var(--color-secondary-text); margin-top: 2px; font-weight: 500;">Teknologi Rekayasa Jaringan Telekomunikasi</p>
-              <p style="font-size: 11px; color: var(--color-muted-text); margin-top: 2px;">Jurusan Teknik Elektro · Politeknik Negeri Lhokseumawe</p>
-            </div>
-          </div>
-
-          <!-- Section 1: Pemberitahuan -->
-          <div class="settings-section-block">
-            <h3 class="settings-heading">Pemberitahuan</h3>
-            <div class="settings-card">
-              
-              <!-- Status Notifikasi -->
-              <div class="settings-row" id="row-notif-status">
-                <div class="settings-icon-box">
-                  <i data-lucide="shield-check" style="width: 18px; height: 18px;"></i>
-                </div>
-                <div class="settings-text-wrap">
-                  <span class="settings-item-title">Status Notifikasi</span>
-                  <span id="desc-notif-status" class="settings-item-desc">Memeriksa kesiapan push notification...</span>
-                </div>
-                <span id="badge-notif-status" class="soft-badge-neutral">Memeriksa</span>
-              </div>
-
-              <div class="settings-row">
-                <div class="settings-icon-box">
-                  <i data-lucide="bell-ring" style="width: 18px; height: 18px;"></i>
-                </div>
-                <div class="settings-text-wrap">
-                  <span class="settings-item-title">Pengingat H-10 Menit</span>
-                  <span class="settings-item-desc">Notifikasi otomatis 10 menit sebelum kuliah</span>
-                </div>
-                <label class="switch">
-                  <input type="checkbox" id="switch-h10" aria-label="Toggle Pengingat H-10">
-                  <span class="slider"></span>
-                </label>
-              </div>
-
-              <div class="settings-row">
-                <div class="settings-icon-box">
-                  <i data-lucide="volume-2" style="width: 18px; height: 18px;"></i>
-                </div>
-                <div class="settings-text-wrap">
-                  <span class="settings-item-title">Suara & Getar</span>
-                  <span class="settings-item-desc">Alarm nada lonceng keras & getaran ritmik (didukung browser & Android)</span>
-                </div>
-                <label class="switch">
-                  <input type="checkbox" id="switch-sound" checked aria-label="Toggle Suara & Getar">
-                  <span class="slider"></span>
-                </label>
-              </div>
-
-              <div class="settings-row">
-                <div class="settings-icon-box">
-                  <i data-lucide="sparkles" style="width: 18px; height: 18px;"></i>
-                </div>
-                <div class="settings-text-wrap">
-                  <span class="settings-item-title">Uji Notifikasi</span>
-                  <span class="settings-item-desc">Kirim contoh notifikasi langsung ke perangkat ini</span>
-                </div>
-                <button id="btn-test-notification" class="btn-primary" style="padding: 6px 14px; font-size: 12px; border-radius: 8px; flex-shrink: 0; min-height: 32px;">
-                  <i data-lucide="send" style="width: 13px; height: 13px;"></i> Tes
-                </button>
-              </div>
-
-              <!-- iOS Safari Web Push Notification Tip Banner -->
-              <div id="ios-pwa-tip" class="settings-row" style="display: none; background-color: #EFF6FF; border: 1px solid #BFDBFE; border-radius: var(--radius-inner); padding: 12px; margin-top: 6px;">
-                <div class="settings-icon-box" style="background-color: #DBEAFE;">
-                  <i data-lucide="smartphone" style="width: 18px; height: 18px; color: var(--color-primary-blue);"></i>
-                </div>
-                <div class="settings-text-wrap">
-                  <span class="settings-item-title" style="color: var(--color-deep-blue); font-size: 13px;">Pengguna iPhone / iOS</span>
-                  <span class="settings-item-desc" style="color: var(--color-primary-text); font-size: 11px; margin-top: 2px;">
-                    Agar pengingat muncul di layar kunci iPhone: Ketuk tombol <strong>Bagikan (Share ⬆️)</strong> di Safari lalu pilih <strong>'Tambahkan ke Layar Utama' (Add to Home Screen)</strong>.
-                  </span>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-          <!-- Section 2: Sistem & Diagnostik -->
-          <div class="settings-section-block">
-            <div style="display: flex; align-items: center; justify-content: space-between;">
-              <h3 class="settings-heading" style="margin-bottom: 0;">Sistem & Diagnostik</h3>
-              <button id="btn-toggle-diagnostics" class="btn-ghost" style="font-size: 12px; padding: 4px 8px; color: var(--color-primary-blue); font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
-                <i data-lucide="info" style="width: 13px; height: 13px;"></i> Diagnostik
-              </button>
-            </div>
+          <div class="settings-panel-wrap">
             
-            <div class="settings-card" style="margin-top: 8px;">
-              
-              <div class="settings-row">
-                <div class="settings-icon-box">
-                  <i data-lucide="smartphone" style="width: 18px; height: 18px;"></i>
+            <!-- PANEL 1: Notifikasi & Alarm -->
+            <div>
+              <h3 class="settings-section-title">Notifikasi & Alarm</h3>
+              <div class="settings-glass-panel">
+                
+                <!-- Izin Notifikasi -->
+                <div class="settings-item-row" id="row-notif-status" style="cursor: pointer;">
+                  <div class="settings-item-left">
+                    <div class="settings-icon-circle">
+                      <i data-lucide="bell" style="width: 18px; height: 18px;"></i>
+                    </div>
+                    <span class="settings-label-text">Izin notifikasi</span>
+                  </div>
+                  <div class="settings-item-right">
+                    <span id="badge-notif-status" class="settings-value-badge">Diizinkan</span>
+                    <i data-lucide="chevron-right" class="settings-chevron"></i>
+                  </div>
                 </div>
-                <div class="settings-text-wrap">
-                  <span class="settings-item-title">Android Wrapper</span>
-                  <span class="settings-item-desc">Safe-area & WebView viewport optimized</span>
-                </div>
-                <span class="soft-badge-success">Siap APK</span>
-              </div>
 
-              <div class="settings-row">
-                <div class="settings-icon-box">
-                  <i data-lucide="cloud-lightning" style="width: 18px; height: 18px;"></i>
+                <!-- Pengingat Sebelum Kelas -->
+                <div class="settings-item-row">
+                  <div class="settings-item-left">
+                    <div class="settings-icon-circle">
+                      <i data-lucide="clock" style="width: 18px; height: 18px;"></i>
+                    </div>
+                    <span class="settings-label-text">Pengingat sebelum kelas</span>
+                  </div>
+                  <div class="settings-item-right">
+                    <span class="settings-value-text">10 menit</span>
+                    <i data-lucide="chevron-right" class="settings-chevron"></i>
+                  </div>
                 </div>
-                <div class="settings-text-wrap">
-                  <span class="settings-item-title">Firebase Cloud Messaging</span>
-                  <span class="settings-item-desc">Sinkronisasi push jadwal otomatis</span>
-                </div>
-                <span id="badge-fcm-status" class="soft-badge-neutral">Memeriksa</span>
-              </div>
 
-              <div class="settings-row">
-                <div class="settings-icon-box">
-                  <i data-lucide="wifi" style="width: 18px; height: 18px;"></i>
+                <!-- Suara Alarm -->
+                <div class="settings-item-row">
+                  <div class="settings-item-left">
+                    <div class="settings-icon-circle">
+                      <i data-lucide="volume-2" style="width: 18px; height: 18px;"></i>
+                    </div>
+                    <span class="settings-label-text">Suara alarm</span>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="switch-sound" checked aria-label="Toggle Suara Alarm">
+                    <span class="slider"></span>
+                  </label>
                 </div>
-                <div class="settings-text-wrap">
-                  <span class="settings-item-title">PWA Service Worker</span>
-                  <span class="settings-item-desc">Cache lokal offline & background messaging</span>
-                </div>
-                <span id="badge-sw-status" class="soft-badge-neutral">Memeriksa</span>
-              </div>
 
-              <!-- Collapsible Diagnostics Detail -->
-              <div id="panel-diagnostics" style="display: none; padding-top: 12px; border-top: 1px dashed var(--color-border-card); flex-direction: column; gap: 8px;">
-                <div style="display: flex; justify-content: space-between; font-size: 12px;">
-                  <span style="color: var(--color-secondary-text);">Permission:</span>
-                  <span id="diag-permission" style="font-weight: 600;">-</span>
+                <!-- Getar -->
+                <div class="settings-item-row">
+                  <div class="settings-item-left">
+                    <div class="settings-icon-circle">
+                      <i data-lucide="smartphone" style="width: 18px; height: 18px;"></i>
+                    </div>
+                    <span class="settings-label-text">Getar</span>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="switch-vibration" checked aria-label="Toggle Getar">
+                    <span class="slider"></span>
+                  </label>
                 </div>
-                <div style="display: flex; justify-content: space-between; font-size: 12px;">
-                  <span style="color: var(--color-secondary-text);">Service Worker:</span>
-                  <span id="diag-sw" style="font-weight: 600;">-</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; font-size: 12px;">
-                  <span style="color: var(--color-secondary-text);">FCM Token:</span>
-                  <span id="diag-token" style="font-weight: 600; font-family: monospace; font-size: 11px;">-</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; font-size: 12px;">
-                  <span style="color: var(--color-secondary-text);">Platform:</span>
-                  <span id="diag-platform" style="font-weight: 600;">-</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; font-size: 12px;">
-                  <span style="color: var(--color-secondary-text);">Notifikasi Terakhir:</span>
-                  <span id="diag-last-notif" style="font-weight: 600;">-</span>
-                </div>
-              </div>
 
+                <!-- Switch H10 Hidden / Synced -->
+                <input type="checkbox" id="switch-h10" checked style="display: none;" aria-label="Toggle H10">
+
+                <!-- Button: Tes Notifikasi -->
+                <button id="btn-test-notification" class="btn-panel-action">
+                  <i data-lucide="bell" style="width: 16px; height: 16px;"></i>
+                  <span>Tes notifikasi</span>
+                </button>
+
+              </div>
             </div>
+
+            <!-- PANEL 2: Tampilan -->
+            <div>
+              <h3 class="settings-section-title">Tampilan</h3>
+              <div class="settings-glass-panel">
+                <div class="settings-item-row">
+                  <div class="settings-item-left">
+                    <div class="settings-icon-circle">
+                      <i data-lucide="sun" style="width: 18px; height: 18px;"></i>
+                    </div>
+                    <span class="settings-label-text">Tema</span>
+                  </div>
+                  <div class="settings-item-right">
+                    <span class="settings-value-text">Terang</span>
+                    <i data-lucide="chevron-right" class="settings-chevron"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PANEL 3: Aplikasi -->
+            <div>
+              <h3 class="settings-section-title">Aplikasi</h3>
+              <div class="settings-glass-panel">
+                <div class="settings-item-row">
+                  <div class="settings-item-left">
+                    <div class="settings-icon-circle">
+                      <i data-lucide="graduation-cap" style="width: 18px; height: 18px;"></i>
+                    </div>
+                    <span class="settings-label-text">Semester</span>
+                  </div>
+                  <div class="settings-item-right">
+                    <span class="settings-value-text">Semester 5</span>
+                    <i data-lucide="chevron-right" class="settings-chevron"></i>
+                  </div>
+                </div>
+
+                <div class="settings-item-row" id="row-about-app" style="cursor: pointer;">
+                  <div class="settings-item-left">
+                    <div class="settings-icon-circle">
+                      <i data-lucide="info" style="width: 18px; height: 18px;"></i>
+                    </div>
+                    <span class="settings-label-text">Tentang TRJT 3A</span>
+                  </div>
+                  <div class="settings-item-right">
+                    <i data-lucide="chevron-right" class="settings-chevron"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Hidden Diagnostics Panel (Available via Dev & Debugging) -->
+            <div id="panel-diagnostics" style="display: none;">
+              <span id="diag-permission">-</span>
+              <span id="diag-sw">-</span>
+              <span id="diag-token">-</span>
+              <span id="diag-platform">-</span>
+              <span id="diag-last-notif">-</span>
+            </div>
+
           </div>
 
           <!-- Toast Container for Real-time Feedback -->
@@ -318,9 +312,9 @@
 
       </main>
 
-      <!-- Bottom Navigation (Fixed, 4 items, safe-area aware) -->
+      <!-- Bottom Navigation (Fixed Glass Bar, 4 Items, Safe Area) -->
       <nav class="bottom-nav">
-        <button class="nav-item active" data-tab="beranda" aria-label="Beranda">
+        <button class="nav-item active" data-tab="beranda" aria-label="Beranda" aria-current="page">
           <div class="nav-icon-wrap">
             <i data-lucide="home" style="width: 20px; height: 20px;"></i>
           </div>
@@ -329,7 +323,7 @@
 
         <button class="nav-item" data-tab="jadwal" aria-label="Jadwal">
           <div class="nav-icon-wrap">
-            <i data-lucide="calendar-days" style="width: 20px; height: 20px;"></i>
+            <i data-lucide="calendar" style="width: 20px; height: 20px;"></i>
           </div>
           <span class="nav-label">Jadwal</span>
         </button>
@@ -359,19 +353,19 @@
   <div id="modal-course-materials" class="modal-backdrop" role="dialog" aria-modal="true">
     <div class="modal-sheet">
       <div class="modal-drag-handle"></div>
-      <!-- Modal Header -->
+      
       <div class="modal-header">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <div class="brand-logo-box" style="width: 40px; height: 40px; background-color: #EFF6FF; border-color: #BFDBFE;">
-            <i data-lucide="book-open" style="width: 20px; height: 20px; color: var(--color-primary-blue);"></i>
+          <div class="brand-logo-box">
+            <i data-lucide="book-open" style="width: 20px; height: 20px;"></i>
           </div>
           <div>
-            <h2 id="mat-modal-course-name" style="font-size: 15px; font-weight: 700; color: var(--color-primary-text); line-height: 1.25;">Materi Mata Kuliah</h2>
-            <p id="mat-modal-course-meta" style="font-size: 12px; color: var(--color-secondary-text); margin-top: 2px;">Dosen Pengampu · Ruang</p>
+            <h2 id="mat-modal-course-name" style="font-size: 15px; font-weight: 700; color: var(--color-primary-navy); line-height: 1.25;">Materi Mata Kuliah</h2>
+            <p id="mat-modal-course-meta" style="font-size: 12px; color: var(--color-text-secondary); margin-top: 2px;">Dosen Pengampu · Ruang</p>
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
-          <a id="btn-open-course-drive-folder" href="https://drive.google.com/drive/folders/1W7F5rWsNNq-nsLUF1emnOj4eJsYSShzW?usp=drive_link" target="_blank" rel="noopener noreferrer" class="btn-secondary" style="padding: 6px 12px; font-size: 12px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" title="Buka Folder di Google Drive">
+          <a id="btn-open-course-drive-folder" href="https://drive.google.com/drive/folders/1W7F5rWsNNq-nsLUF1emnOj4eJsYSShzW?usp=drive_link" target="_blank" rel="noopener noreferrer" class="btn-schedule-mat" style="padding: 6px 12px; font-size: 12px; text-decoration: none;" title="Buka Folder di Google Drive">
             <i data-lucide="hard-drive" style="width: 14px; height: 14px;"></i> Drive
           </a>
           <button id="btn-close-materials-modal" class="btn-close-modal" aria-label="Tutup">
@@ -380,46 +374,33 @@
         </div>
       </div>
 
-      <!-- Modal Body -->
       <div class="modal-body">
-        
-        <!-- Top Action & Search Bar -->
         <div style="display: flex; flex-direction: column; gap: 10px;">
           <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-            <button id="btn-trigger-upload-modal" class="btn-primary" style="padding: 8px 16px; font-size: 13px; flex-shrink: 0;">
+            <button id="btn-trigger-upload-modal" class="btn-submit-upload" style="padding: 8px 16px; font-size: 13px; width: auto; min-height: 38px;">
               <i data-lucide="plus-circle" style="width: 16px; height: 16px;"></i> Tambah Materi
             </button>
             <div style="position: relative; flex: 1;">
-              <i data-lucide="search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: var(--color-secondary-text);"></i>
-              <input type="text" id="mat-search-input" class="form-input" placeholder="Cari materi..." style="width: 100%; padding-left: 32px; font-size: 13px; padding-top: 7px; padding-bottom: 7px; border-radius: 9999px; min-height: 38px;">
+              <i data-lucide="search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: var(--color-text-muted);"></i>
+              <input type="text" id="mat-search-input" class="form-input" placeholder="Cari materi..." style="width: 100%; padding-left: 32px; font-size: 13px; padding-top: 6px; padding-bottom: 6px; border-radius: 9999px;">
             </div>
           </div>
 
-          <!-- Category Pills Filter -->
-          <div class="filter-pills-wrap">
-            <button class="filter-pill active" data-filter="all">Semua File (<span id="count-mat-all">0</span>)</button>
-            <button class="filter-pill" data-filter="photo">📷 Foto (<span id="count-mat-photo">0</span>)</button>
-            <button class="filter-pill" data-filter="doc">📄 Dokumen (<span id="count-mat-doc">0</span>)</button>
+          <div style="display: flex; gap: 8px;">
+            <button class="filter-glass-pill active" data-filter="all">Semua (<span id="count-mat-all">0</span>)</button>
+            <button class="filter-glass-pill" data-filter="photo">📷 Foto (<span id="count-mat-photo">0</span>)</button>
+            <button class="filter-glass-pill" data-filter="doc">📄 Dokumen (<span id="count-mat-doc">0</span>)</button>
           </div>
         </div>
 
-        <!-- Materials List Container -->
         <div id="mat-list-container" style="display: flex; flex-direction: column; gap: 10px; min-height: 120px;">
           <!-- Dynamically populated -->
         </div>
 
-        <!-- Empty State -->
-        <div id="mat-empty-state" class="empty-state-card" style="padding: 32px 16px; display: none;">
-          <div class="empty-icon-circle">
-            <i data-lucide="folder-open" style="width: 28px; height: 28px; color: var(--color-muted-text);"></i>
-          </div>
-          <p style="font-weight: 700; font-size: 14px; color: var(--color-primary-text); margin-top: 10px;">Belum Ada Materi</p>
-          <p style="font-size: 12px; color: var(--color-secondary-text); margin-top: 3px; max-width: 280px; text-align: center;">File, foto slide, dan dokumen modul perkuliahan untuk mata kuliah ini akan tersimpan di Google Drive admin.</p>
-          <button class="btn-primary" onclick="document.getElementById('btn-trigger-upload-modal').click()" style="margin-top: 14px; padding: 7px 16px; font-size: 12px;">
-            <i data-lucide="plus" style="width: 14px; height: 14px;"></i> Tambah Materi Pertama
-          </button>
+        <div id="mat-empty-state" class="empty-state-card" style="padding: 24px 16px; display: none; text-align: center;">
+          <p style="font-weight: 700; font-size: 14px; color: var(--color-primary-navy);">Belum Ada Materi</p>
+          <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 3px;">File modul dan materi perkuliahan untuk mata kuliah ini akan tersimpan di Google Drive.</p>
         </div>
-
       </div>
     </div>
   </div>
@@ -430,78 +411,69 @@
   <div id="modal-upload-material" class="modal-backdrop" role="dialog" aria-modal="true">
     <div class="modal-sheet">
       <div class="modal-drag-handle"></div>
-      <!-- Modal Header -->
+      
       <div class="modal-header">
         <div>
-          <h2 style="font-size: 15px; font-weight: 700; color: var(--color-primary-text);">Unggah Materi</h2>
-          <p id="upload-modal-course-sub" style="font-size: 12px; color: var(--color-secondary-text); margin-top: 2px;">Tersimpan otomatis di Google Drive Admin</p>
+          <h2 style="font-size: 15px; font-weight: 700; color: var(--color-primary-navy);">Unggah Materi</h2>
+          <p id="upload-modal-course-sub" style="font-size: 12px; color: var(--color-text-secondary); margin-top: 2px;">Tersimpan otomatis di Google Drive Admin</p>
         </div>
         <button id="btn-close-upload-modal" class="btn-close-modal" aria-label="Tutup">
           <i data-lucide="x" style="width: 18px; height: 18px;"></i>
         </button>
       </div>
 
-      <!-- Upload Form Body -->
       <form id="form-upload-material" class="modal-body">
-        
-        <!-- Picker Actions Row (Camera, Gallery, Files) -->
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
-          <label style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 6px; background-color: #EFF6FF; border: 1px dashed #93C5FD; border-radius: 14px; cursor: pointer; text-align: center; transition: all var(--transition-fast); min-height: 70px;">
+          <label style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 6px; background: var(--color-very-light-blue); border: 1px dashed #93C5FD; border-radius: 14px; cursor: pointer; text-align: center; min-height: 70px;">
             <input type="file" id="file-input-camera" accept="image/*" capture="environment" style="display: none;">
             <i data-lucide="camera" style="width: 22px; height: 22px; color: var(--color-primary-blue);"></i>
-            <span style="font-size: 11px; font-weight: 600; color: var(--color-deep-blue); line-height: 1.2;">Ambil Foto</span>
+            <span style="font-size: 11px; font-weight: 600; color: var(--color-deep-blue);">Ambil Foto</span>
           </label>
 
-          <label style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 6px; background-color: #EFF6FF; border: 1px dashed #93C5FD; border-radius: 14px; cursor: pointer; text-align: center; transition: all var(--transition-fast); min-height: 70px;">
+          <label style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 6px; background: var(--color-very-light-blue); border: 1px dashed #93C5FD; border-radius: 14px; cursor: pointer; text-align: center; min-height: 70px;">
             <input type="file" id="file-input-gallery" accept="image/*" style="display: none;">
             <i data-lucide="image" style="width: 22px; height: 22px; color: var(--color-primary-blue);"></i>
-            <span style="font-size: 11px; font-weight: 600; color: var(--color-deep-blue); line-height: 1.2;">Galeri Foto</span>
+            <span style="font-size: 11px; font-weight: 600; color: var(--color-deep-blue);">Galeri Foto</span>
           </label>
 
-          <label style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 6px; background-color: #F8FAFC; border: 1px dashed var(--color-border-card); border-radius: 14px; cursor: pointer; text-align: center; transition: all var(--transition-fast); min-height: 70px;">
+          <label style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 6px; background: #FFFFFF; border: 1px dashed rgba(191, 219, 254, 0.8); border-radius: 14px; cursor: pointer; text-align: center; min-height: 70px;">
             <input type="file" id="file-input-document" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.rar" style="display: none;">
-            <i data-lucide="file-text" style="width: 22px; height: 22px; color: var(--color-secondary-text);"></i>
-            <span style="font-size: 11px; font-weight: 600; color: var(--color-primary-text); line-height: 1.2;">Pilih Dokumen</span>
+            <i data-lucide="file-text" style="width: 22px; height: 22px; color: var(--color-text-secondary);"></i>
+            <span style="font-size: 11px; font-weight: 600; color: var(--color-primary-navy);">Pilih Dokumen</span>
           </label>
         </div>
 
-        <!-- Selected File Preview Card -->
-        <div id="upload-preview-box" style="display: none; padding: 12px; background-color: var(--color-panel-bg); border: 1px solid var(--color-border-card); border-radius: 14px; align-items: center; gap: 12px;">
-          <div id="upload-preview-icon" style="width: 44px; height: 44px; border-radius: 10px; background-color: #EFF6FF; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+        <div id="upload-preview-box" style="display: none; padding: 12px; background: var(--color-very-light-blue); border: 1px solid rgba(191, 219, 254, 0.8); border-radius: 14px; align-items: center; gap: 12px;">
+          <div id="upload-preview-icon" style="width: 40px; height: 40px; border-radius: 10px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
             <i data-lucide="file" style="width: 20px; height: 20px; color: var(--color-primary-blue);"></i>
           </div>
           <div style="flex: 1; min-width: 0;">
-            <p id="upload-file-name" style="font-size: 13px; font-weight: 700; color: var(--color-primary-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">file-name.pdf</p>
-            <p id="upload-file-size" style="font-size: 11px; color: var(--color-secondary-text); margin-top: 2px;">2.4 MB</p>
+            <p id="upload-file-name" style="font-size: 13px; font-weight: 700; color: var(--color-primary-navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">file-name.pdf</p>
+            <p id="upload-file-size" style="font-size: 11px; color: var(--color-text-secondary); margin-top: 2px;">2.4 MB</p>
           </div>
-          <button type="button" id="btn-remove-selected-file" style="background: none; border: none; cursor: pointer; color: var(--color-muted-text); padding: 6px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Hapus File">
-            <i data-lucide="trash-2" style="width: 18px; height: 18px; color: #DC2626;"></i>
+          <button type="button" id="btn-remove-selected-file" style="background: none; border: none; cursor: pointer; color: var(--color-danger); padding: 6px;" aria-label="Hapus File">
+            <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
           </button>
         </div>
 
-        <!-- Description / Note Input (Strictly Vertical) -->
         <div class="form-group">
           <label for="upload-material-desc" class="form-label">Catatan / Keterangan (Opsional)</label>
           <input type="text" id="upload-material-desc" class="form-input" placeholder="Contoh: Modul Praktikum Bab 1">
         </div>
 
-        <!-- Uploader Name Input (Strictly Vertical) -->
         <div class="form-group">
           <label for="upload-material-author" class="form-label">Nama Pengunggah (Opsional)</label>
-          <input type="text" id="upload-material-author" class="form-input" placeholder="Contoh: Komti / Nama Mahasiswa">
+          <input type="text" id="upload-material-author" class="form-input" placeholder="Contoh: Nama Mahasiswa">
         </div>
 
-        <!-- Submit Button (Min height 52px, full width) -->
         <button type="submit" id="btn-submit-upload-mat" class="btn-submit-upload" disabled>
-          <i data-lucide="cloud-upload" style="width: 20px; height: 20px;"></i>
-          <span id="btn-submit-upload-text">Simpan ke Google Drive</span>
+          <i data-lucide="cloud-upload" style="width: 18px; height: 18px;"></i>
+          <span>Simpan ke Google Drive</span>
         </button>
 
-        <!-- Upload Status Feedback -->
         <div id="upload-status-text" style="display: none; text-align: center; font-size: 13px; font-weight: 600; color: var(--color-primary-blue);">
           <i data-lucide="loader-2" class="spin-animate" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 4px;"></i> Mengunggah ke Google Drive…
         </div>
-
       </form>
     </div>
   </div>
