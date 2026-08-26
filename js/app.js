@@ -14,7 +14,7 @@
   })();
 
   // --- Version check & Cache Storage Auto-Purge ---
-  const CURRENT_APP_VERSION = '4.6';
+  const CURRENT_APP_VERSION = '4.7';
   try {
     const savedVer = localStorage.getItem('trjt_app_version');
     if (savedVer !== CURRENT_APP_VERSION) {
@@ -538,9 +538,15 @@
 
     listContainer.innerHTML = dayClasses
       .map((item) => {
-        const cleanRoomName = item.roomName 
-          ? item.roomName.split('(')[0].replace('Gedung III Teknik Elektro Lt. 2', 'Gd. III Lt. 2').replace('Gedung III Teknik Elektro', 'Gd. III').trim()
-          : 'Gd. III';
+        let cleanRoomName = item.roomName ? item.roomName.split('(')[0].trim() : '';
+        cleanRoomName = cleanRoomName
+          .replace('Lab. Jaringan Telekomunikasi', 'Lab. Jartel')
+          .replace('Lab. Jaringan Komputer', 'Lab. Jarkom')
+          .replace('Lab. HF & Propagasi', 'Lab. HF')
+          .replace('Gedung III Teknik Elektro Lt. 2', 'Gd. III Lt. 2')
+          .replace('Gedung III Teknik Elektro', 'Gd. III');
+
+        const roomDisplay = item.roomCode ? `${item.roomCode} · ${cleanRoomName}` : cleanRoomName;
 
         return `
           <div class="schedule-glass-card">
@@ -551,7 +557,7 @@
               </div>
               <div class="schedule-room-badge">
                 <i data-lucide="map-pin"></i>
-                <span>${item.roomCode} · ${cleanRoomName}</span>
+                <span>${roomDisplay}</span>
               </div>
             </div>
             

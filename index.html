@@ -130,7 +130,7 @@
     .schedule-top-meta-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     .schedule-time-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; background: rgba(47, 128, 237, 0.08); border: 1px solid rgba(191, 219, 254, 0.8); border-radius: 8px; font-size: 12px; font-weight: 700; color: var(--color-primary-blue); flex-shrink: 0; }
     .schedule-time-badge i { width: 13px; height: 13px; }
-    .schedule-room-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: #475569; max-width: 58%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .schedule-room-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; background: rgba(244, 248, 254, 0.9); border: 1px solid rgba(220, 235, 252, 0.9); border-radius: 8px; font-size: 11.5px; font-weight: 600; color: #334155; white-space: nowrap; flex-shrink: 0; }
     .schedule-room-badge i { width: 13px; height: 13px; color: var(--color-primary-blue); flex-shrink: 0; }
     .schedule-subject-heading { font-size: 1.125rem; font-weight: 800; color: var(--color-primary-navy); line-height: 1.35; letter-spacing: -0.015em; }
     .schedule-lecturer-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 2px; }
@@ -141,9 +141,10 @@
     .notif-top-action-row { display: flex; align-items: center; justify-content: space-between; }
     .notif-subtitle-text { font-size: 13px; color: var(--color-text-secondary); margin-top: 2px; }
     .btn-mark-read-link { background: none; border: none; color: var(--color-primary-blue); font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; padding: 4px 6px; }
-    .filter-pills-bar { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
-    .filter-glass-pill { padding: 6px 18px; border-radius: var(--radius-full); font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; background: rgba(255, 255, 255, 0.7); border: 1px solid var(--color-border-subtle); color: var(--color-text-secondary); }
-    .filter-glass-pill.active { background: var(--color-very-light-blue); border-color: #BFDBFE; color: var(--color-primary-blue); font-weight: 600; }
+    .filter-pills-bar { display: flex; align-items: center; gap: 8px; margin-top: 2px; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; padding: 4px 2px; -webkit-overflow-scrolling: touch; }
+    .filter-pills-bar::-webkit-scrollbar { display: none; }
+    .filter-glass-pill { padding: 7px 16px; border-radius: var(--radius-full); font-size: 12.5px; font-weight: 600; font-family: inherit; cursor: pointer; background: rgba(255, 255, 255, 0.85); border: 1px solid var(--color-border-subtle); color: var(--color-text-secondary); white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; }
+    .filter-glass-pill.active { background: var(--color-primary-blue); border-color: var(--color-primary-blue); color: #FFFFFF; font-weight: 700; box-shadow: 0 3px 10px rgba(47, 128, 237, 0.35); }
     .notif-cards-list { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
     .notif-card { background: var(--color-surface-glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--color-border-glass); border-radius: var(--radius-card); padding: 14px 16px; box-shadow: 0 10px 30px rgba(15, 61, 145, 0.06); display: flex; align-items: flex-start; gap: 12px; cursor: pointer; }
     .notif-card.unread { background: rgba(255, 255, 255, 0.92); }
@@ -866,13 +867,13 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
-  <script src="./js/firebase-config.js?v=4.6"></script>
+  <script src="./js/firebase-config.js?v=4.7"></script>
 
   <!-- Application Scripts -->
-  <script src="./js/time-provider.js?v=4.6"></script>
-  <script src="./js/data.js?v=4.6"></script>
-  <script src="./js/drive-service.js?v=4.6"></script>
-  <script src="./js/material-service.js?v=4.6"></script>
-  <script src="./js/app.js?v=4.6"></script>
+  <script src="./js/time-provider.js?v=4.7"></script>
+  <script src="./js/data.js?v=4.7"></script>
+  <script src="./js/drive-service.js?v=4.7"></script>
+  <script src="./js/material-service.js?v=4.7"></script>
+  <script src="./js/app.js?v=4.7"></script>
 </body>
 </html>
