@@ -14,7 +14,7 @@
   })();
 
   // --- Version check & Cache Storage Auto-Purge ---
-  const CURRENT_APP_VERSION = '4.3';
+  const CURRENT_APP_VERSION = '4.4';
   try {
     const savedVer = localStorage.getItem('trjt_app_version');
     if (savedVer !== CURRENT_APP_VERSION) {
@@ -283,7 +283,7 @@
       const item = data.inProgressClass;
       heroContainer.innerHTML = `
         <div class="hero-glass-card">
-          <div class="hero-tag-row" style="color: var(--color-success-text);">
+          <div class="hero-tag-pill in-progress">
             <i data-lucide="play-circle"></i>
             <span>SEDANG BERLANGSUNG</span>
           </div>
@@ -292,14 +292,24 @@
             <div class="hero-clock-circle" style="background: var(--color-success-bg); border-color: var(--color-success-border); color: var(--color-success-text);">
               <i data-lucide="clock" style="width: 20px; height: 20px;"></i>
             </div>
-            <span class="hero-time-text">${item.startTime.replace(':', '.')} – ${item.endTime.replace(':', '.')}</span>
+            <div class="hero-time-text-wrap">
+              <span class="hero-day-text">Hari ini</span>
+              <span class="hero-time-dot">•</span>
+              <span class="hero-time-text">${item.startTime.replace(':', '.')} – ${item.endTime.replace(':', '.')}</span>
+            </div>
           </div>
 
           <div>
             <h2 class="hero-course-title">${item.courseName}</h2>
-            <div class="hero-meta-row" style="margin-top: 6px;">
-              <i data-lucide="landmark"></i>
-              <span>${getRoomDisplay(item.roomCode, item.roomName)} • ${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}</span>
+            <div class="hero-meta-grid">
+              <div class="hero-meta-chip">
+                <i data-lucide="map-pin"></i>
+                <span>${getRoomDisplay(item.roomCode, item.roomName)}</span>
+              </div>
+              <div class="hero-meta-chip">
+                <i data-lucide="user"></i>
+                <span>${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}</span>
+              </div>
             </div>
           </div>
 
@@ -319,10 +329,11 @@
     if (data.nextUpcomingClass) {
       const item = data.nextUpcomingClass;
       const isH10 = data.isH10;
+      const dayName = daysMap[data.dayIndex] || 'Hari ini';
 
       heroContainer.innerHTML = `
         <div class="hero-glass-card">
-          <div class="hero-tag-row">
+          <div class="hero-tag-pill">
             <i data-lucide="calendar"></i>
             <span>KELAS BERIKUTNYA</span>
           </div>
@@ -331,18 +342,29 @@
             <div class="hero-clock-circle">
               <i data-lucide="clock" style="width: 20px; height: 20px;"></i>
             </div>
-            <span class="hero-time-text">${daysMap[data.dayIndex]} • ${item.startTime.replace(':', '.')}</span>
+            <div class="hero-time-text-wrap">
+              <span class="hero-day-text">${dayName}</span>
+              <span class="hero-time-dot">•</span>
+              <span class="hero-time-text">${item.startTime.replace(':', '.')}</span>
+            </div>
           </div>
 
           <div>
             <h2 class="hero-course-title">${item.courseName}</h2>
-            <div class="hero-meta-row" style="margin-top: 6px;">
-              <i data-lucide="landmark"></i>
-              <span>${getRoomDisplay(item.roomCode, item.roomName)} • ${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}</span>
+            <div class="hero-meta-grid">
+              <div class="hero-meta-chip">
+                <i data-lucide="map-pin"></i>
+                <span>${getRoomDisplay(item.roomCode, item.roomName)}</span>
+              </div>
+              <div class="hero-meta-chip">
+                <i data-lucide="user"></i>
+                <span>${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}</span>
+              </div>
             </div>
           </div>
 
           <div class="hero-reminder-badge">
+            <div class="hero-pulse-dot"></div>
             <i data-lucide="bell"></i>
             <span>${isH10 ? 'Mulai dalam ' + formatCountdown(data.countdownMs) : 'Pengingat 10 menit aktif'}</span>
           </div>
@@ -356,7 +378,7 @@
       const item = data.nextDayUpcomingClass;
       heroContainer.innerHTML = `
         <div class="hero-glass-card" onclick="document.querySelector('[data-tab=jadwal]').click()" style="cursor: pointer;">
-          <div class="hero-tag-row">
+          <div class="hero-tag-pill">
             <i data-lucide="calendar"></i>
             <span>KELAS BERIKUTNYA</span>
           </div>
@@ -365,18 +387,29 @@
             <div class="hero-clock-circle">
               <i data-lucide="clock" style="width: 20px; height: 20px;"></i>
             </div>
-            <span class="hero-time-text">${data.nextDayName} • ${item.startTime.replace(':', '.')}</span>
+            <div class="hero-time-text-wrap">
+              <span class="hero-day-text">${data.nextDayName}</span>
+              <span class="hero-time-dot">•</span>
+              <span class="hero-time-text">${item.startTime.replace(':', '.')}</span>
+            </div>
           </div>
 
           <div>
             <h2 class="hero-course-title">${item.courseName}</h2>
-            <div class="hero-meta-row" style="margin-top: 6px;">
-              <i data-lucide="landmark"></i>
-              <span>${getRoomDisplay(item.roomCode, item.roomName)} • ${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}</span>
+            <div class="hero-meta-grid">
+              <div class="hero-meta-chip">
+                <i data-lucide="map-pin"></i>
+                <span>${getRoomDisplay(item.roomCode, item.roomName)}</span>
+              </div>
+              <div class="hero-meta-chip">
+                <i data-lucide="user"></i>
+                <span>${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}</span>
+              </div>
             </div>
           </div>
 
           <div class="hero-reminder-badge">
+            <div class="hero-pulse-dot"></div>
             <i data-lucide="bell"></i>
             <span>Pengingat 10 menit aktif</span>
           </div>
@@ -387,12 +420,12 @@
 
     // Case 4: Complete Holiday
     heroContainer.innerHTML = `
-      <div class="hero-glass-card" style="text-align: center; align-items: center;">
-        <div class="hero-clock-circle" style="width: 46px; height: 46px;">
+      <div class="hero-glass-card" style="text-align: center; align-items: center; padding: 28px 20px;">
+        <div class="hero-clock-circle" style="width: 48px; height: 48px; border-radius: 16px; margin-bottom: 4px;">
           <i data-lucide="coffee" style="width: 24px; height: 24px;"></i>
         </div>
         <h2 class="hero-course-title">Tidak ada agenda kuliah</h2>
-        <p style="font-size: 13px; color: var(--color-text-secondary);">Nikmati waktu istirahatmu. Jadwal perkuliahan telah siap di menu Jadwal.</p>
+        <p style="font-size: 13px; color: var(--color-text-secondary); line-height: 1.4; max-width: 280px;">Nikmati waktu istirahatmu. Jadwal perkuliahan telah siap di menu Jadwal.</p>
       </div>
     `;
   }
