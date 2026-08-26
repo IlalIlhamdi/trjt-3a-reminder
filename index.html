@@ -73,7 +73,7 @@
     .brand-subtitle { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); line-height: 1.2; margin-top: 1px; }
     .btn-header-bell { width: 40px; height: 40px; border-radius: var(--radius-full); border: 1px solid rgba(220, 235, 252, 0.9); background: rgba(255, 255, 255, 0.8); color: var(--color-primary-navy); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
     .bell-unread-dot { position: absolute; top: 9px; right: 10px; width: 7px; height: 7px; background-color: var(--color-primary-blue); border-radius: 50%; border: 1.5px solid #FFFFFF; }
-    .main-content { flex: 1; padding: 16px 20px; display: flex; flex-direction: column; gap: 20px; }
+    .main-content { flex: 1; padding: 16px 20px calc(96px + var(--safe-area-bottom)) 20px; display: flex; flex-direction: column; gap: 20px; }
     .view-section { display: none; flex-direction: column; gap: 20px; }
     .view-section.active { display: flex; }
     .beranda-greeting-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
@@ -177,13 +177,18 @@
     input:checked + .slider { background-color: var(--color-primary-blue); }
     input:checked + .slider::before { transform: translateX(20px); }
     .btn-panel-action { margin: 10px 16px 14px 16px; padding: 10px 16px; background: rgba(235, 244, 254, 0.6); border: 1.5px solid rgba(191, 219, 254, 0.9); border-radius: 12px; color: var(--color-primary-blue); font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: rgba(244, 248, 254, 0.92); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-top: 1px solid rgba(255, 255, 255, 0.85); display: grid; grid-template-columns: repeat(5, 1fr); padding: 6px 6px calc(6px + var(--safe-area-bottom)) 6px; z-index: 50; box-shadow: 0 -8px 24px rgba(15, 61, 145, 0.05); }
-    @media (min-width: 1024px) { .bottom-nav { max-width: 460px; border-bottom-left-radius: 36px; border-bottom-right-radius: 36px; } }
-    .nav-item { background: none; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 5px 2px; color: var(--color-text-secondary); font-family: inherit; cursor: pointer; border-radius: 14px; position: relative; min-height: 46px; }
-    .nav-item.active { background: var(--color-very-light-blue); color: var(--color-primary-blue); }
+    .bottom-nav { position: fixed; bottom: calc(14px + var(--safe-area-bottom)); left: 50%; transform: translateX(-50%); width: calc(100% - 24px); max-width: 440px; background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(28px) saturate(180%); -webkit-backdrop-filter: blur(28px) saturate(180%); border: 1.5px solid rgba(255, 255, 255, 0.95); border-radius: 28px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; padding: 6px; z-index: 50; box-shadow: 0 16px 36px -6px rgba(15, 61, 145, 0.14), 0 4px 12px rgba(15, 61, 145, 0.06), inset 0 1px 2px rgba(255, 255, 255, 1); box-sizing: border-box; }
+    @media (min-width: 1024px) { .bottom-nav { max-width: 440px; border-radius: 28px; } }
+    .nav-item { background: transparent; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 6px 2px; color: #64748B; font-family: inherit; cursor: pointer; border-radius: 18px; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); position: relative; min-height: 48px; }
+    .nav-item:hover:not(.active) { background: rgba(235, 244, 254, 0.6); color: var(--color-primary-blue); }
+    .nav-item:active { transform: scale(0.93); }
+    .nav-item.active { background: rgba(235, 244, 254, 0.95); color: var(--color-primary-blue); box-shadow: 0 2px 8px rgba(47, 128, 237, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.9); }
     .nav-icon-wrap { display: flex; align-items: center; justify-content: center; position: relative; }
-    .nav-label { font-size: 10.5px; font-weight: 600; line-height: 1.1; white-space: nowrap; }
-    .nav-item.active .nav-label { font-weight: 700; color: var(--color-primary-blue); }
+    .nav-icon-wrap i { width: 20px; height: 20px; transition: stroke-width 0.2s ease; }
+    .nav-label { font-size: 10px; font-weight: 600; line-height: 1.1; white-space: nowrap; }
+    .nav-item.active .nav-label { font-weight: 800; color: var(--color-primary-blue); letter-spacing: -0.01em; }
+    .nav-item.active .nav-icon-wrap i { stroke-width: 2.3; }
+    .nav-item.active::after { content: ''; width: 4px; height: 4px; border-radius: 50%; background-color: var(--color-primary-blue); margin-top: 1px; }
     .nav-badge-dot { position: absolute; top: -2px; right: -3px; width: 7px; height: 7px; background-color: var(--color-primary-blue); border-radius: 50%; border: 1.5px solid #FFFFFF; display: none; }
     .modal-backdrop { position: fixed; inset: 0; background: rgba(15, 41, 66, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 100; display: none; align-items: flex-end; justify-content: center; }
     .modal-backdrop.is-open { display: flex; }
@@ -904,13 +909,13 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
-  <script src="./js/firebase-config.js?v=5.0"></script>
+  <script src="./js/firebase-config.js?v=5.1"></script>
 
   <!-- Application Scripts -->
-  <script src="./js/time-provider.js?v=5.0"></script>
-  <script src="./js/data.js?v=5.0"></script>
-  <script src="./js/drive-service.js?v=5.0"></script>
-  <script src="./js/material-service.js?v=5.0"></script>
-  <script src="./js/app.js?v=5.0"></script>
+  <script src="./js/time-provider.js?v=5.1"></script>
+  <script src="./js/data.js?v=5.1"></script>
+  <script src="./js/drive-service.js?v=5.1"></script>
+  <script src="./js/material-service.js?v=5.1"></script>
+  <script src="./js/app.js?v=5.1"></script>
 </body>
 </html>

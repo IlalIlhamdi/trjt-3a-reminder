@@ -14,7 +14,7 @@
   })();
 
   // --- Version check & Cache Storage Auto-Purge ---
-  const CURRENT_APP_VERSION = '5.0';
+  const CURRENT_APP_VERSION = '5.1';
   try {
     const savedVer = localStorage.getItem('trjt_app_version');
     if (savedVer !== CURRENT_APP_VERSION) {

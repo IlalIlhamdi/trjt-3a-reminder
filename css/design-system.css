@@ -133,8 +133,32 @@
 }
 
 [data-theme="dark"] .bottom-nav {
-  background: rgba(9, 14, 23, 0.92);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(145deg, rgba(20, 32, 54, 0.92) 0%, rgba(14, 23, 40, 0.94) 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .nav-item {
+  color: #94A3B8;
+}
+
+[data-theme="dark"] .nav-item:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.06);
+  color: #F8FAFC;
+}
+
+[data-theme="dark"] .nav-item.active {
+  background: rgba(47, 128, 237, 0.18);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  color: #60A5FA;
+}
+
+[data-theme="dark"] .nav-item.active .nav-label {
+  color: #93C5FD;
+}
+
+[data-theme="dark"] .nav-item.active::after {
+  background-color: #60A5FA;
 }
 
 [data-theme="dark"] .hero-glass-card {
@@ -374,7 +398,7 @@ body {
    ========================================================================== */
 .main-content {
   flex: 1;
-  padding: 16px 20px;
+  padding: 16px 20px calc(96px + var(--safe-area-bottom)) 20px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -1420,62 +1444,70 @@ input:checked + .slider::before {
 
 /* ==========================================================================
    BOTTOM NAVIGATION
-   - White Glass Bar (Blur 20px)
-   - 4 Items: Beranda, Jadwal, Notifikasi, Pengaturan
-   - Active Tab: Soft Blue Capsule (#EBF4FE) & Primary Blue Accent
+   - Floating Island Glass Capsule (Blur 28px)
+   - 5 Items: Beranda, Jadwal, Notifikasi, Dosen, Pengaturan
+   - Active Tab: Soft Blue Squircle Card with Dot Indicator
    - Safe-area aware
    ========================================================================== */
 .bottom-nav {
   position: fixed;
-  bottom: 0;
+  bottom: calc(14px + var(--safe-area-bottom));
   left: 50%;
   transform: translateX(-50%);
-  width: 100%;
-  max-width: 480px;
-  background: rgba(244, 248, 254, 0.88);
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
-  border-top: 1px solid rgba(255, 255, 255, 0.85);
+  width: calc(100% - 24px);
+  max-width: 440px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1.5px solid rgba(255, 255, 255, 0.95);
+  border-radius: 28px;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  padding: 6px 6px calc(6px + var(--safe-area-bottom)) 6px;
+  gap: 3px;
+  padding: 6px;
   z-index: 50;
-  box-shadow: var(--shadow-bottom-nav);
+  box-shadow: 0 16px 36px -6px rgba(15, 61, 145, 0.14), 0 4px 12px rgba(15, 61, 145, 0.06), inset 0 1px 2px rgba(255, 255, 255, 1);
+  box-sizing: border-box;
 }
 
 @media (min-width: 1024px) {
   .bottom-nav {
-    max-width: 460px;
-    border-bottom-left-radius: 36px;
-    border-bottom-right-radius: 36px;
+    max-width: 440px;
+    border-radius: 28px;
   }
 }
 
 .nav-item {
-  background: none;
+  background: transparent;
   border: none;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 2px;
-  padding: 4px 2px;
-  color: var(--color-text-secondary);
+  padding: 6px 2px;
+  color: #64748B;
   font-family: inherit;
   cursor: pointer;
-  border-radius: 12px;
-  transition: all var(--transition-fast);
+  border-radius: 18px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  min-height: 44px;
+  min-height: 48px;
+}
+
+.nav-item:hover:not(.active) {
+  background: rgba(235, 244, 254, 0.6);
+  color: var(--color-primary-blue);
 }
 
 .nav-item:active {
-  transform: scale(0.95);
+  transform: scale(0.93);
 }
 
 .nav-item.active {
-  background: var(--color-very-light-blue);
+  background: rgba(235, 244, 254, 0.95);
   color: var(--color-primary-blue);
+  box-shadow: 0 2px 8px rgba(47, 128, 237, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.9);
 }
 
 .nav-icon-wrap {
@@ -1485,16 +1517,36 @@ input:checked + .slider::before {
   position: relative;
 }
 
+.nav-icon-wrap i {
+  width: 20px;
+  height: 20px;
+  transition: stroke-width 0.2s ease;
+}
+
 .nav-label {
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 600;
   line-height: 1.1;
   white-space: nowrap;
 }
 
 .nav-item.active .nav-label {
-  font-weight: 700;
+  font-weight: 800;
   color: var(--color-primary-blue);
+  letter-spacing: -0.01em;
+}
+
+.nav-item.active .nav-icon-wrap i {
+  stroke-width: 2.3;
+}
+
+.nav-item.active::after {
+  content: '';
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: var(--color-primary-blue);
+  margin-top: 1px;
 }
 
 .nav-badge-dot {
