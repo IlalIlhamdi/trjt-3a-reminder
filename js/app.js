@@ -1236,8 +1236,13 @@
     }
 
     // Piket Schedule Modal Trigger & Handlers
-    const btnOpenPiket = document.getElementById('btn-open-piket-modal');
-    if (btnOpenPiket) btnOpenPiket.addEventListener('click', openPiketModal);
+    // Piket button listeners (both in Beranda & Jadwal)
+    document.querySelectorAll('.btn-piket-action, #btn-open-piket-modal').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openPiketModal();
+      });
+    });
 
     const btnClosePiket = document.getElementById('btn-close-piket-modal');
     if (btnClosePiket) btnClosePiket.addEventListener('click', closePiketModal);
@@ -1255,6 +1260,17 @@
         renderPiketModal(filterVal);
       });
     });
+  }
+
+  // --- HTML sanitization helper ---
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 
   // --- Daftar Piket Modal & Controller System ---
@@ -1375,16 +1391,26 @@
   }
 
   function openPiketModal() {
-    activePiketFilter = 'all';
-    renderPiketModal('all');
+    try {
+      activePiketFilter = 'all';
+      renderPiketModal('all');
+    } catch (err) {
+      console.error('Error rendering piket modal:', err);
+    }
     const modal = document.getElementById('modal-piket-schedule');
-    if (modal) modal.classList.add('is-open');
+    if (modal) {
+      modal.classList.add('is-open');
+      modal.style.display = 'flex';
+    }
     if (window.lucide) window.lucide.createIcons();
   }
 
   function closePiketModal() {
     const modal = document.getElementById('modal-piket-schedule');
-    if (modal) modal.classList.remove('is-open');
+    if (modal) {
+      modal.classList.remove('is-open');
+      modal.style.display = 'none';
+    }
   }
 
   window.openPiketModal = openPiketModal;
