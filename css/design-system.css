@@ -206,12 +206,29 @@
 }
 
 /* ==========================================================================
-   CSS Reset & Base
+   CSS Reset & Base (iOS & Android Responsive Optimization)
    ========================================================================== */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+input,
+select,
+textarea,
+.nav-item,
+.day-btn-item,
+.filter-glass-pill,
+.dosen-course-pill,
+.btn-schedule-mat,
+.settings-item-row,
+.theme-option-item,
+.btn-piket-action {
+  touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -225,9 +242,33 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Glassmorphism Fallback for older Android/iOS WebViews */
+@supports not ((-webkit-backdrop-filter: blur(18px)) or (backdrop-filter: blur(18px))) {
+  .hero-glass-card,
+  .schedule-glass-card,
+  .notif-card,
+  .settings-glass-panel,
+  .day-selector-capsule,
+  .dosen-glass-card,
+  .modal-sheet,
+  .bottom-nav {
+    background: rgba(255, 255, 255, 0.98) !important;
+  }
+  [data-theme="dark"] .hero-glass-card,
+  [data-theme="dark"] .schedule-glass-card,
+  [data-theme="dark"] .notif-card,
+  [data-theme="dark"] .settings-glass-panel,
+  [data-theme="dark"] .day-selector-capsule,
+  [data-theme="dark"] .dosen-glass-card,
+  [data-theme="dark"] .modal-sheet,
+  [data-theme="dark"] .bottom-nav {
+    background: rgba(14, 23, 40, 0.98) !important;
+  }
+}
+
 body {
   min-height: 100vh;
-  min-height: -webkit-fill-available;
+  min-height: 100dvh;
   background-color: #F4F8FE;
   background-image: 
     radial-gradient(at 92% 6%, rgba(200, 228, 255, 0.6) 0px, transparent 50%),
@@ -241,23 +282,29 @@ body {
 }
 
 /* ==========================================================================
-   App Shell & Viewport Layout
+   App Shell & Viewport Layout (iOS & Android Responsive)
    ========================================================================== */
 .app-viewport {
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   justify-content: center;
+  overflow-x: hidden;
 }
 
-.app-container {
+.app-container,
+.app-shell {
   width: 100%;
   max-width: 480px;
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   position: relative;
-  padding-bottom: calc(var(--nav-height) + var(--safe-area-bottom) + 36px);
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
 }
 
 @media (min-width: 1024px) {
@@ -269,9 +316,11 @@ body {
     padding: 24px 0;
   }
   
-  .app-container {
+  .app-container,
+  .app-shell {
     max-width: 460px;
     min-height: calc(100vh - 48px);
+    min-height: calc(100dvh - 48px);
     border-radius: 36px;
     border: 1px solid rgba(255, 255, 255, 0.9);
     background-color: #F4F8FE;
@@ -1671,16 +1720,29 @@ input:checked + .slider::before {
   color: var(--color-primary-navy);
 }
 
+input[type="text"],
+input[type="search"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+textarea,
+select,
+.form-input {
+  font-size: 16px; /* Prevents auto-zoom in Safari iOS */
+  touch-action: manipulation;
+}
+
 .form-input {
   background: rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(191, 219, 254, 0.8);
   border-radius: var(--radius-btn);
   padding: 10px 14px;
   font-family: inherit;
-  font-size: 13.5px;
   color: var(--color-primary-navy);
   outline: none;
   transition: all var(--transition-fast);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .form-input:focus {
