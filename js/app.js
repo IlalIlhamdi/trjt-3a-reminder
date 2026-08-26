@@ -41,6 +41,53 @@
     } catch (e) {}
   }
 
+  // --- Fired H-10 Reminder Deduplication Manager ---
+  const H10_FIRED_STORAGE_KEY = 'trjt_h10_fired_v1';
+  const processingH10Keys = new Set();
+
+  function getFiredH10Reminders() {
+    try {
+      const raw = localStorage.getItem(H10_FIRED_STORAGE_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+    } catch (e) {}
+    return [];
+  }
+
+  function saveFiredH10Reminders(list) {
+    try {
+      localStorage.setItem(H10_FIRED_STORAGE_KEY, JSON.stringify(list));
+    } catch (e) {}
+  }
+
+  function hasH10ReminderFired(key) {
+    const list = getFiredH10Reminders();
+    return list.some((item) => (typeof item === 'string' ? item === key : item && item.key === key));
+  }
+
+  function recordH10ReminderFired(key) {
+    let list = getFiredH10Reminders();
+    const nowMs = Date.now();
+    const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+
+    list = list
+      .map((item) => (typeof item === 'string' ? { key: item, timestamp: nowMs } : item))
+      .filter((item) => item && item.key && (nowMs - (item.timestamp || 0) <= sevenDaysMs));
+
+    if (!list.some((item) => item.key === key)) {
+      list.push({ key, timestamp: nowMs });
+    }
+
+    if (list.length > 30) {
+      list = list.slice(list.length - 30);
+    }
+
+    saveFiredH10Reminders(list);
+  }
+
   const daysMap = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
   const monthsMap = [
     'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -635,28 +682,148 @@
     if (window.lucide) window.lucide.createIcons();
   };
 
-  function triggerH10Notification(courseName, roomCode, startTime, lecturerName) {
-    // Only internal mock push if not simulated
-    const newNotif = {
-      id: `notif-${Date.now()}`,
-      type: 'h10',
-      title: 'Kelas 10 Menit Lagi',
-      subject: courseName,
-      lecturer: getLecturerDisplay(lecturerName),
-      meta: `${startTime.replace(':', '.')} · ${roomCode}`,
-      time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.'),
-      read: false
-    };
-    state.notifications.unshift(newNotif);
-    saveNotificationsState();
-    renderNotifications();
+  async function processH10Reminder(scheduleData) {
+    if (!scheduleData) return;
+    if (scheduleData.isH10 !== true) return;
+    if (!scheduleData.nextUpcomingClass) return;
+    if (state.settings.h10Alert !== true) return;
+    if (typeof scheduleData.countdownMs !== 'number' || scheduleData.countdownMs <= 0 || scheduleData.countdownMs > 600000) return;
 
-    if (!timeProvider.isSimulated() && 'Notification' in window && Notification.permission === 'granted' && state.settings.h10Alert) {
-      new Notification(`🔔 Kelas 10 Menit Lagi: ${courseName}`, {
-        body: `Ruangan: ${roomCode} | Dosen: ${getLecturerDisplay(lecturerName)} | Jam: ${startTime}`,
-        icon: './assets/icons/app-icon.svg',
-        vibrate: [200, 100, 200]
-      });
+    const course = scheduleData.nextUpcomingClass;
+    if (!course || !course.id) return;
+
+    const now = scheduleData.now || timeProvider.now();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
+    const reminderKey = `${dateStr}|${course.id}|${course.startTime}`;
+
+    if (hasH10ReminderFired(reminderKey) || processingH10Keys.has(reminderKey)) {
+      return;
+    }
+
+    processingH10Keys.add(reminderKey);
+    recordH10ReminderFired(reminderKey);
+
+    try {
+      await triggerH10Notification(
+        course.courseName,
+        course.roomCode,
+        course.startTime,
+        course.lecturerName,
+        course.id,
+        reminderKey
+      );
+    } finally {
+      processingH10Keys.delete(reminderKey);
+    }
+  }
+
+  async function triggerH10Notification(courseName, roomCode, startTime, lecturerName, courseId, reminderKey) {
+    const formattedLecturer = getLecturerDisplay(lecturerName, null, courseName);
+    const nowObj = timeProvider ? timeProvider.now() : new Date();
+    const timeFormatted = nowObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.');
+
+    const notifId = reminderKey ? `notif-h10-${reminderKey.replace(/\|/g, '_')}` : `notif-${Date.now()}`;
+
+    // 1. Inbox record on Notifikasi page
+    const alreadyExists = state.notifications.some((n) => n.id === notifId);
+    if (!alreadyExists) {
+      const newNotif = {
+        id: notifId,
+        type: 'h10',
+        title: 'Kelas 10 Menit Lagi',
+        subject: courseName,
+        lecturer: formattedLecturer,
+        meta: `${(startTime || '').replace(':', '.')} · ${roomCode || ''}`,
+        time: timeFormatted,
+        read: false
+      };
+      state.notifications.unshift(newNotif);
+      saveNotificationsState();
+      renderNotifications();
+    }
+
+    const title = `🔔 Kelas 10 Menit Lagi: ${courseName}`;
+    const body = `Ruangan: ${roomCode} | Dosen: ${formattedLecturer} | Jam: ${startTime}`;
+    const tag = reminderKey || `h10-${courseId || courseName}-${startTime}`;
+
+    // 2. Notification API & Permission checks
+    if (!('Notification' in window)) {
+      console.warn('⚠️ Notification API tidak didukung pada browser/perangkat ini.');
+      if (window.lucide) window.lucide.createIcons();
+      return;
+    }
+
+    if (Notification.permission !== 'granted') {
+      console.warn(`⚠️ Izin notifikasi belum disetujui (Status: ${Notification.permission}). Pengingat kelas dicatat di notifikasi internal aplikasi.`);
+      if (window.lucide) window.lucide.createIcons();
+      return;
+    }
+
+    if (!state.settings.h10Alert) {
+      console.warn('ℹ️ Pengingat H-10 dinonaktifkan dalam pengaturan.');
+      if (window.lucide) window.lucide.createIcons();
+      return;
+    }
+
+    // 3. Service Worker notification first
+    let swDispatched = false;
+    if ('serviceWorker' in navigator) {
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        if (registration && typeof registration.showNotification === 'function') {
+          const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+          const notifOptions = {
+            body: body,
+            tag: tag,
+            renotify: false,
+            requireInteraction: true,
+            vibrate: [200, 100, 200],
+            data: {
+              url: './index.html',
+              type: 'h10',
+              scheduleId: courseId || null
+            }
+          };
+
+          if (!isIOS) {
+            notifOptions.icon = './assets/icons/app-icon.svg';
+            notifOptions.badge = './assets/icons/app-icon.svg';
+          }
+
+          await registration.showNotification(title, notifOptions);
+          swDispatched = true;
+        }
+      } catch (swErr) {
+        console.warn('⚠️ Service Worker showNotification fallback ke Notification:', swErr);
+      }
+    }
+
+    // 4. Fallback to new Notification
+    if (!swDispatched) {
+      try {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const options = {
+          body: body,
+          tag: tag,
+          vibrate: [200, 100, 200]
+        };
+        if (!isIOS) {
+          options.icon = './assets/icons/app-icon.svg';
+        }
+        new Notification(title, options);
+      } catch (nativeErr) {
+        console.warn('⚠️ Native Notification error:', nativeErr);
+      }
+    }
+
+    // 5. Sound chime if enabled
+    if (state.settings.soundEnabled && window.TRJT_FIREBASE && typeof window.TRJT_FIREBASE.playNotificationChime === 'function') {
+      try {
+        window.TRJT_FIREBASE.playNotificationChime();
+      } catch (e) {}
     }
 
     if (window.lucide) window.lucide.createIcons();
@@ -716,11 +883,12 @@
     // 2. Switches synchronization
     const switchH10 = document.getElementById('switch-h10');
     if (switchH10) {
-      switchH10.checked = notifStatus.reminderEnabled && notifStatus.code === 'active';
-      if (notifStatus.code === 'blocked') {
+      const isBlocked = notifStatus.code === 'blocked' || (('Notification' in window) && Notification.permission === 'denied');
+      if (isBlocked) {
         switchH10.checked = false;
         switchH10.disabled = true;
       } else {
+        switchH10.checked = state.settings.h10Alert;
         switchH10.disabled = false;
       }
     }
@@ -902,27 +1070,27 @@
       switchH10.addEventListener('change', async (e) => {
         const isChecked = e.target.checked;
         state.settings.h10Alert = isChecked;
+        localStorage.setItem('trjt_h10_enabled', isChecked ? 'true' : 'false');
 
         if (isChecked) {
           try {
-            if (window.TRJT_FIREBASE) {
-              await window.TRJT_FIREBASE.requestNotificationPermission(true);
-              showToast('✅ Pengingat H-10 berhasil diaktifkan', 'success');
-            } else {
-              if ('Notification' in window) await Notification.requestPermission();
-              localStorage.setItem('trjt_h10_enabled', 'true');
-              showToast('✅ Pengingat H-10 diaktifkan (Mode Lokal)', 'success');
+            if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+              await Notification.requestPermission();
             }
+            if (window.TRJT_FIREBASE) {
+              await window.TRJT_FIREBASE.updateDeviceSetting('reminderEnabled', true);
+              if (window.TRJT_FIREBASE.requestNotificationPermission) {
+                window.TRJT_FIREBASE.requestNotificationPermission(true).catch(() => {});
+              }
+            }
+            showToast('✅ Pengingat H-10 berhasil diaktifkan', 'success');
           } catch (err) {
-            e.target.checked = false;
-            state.settings.h10Alert = false;
-            showToast('⚠️ ' + err.message, 'error');
+            console.warn('H-10 permission request note:', err);
+            showToast('ℹ️ Pengingat H-10 diaktifkan', 'info');
           }
         } else {
           if (window.TRJT_FIREBASE) {
             await window.TRJT_FIREBASE.updateDeviceSetting('reminderEnabled', false);
-          } else {
-            localStorage.setItem('trjt_h10_enabled', 'false');
           }
           showToast('ℹ️ Pengingat H-10 dinonaktifkan', 'info');
         }
@@ -1393,6 +1561,8 @@
 
   function tick() {
     const scheduleData = evaluateScheduleState(timeProvider, window.TRJT_SCHEDULE);
+    void processH10Reminder(scheduleData).catch(console.error);
+
     renderHeader(scheduleData);
     renderHeroCard(scheduleData);
     renderQuickStats(scheduleData);
@@ -1441,6 +1611,7 @@
 
   // Export engine for developer testing
   window.evaluateScheduleState = evaluateScheduleState;
+  window.processH10Reminder = processH10Reminder;
   window.triggerH10Notification = triggerH10Notification;
   window.showToast = showToast;
   window.renderSettingsUI = renderSettingsUI;
