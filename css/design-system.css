@@ -1463,3 +1463,277 @@ input:checked + .slider::before {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* ==========================================================================
+   DAFTAR PIKET KELAS (DUTY ROSTER)
+   - Button Piket Action Card
+   - Piket Modal Sheet & Today Banner
+   - Kelompok I - V Glass Cards & Member Badges
+   ========================================================================== */
+.btn-piket-action {
+  width: 100%;
+  background: var(--color-surface-glass);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid var(--color-border-glass);
+  border-radius: var(--radius-card);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-glass-card);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--transition-fast);
+  text-align: left;
+}
+
+.btn-piket-action:hover {
+  background: var(--color-surface-glass-strong);
+  border-color: var(--color-border-hover);
+  transform: translateY(-1px);
+}
+
+.btn-piket-action:active {
+  transform: scale(0.99);
+}
+
+.btn-piket-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.btn-piket-icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--color-very-light-blue);
+  border: 1px solid rgba(191, 219, 254, 0.8);
+  color: var(--color-primary-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.btn-piket-text-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.btn-piket-title {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--color-primary-navy);
+}
+
+.btn-piket-subtitle {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn-piket-chevron {
+  color: var(--color-primary-blue);
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.piket-today-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--color-success-bg);
+  border: 1px solid var(--color-success-border);
+  color: var(--color-success-text);
+}
+
+/* Piket Today Banner Inside Modal */
+.piket-today-banner {
+  background: linear-gradient(135deg, rgba(235, 244, 254, 0.95), rgba(220, 238, 255, 0.85));
+  border: 1px solid rgba(191, 219, 254, 0.9);
+  border-radius: var(--radius-inner);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.piket-today-banner-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.piket-today-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-primary-blue);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.piket-today-group-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-primary-navy);
+}
+
+.piket-today-members-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.piket-member-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #FFFFFF;
+  border: 1px solid rgba(191, 219, 254, 0.8);
+  border-radius: var(--radius-full);
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary-navy);
+  box-shadow: 0 1px 3px rgba(15, 61, 145, 0.04);
+}
+
+.piket-member-chip-num {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-very-light-blue);
+  color: var(--color-primary-blue);
+  font-size: 10px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Piket Group Card */
+.piket-group-card {
+  background: var(--color-surface-glass);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid var(--color-border-glass);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  box-shadow: var(--shadow-glass-card);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all var(--transition-fast);
+}
+
+.piket-group-card.is-today {
+  border-color: rgba(47, 128, 237, 0.5);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 24px rgba(47, 128, 237, 0.12);
+}
+
+.piket-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.piket-group-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.piket-roman-box {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: var(--color-very-light-blue);
+  border: 1px solid rgba(191, 219, 254, 0.8);
+  color: var(--color-primary-blue);
+  font-weight: 700;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.piket-group-card.is-today .piket-roman-box {
+  background: var(--color-primary-blue);
+  color: #FFFFFF;
+  border-color: var(--color-primary-blue);
+}
+
+.piket-group-title {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--color-primary-navy);
+}
+
+.piket-day-chip {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.piket-members-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+@media (max-width: 360px) {
+  .piket-members-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.piket-member-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(244, 248, 254, 0.7);
+  border: 1px solid rgba(220, 235, 252, 0.8);
+  border-radius: 10px;
+}
+
+.piket-avatar-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-very-light-blue);
+  color: var(--color-primary-blue);
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.piket-member-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-primary-navy);
+  line-height: 1.25;
+}
+

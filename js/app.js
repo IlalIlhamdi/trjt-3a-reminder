@@ -1201,7 +1201,165 @@
         }
       });
     }
+
+    // Piket Schedule Modal Trigger & Handlers
+    const btnOpenPiket = document.getElementById('btn-open-piket-modal');
+    if (btnOpenPiket) btnOpenPiket.addEventListener('click', openPiketModal);
+
+    const btnClosePiket = document.getElementById('btn-close-piket-modal');
+    if (btnClosePiket) btnClosePiket.addEventListener('click', closePiketModal);
+
+    const modalPiket = document.getElementById('modal-piket-schedule');
+    if (modalPiket) {
+      modalPiket.addEventListener('click', (e) => {
+        if (e.target === modalPiket) closePiketModal();
+      });
+    }
+
+    document.querySelectorAll('#modal-piket-schedule [data-piket-filter]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const filterVal = btn.getAttribute('data-piket-filter') || 'all';
+        renderPiketModal(filterVal);
+      });
+    });
   }
+
+  // --- Daftar Piket Modal & Controller System ---
+  let activePiketFilter = 'all';
+
+  function getTodayPiketGroup() {
+    const todayDay = timeProvider.now().getDay(); // 0: Min, 1: Sen, 2: Sel, 3: Rab, 4: Kam, 5: Jum, 6: Sab
+    const piketList = window.TRJT_PIKET || (window.TRJT_SCHEDULE && window.TRJT_SCHEDULE.piket) || [];
+    return piketList.find(p => p.dayOfWeek === todayDay) || null;
+  }
+
+  function renderPiketBadge() {
+    const chipEl = document.getElementById('badge-piket-today-chip');
+    if (!chipEl) return;
+    const todayPiket = getTodayPiketGroup();
+    if (todayPiket) {
+      chipEl.innerText = `Hari ini: ${todayPiket.groupName}`;
+      chipEl.style.display = 'inline-flex';
+    } else {
+      chipEl.innerText = 'Libur piket';
+      chipEl.style.display = 'inline-flex';
+    }
+  }
+
+  function renderPiketModal(filterGroup = activePiketFilter) {
+    activePiketFilter = filterGroup;
+    const bannerEl = document.getElementById('piket-today-banner');
+    const containerEl = document.getElementById('piket-groups-container');
+    const piketList = window.TRJT_PIKET || (window.TRJT_SCHEDULE && window.TRJT_SCHEDULE.piket) || [];
+    const todayPiket = getTodayPiketGroup();
+    const todayDay = timeProvider.now().getDay();
+
+    // 1. Render Today's Banner
+    if (bannerEl) {
+      if (todayPiket) {
+        bannerEl.innerHTML = `
+          <div class="piket-today-banner-header">
+            <span class="piket-today-badge">
+              <i data-lucide="sparkles" style="width: 14px; height: 14px;"></i> Bertugas Hari Ini (${todayPiket.dayName})
+            </span>
+            <span class="piket-today-pill">${todayPiket.groupName}</span>
+          </div>
+          <p class="piket-today-group-name">Petugas Piket Hari Ini:</p>
+          <div class="piket-today-members-list">
+            ${todayPiket.members.map((name, idx) => `
+              <span class="piket-member-chip">
+                <span class="piket-member-chip-num">${idx + 1}</span>
+                <span>${escapeHtml(name)}</span>
+              </span>
+            `).join('')}
+          </div>
+        `;
+      } else {
+        bannerEl.innerHTML = `
+          <div class="piket-today-banner-header">
+            <span class="piket-today-badge" style="color: var(--color-text-secondary);">
+              <i data-lucide="coffee" style="width: 14px; height: 14px;"></i> Akhir Pekan / Libur
+            </span>
+          </div>
+          <p class="piket-today-group-name" style="font-size: 13px; font-weight: 500; color: var(--color-text-secondary);">
+            Tidak ada jadwal piket kelas untuk hari ini. Jadwal piket aktif Senin s/d Jumat.
+          </p>
+        `;
+      }
+    }
+
+    // 2. Render Groups List
+    if (containerEl) {
+      let filtered = piketList;
+      if (filterGroup !== 'all') {
+        const num = parseInt(filterGroup, 10);
+        filtered = piketList.filter(p => p.groupNumber === num);
+      }
+
+      if (filtered.length === 0) {
+        containerEl.innerHTML = `
+          <div class="empty-state-card" style="padding: 24px; text-align: center;">
+            <p style="font-weight: 600; font-size: 13px; color: var(--color-text-secondary);">Data kelompok tidak ditemukan.</p>
+          </div>
+        `;
+      } else {
+        containerEl.innerHTML = filtered.map((g) => {
+          const isToday = g.dayOfWeek === todayDay;
+          return `
+            <div class="piket-group-card ${isToday ? 'is-today' : ''}">
+              <div class="piket-group-header">
+                <div class="piket-group-title-wrap">
+                  <div class="piket-roman-box">${g.groupRoman}</div>
+                  <div>
+                    <h3 class="piket-group-title">${escapeHtml(g.groupName)}</h3>
+                    <span class="piket-day-chip">Hari ${g.dayName}</span>
+                  </div>
+                </div>
+                ${isToday ? `<span class="piket-today-pill">Hari Ini</span>` : ''}
+              </div>
+
+              <div class="piket-members-grid">
+                ${g.members.map((name, i) => `
+                  <div class="piket-member-item">
+                    <div class="piket-avatar-dot">${i + 1}</div>
+                    <span class="piket-member-name">${escapeHtml(name)}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    // Update filter pills active state
+    document.querySelectorAll('#modal-piket-schedule [data-piket-filter]').forEach((pill) => {
+      if (pill.getAttribute('data-piket-filter') === String(filterGroup)) {
+        pill.classList.add('active');
+      } else {
+        pill.classList.remove('active');
+      }
+    });
+
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  function openPiketModal() {
+    activePiketFilter = 'all';
+    renderPiketModal('all');
+    const modal = document.getElementById('modal-piket-schedule');
+    if (modal) modal.classList.add('is-open');
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  function closePiketModal() {
+    const modal = document.getElementById('modal-piket-schedule');
+    if (modal) modal.classList.remove('is-open');
+  }
+
+  window.openPiketModal = openPiketModal;
+  window.closePiketModal = closePiketModal;
+  window.renderPiketModal = renderPiketModal;
 
   // --- Course Materials Modal & Controller System ---
   let activeMaterialCourse = null;
@@ -1394,6 +1552,7 @@
     renderHeader(scheduleData);
     renderHeroCard(scheduleData);
     renderTodayTimeline(scheduleData);
+    renderPiketBadge();
 
     if (window.lucide) {
       window.lucide.createIcons();
@@ -1409,6 +1568,7 @@
     renderWeeklySchedule();
     renderNotifications();
     renderSettingsUI();
+    renderPiketBadge();
     tick();
 
     setInterval(tick, 1000);

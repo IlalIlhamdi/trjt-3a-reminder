@@ -212,6 +212,72 @@ const TRJT_SCHEDULE = {
     }
   ],
 
+  // Piket Schedule (Daftar Piket Kelas Kelompok I - V)
+  piket: [
+    {
+      groupNumber: 1,
+      groupRoman: 'I',
+      groupName: 'Kelompok I',
+      dayOfWeek: 1,
+      dayName: 'Senin',
+      members: [
+        'Aqil Ocean Difra',
+        'Renka Laura',
+        'Firlita Afianti',
+        'Afriansyah Sinamo'
+      ]
+    },
+    {
+      groupNumber: 2,
+      groupRoman: 'II',
+      groupName: 'Kelompok II',
+      dayOfWeek: 2,
+      dayName: 'Selasa',
+      members: [
+        'Lunna Auamara',
+        'Nazar Alfaraby',
+        'Rahmat Haikal',
+        'Muhammad Halfi Al Barizi'
+      ]
+    },
+    {
+      groupNumber: 3,
+      groupRoman: 'III',
+      groupName: 'Kelompok III',
+      dayOfWeek: 3,
+      dayName: 'Rabu',
+      members: [
+        'Syawal Fitriadi',
+        'Sarah Fonna',
+        'Muhammad Rais'
+      ]
+    },
+    {
+      groupNumber: 4,
+      groupRoman: 'IV',
+      groupName: 'Kelompok IV',
+      dayOfWeek: 4,
+      dayName: 'Kamis',
+      members: [
+        'Nesya Zikriya',
+        'Farhan Alfarisi',
+        'Ilal Ilhamdi'
+      ]
+    },
+    {
+      groupNumber: 5,
+      groupRoman: 'V',
+      groupName: 'Kelompok V',
+      dayOfWeek: 5,
+      dayName: 'Jumat',
+      members: [
+        'Durratul Hikmah',
+        'Suheil Maulana',
+        'Khairul Fajar Sidiq'
+      ]
+    }
+  ],
+
   // Notifications
   initialNotifications: [
     {
@@ -247,6 +313,10 @@ const TRJT_SCHEDULE = {
   ]
 };
 
+const TRJT_PIKET = TRJT_SCHEDULE.piket;
+
 window.roomMap = roomMap;
 window.lecturerMap = lecturerMap;
 window.TRJT_SCHEDULE = TRJT_SCHEDULE;
+window.TRJT_PIKET = TRJT_PIKET;
+
