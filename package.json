@@ -1,12 +1,8 @@
 {
   "name": "trjt-3a-reminder",
-  "version": "4.0.0",
+  "version": "4.3.0",
   "private": true,
   "type": "module",
-  "scripts": {
-    "build": "echo 'Build complete'",
-    "test": "node firebase/functions/test-reminder-engine.js"
-  },
   "dependencies": {
     "firebase-admin": "^12.0.0"
   }
