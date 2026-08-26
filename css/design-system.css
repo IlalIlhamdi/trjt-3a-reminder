@@ -796,16 +796,16 @@ body {
 }
 
 .schedule-glass-card {
-  background: var(--color-surface-glass);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 248, 255, 0.9) 100%);
   backdrop-filter: blur(20px) saturate(150%);
   -webkit-backdrop-filter: blur(20px) saturate(150%);
-  border: 1px solid var(--color-border-glass);
+  border: 1px solid rgba(255, 255, 255, 0.95);
   border-radius: var(--radius-card);
   padding: 16px 18px;
-  box-shadow: var(--shadow-glass-card);
+  box-shadow: 0 10px 24px -6px rgba(15, 61, 145, 0.08), 0 2px 6px rgba(15, 61, 145, 0.03), inset 0 1px 1px rgba(255, 255, 255, 1);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
@@ -813,23 +813,46 @@ body {
   transform: scale(0.99);
 }
 
-.schedule-meta-bar {
+.schedule-top-meta-row {
   display: flex;
   align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
 }
 
-.meta-chip-item {
+.schedule-time-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  background: rgba(47, 128, 237, 0.08);
+  border: 1px solid rgba(191, 219, 254, 0.8);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-primary-blue);
+  flex-shrink: 0;
+}
+
+.schedule-time-badge i {
+  width: 13px;
+  height: 13px;
+}
+
+.schedule-room-badge {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   font-size: 12px;
   font-weight: 600;
-  color: var(--color-text-secondary);
+  color: #475569;
+  max-width: 58%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.meta-chip-item i {
+.schedule-room-badge i {
   width: 13px;
   height: 13px;
   color: var(--color-primary-blue);
@@ -837,11 +860,11 @@ body {
 }
 
 .schedule-subject-heading {
-  font-size: 1.0625rem; /* 17px */
-  font-weight: 700;
+  font-size: 1.125rem; /* 18px */
+  font-weight: 800;
   color: var(--color-primary-navy);
   line-height: 1.35;
-  margin-top: 2px;
+  letter-spacing: -0.015em;
 }
 
 .schedule-lecturer-row {
@@ -849,7 +872,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-top: 2px;
+  padding-top: 2px;
 }
 
 .schedule-lecturer-info {
@@ -857,36 +880,46 @@ body {
   align-items: center;
   gap: 6px;
   font-size: 12.5px;
-  color: var(--color-text-secondary);
+  color: #334155;
   font-weight: 500;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .schedule-lecturer-info i {
-  width: 13px;
-  height: 13px;
-  color: var(--color-text-secondary);
+  width: 14px;
+  height: 14px;
+  color: var(--color-primary-blue);
   flex-shrink: 0;
 }
 
 .btn-schedule-mat {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  font-size: 11px;
+  gap: 5px;
+  padding: 5px 12px;
+  font-size: 11.5px;
   font-weight: 600;
   color: var(--color-primary-blue);
-  background: var(--color-very-light-blue);
-  border: 1px solid rgba(191, 219, 254, 0.8);
-  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(235, 244, 254, 1), rgba(219, 234, 254, 0.85));
+  border: 1px solid rgba(191, 219, 254, 0.9);
+  border-radius: 9px;
   cursor: pointer;
   transition: all var(--transition-fast);
   flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(47, 128, 237, 0.08);
 }
 
 .btn-schedule-mat:hover {
   background: var(--color-primary-blue);
   color: #FFFFFF;
+}
+
+.btn-schedule-mat:active {
+  transform: scale(0.95);
 }
 
 /* ==========================================================================

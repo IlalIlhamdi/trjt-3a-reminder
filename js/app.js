@@ -538,24 +538,20 @@
     listContainer.innerHTML = dayClasses
       .map((item) => {
         const cleanRoomName = item.roomName 
-          ? item.roomName.split('(')[0].replace('Gedung III Teknik Elektro Lt. 2', 'Gd. III Teknik Elektro Lt. 2').trim()
-          : 'Gd. III Teknik Elektro';
+          ? item.roomName.split('(')[0].replace('Gedung III Teknik Elektro Lt. 2', 'Gd. III Lt. 2').replace('Gedung III Teknik Elektro', 'Gd. III').trim()
+          : 'Gd. III';
 
         return `
           <div class="schedule-glass-card">
-            <div class="schedule-meta-bar">
-              <span class="meta-chip-item">
+            <div class="schedule-top-meta-row">
+              <div class="schedule-time-badge">
                 <i data-lucide="clock"></i>
-                ${item.startTime.replace(':', '.')} – ${item.endTime.replace(':', '.')}
-              </span>
-              <span class="meta-chip-item">
-                <i data-lucide="door-closed"></i>
-                ${item.roomCode}
-              </span>
-              <span class="meta-chip-item">
-                <i data-lucide="landmark"></i>
-                ${cleanRoomName}
-              </span>
+                <span>${item.startTime.replace(':', '.')} – ${item.endTime.replace(':', '.')}</span>
+              </div>
+              <div class="schedule-room-badge">
+                <i data-lucide="map-pin"></i>
+                <span>${item.roomCode} · ${cleanRoomName}</span>
+              </div>
             </div>
             
             <h3 class="schedule-subject-heading">${item.courseName}</h3>
@@ -566,7 +562,7 @@
                 <span>${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}</span>
               </div>
               <button class="btn-schedule-mat" onclick="window.openCourseMaterialsModal('${item.id}', '${item.courseName.replace(/'/g, "\\'")}', '${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName).replace(/'/g, "\\'")}', '${item.roomCode}')">
-                <i data-lucide="folder" style="width: 12px; height: 12px;"></i> Materi
+                <i data-lucide="folder" style="width: 13px; height: 13px;"></i> Materi
               </button>
             </div>
           </div>
