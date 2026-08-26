@@ -14,7 +14,7 @@
   })();
 
   // --- Version check & Cache Storage Auto-Purge ---
-  const CURRENT_APP_VERSION = '4.2';
+  const CURRENT_APP_VERSION = '4.3';
   try {
     const savedVer = localStorage.getItem('trjt_app_version');
     if (savedVer !== CURRENT_APP_VERSION) {
@@ -1234,16 +1234,13 @@
   }
 
   function renderPiketBadge() {
-    const chipEl = document.getElementById('badge-piket-today-chip');
-    if (!chipEl) return;
     const todayPiket = getTodayPiketGroup();
-    if (todayPiket) {
-      chipEl.innerText = `Hari ini: ${todayPiket.groupName}`;
-      chipEl.style.display = 'inline-flex';
-    } else {
-      chipEl.innerText = 'Libur piket';
-      chipEl.style.display = 'inline-flex';
-    }
+    const badgeText = todayPiket ? `Hari ini: ${todayPiket.groupName}` : 'Libur piket';
+
+    document.querySelectorAll('#badge-piket-today-chip, .badge-piket-today-chip').forEach((el) => {
+      el.innerText = badgeText;
+      el.style.display = 'inline-flex';
+    });
   }
 
   function renderPiketModal(filterGroup = activePiketFilter) {
