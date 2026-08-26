@@ -14,7 +14,7 @@
   })();
 
   // --- Version check & Cache Storage Auto-Purge ---
-  const CURRENT_APP_VERSION = '4.4';
+  const CURRENT_APP_VERSION = '4.5';
   try {
     const savedVer = localStorage.getItem('trjt_app_version');
     if (savedVer !== CURRENT_APP_VERSION) {
@@ -47,7 +47,8 @@
     settings: {
       h10Alert: localStorage.getItem('trjt_h10_enabled') !== 'false',
       soundEnabled: localStorage.getItem('trjt_sound_enabled') !== 'false',
-      vibrationEnabled: localStorage.getItem('trjt_vibration_enabled') !== 'false'
+      vibrationEnabled: localStorage.getItem('trjt_vibration_enabled') !== 'false',
+      theme: localStorage.getItem('trjt_theme') || 'light'
     }
   };
 
@@ -1256,6 +1257,20 @@
         renderPiketModal(filterVal);
       });
     });
+
+    // Theme selector row & modal handlers
+    const rowTheme = document.getElementById('row-theme-setting');
+    if (rowTheme) rowTheme.addEventListener('click', openThemeModal);
+
+    const btnCloseTheme = document.getElementById('btn-close-theme-modal');
+    if (btnCloseTheme) btnCloseTheme.addEventListener('click', closeThemeModal);
+
+    const modalTheme = document.getElementById('modal-theme-selector');
+    if (modalTheme) {
+      modalTheme.addEventListener('click', (e) => {
+        if (e.target === modalTheme) closeThemeModal();
+      });
+    }
   }
 
   // --- HTML sanitization helper ---
@@ -1412,6 +1427,94 @@
   window.openPiketModal = openPiketModal;
   window.closePiketModal = closePiketModal;
   window.renderPiketModal = renderPiketModal;
+
+  // --- Theme Management System (Terang, Gelap, Sistem) ---
+  function applyTheme(themeName = state.settings.theme || 'light') {
+    state.settings.theme = themeName;
+    try {
+      localStorage.setItem('trjt_theme', themeName);
+    } catch (e) {}
+
+    let effective = themeName;
+    if (themeName === 'system') {
+      effective = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+    }
+
+    if (document.documentElement) {
+      document.documentElement.setAttribute('data-theme', effective);
+    }
+    if (document.body) {
+      document.body.setAttribute('data-theme', effective);
+    }
+
+    // Update settings UI text & icon
+    const themeVal = document.getElementById('settings-theme-value');
+    const themeIcon = document.getElementById('settings-theme-icon');
+    if (themeVal) {
+      themeVal.innerText = themeName === 'dark' ? 'Gelap' : (themeName === 'system' ? 'Sistem' : 'Terang');
+    }
+    if (themeIcon && typeof themeIcon.setAttribute === 'function') {
+      themeIcon.setAttribute('data-lucide', effective === 'dark' ? 'moon' : 'sun');
+    }
+
+    // Update checkmark in modal
+    ['light', 'dark', 'system'].forEach((mode) => {
+      const checkEl = document.getElementById(`theme-check-${mode}`);
+      if (checkEl) {
+        checkEl.style.display = (mode === themeName) ? 'block' : 'none';
+      }
+    });
+
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  function selectTheme(themeName) {
+    applyTheme(themeName);
+    closeThemeModal();
+    const label = themeName === 'dark' ? 'Tema Gelap' : (themeName === 'system' ? 'Tema Sistem' : 'Tema Terang');
+    showToast(`✨ ${label} diaktifkan`, 'info');
+  }
+
+  function cycleTheme() {
+    const current = state.settings.theme || 'light';
+    const next = current === 'light' ? 'dark' : (current === 'dark' ? 'system' : 'light');
+    selectTheme(next);
+  }
+
+  function openThemeModal() {
+    const modal = document.getElementById('modal-theme-selector');
+    if (modal) {
+      modal.classList.add('is-open');
+      modal.style.display = 'flex';
+    }
+    applyTheme(state.settings.theme);
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  function closeThemeModal() {
+    const modal = document.getElementById('modal-theme-selector');
+    if (modal) {
+      modal.classList.remove('is-open');
+      modal.style.display = 'none';
+    }
+  }
+
+  window.selectTheme = selectTheme;
+  window.openThemeModal = openThemeModal;
+  window.closeThemeModal = closeThemeModal;
+  window.cycleTheme = cycleTheme;
+  window.applyTheme = applyTheme;
+
+  // Listen for system color-scheme changes
+  if (typeof window !== 'undefined' && window.matchMedia) {
+    try {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        if (state.settings.theme === 'system') {
+          applyTheme('system');
+        }
+      });
+    } catch (e) {}
+  }
 
   // --- Course Materials Modal & Controller System ---
   let activeMaterialCourse = null;
@@ -1613,6 +1716,7 @@
 
   function init() {
     setupEvents();
+    applyTheme(state.settings.theme);
 
     const todayDay = timeProvider.now().getDay();
     state.selectedWeeklyDayId = (todayDay >= 1 && todayDay <= 5) ? todayDay : 1;

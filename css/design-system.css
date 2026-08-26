@@ -77,6 +77,111 @@
 }
 
 /* ==========================================================================
+   Dark Theme Tokens & Adaptations
+   ========================================================================== */
+[data-theme="dark"] {
+  --color-primary-navy: #F8FAFC;
+  --color-deep-blue: #60A5FA;
+  --color-primary-blue: #3B82F6;
+  --color-blue-hover: #60A5FA;
+  --color-soft-blue: rgba(59, 130, 246, 0.2);
+  --color-very-light-blue: rgba(59, 130, 246, 0.15);
+  --color-light-sky: rgba(30, 58, 138, 0.3);
+
+  --color-app-bg: #090E17;
+  --color-surface-glass: rgba(18, 28, 48, 0.78);
+  --color-surface-glass-strong: rgba(24, 38, 64, 0.92);
+  --color-surface-glass-active: rgba(30, 48, 80, 0.85);
+  --color-surface-card: rgba(18, 28, 48, 0.82);
+  --color-border-glass: rgba(255, 255, 255, 0.12);
+  --color-border-subtle: rgba(255, 255, 255, 0.08);
+  --color-border-hover: rgba(96, 165, 250, 0.4);
+
+  --color-text-primary: #F8FAFC;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #64748B;
+  --color-text-blue: #60A5FA;
+
+  --shadow-glass-subtle: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --shadow-glass-card: 0 10px 30px rgba(0, 0, 0, 0.4);
+  --shadow-glass-hero: 0 16px 36px rgba(0, 0, 0, 0.5);
+  --shadow-bottom-nav: 0 -8px 24px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] body {
+  background-color: #090E17;
+  background-image: 
+    radial-gradient(at 90% 6%, rgba(30, 58, 138, 0.35) 0px, transparent 55%),
+    radial-gradient(at 10% 94%, rgba(15, 23, 42, 0.8) 0px, transparent 50%),
+    radial-gradient(at 50% 30%, rgba(9, 14, 23, 0.95) 0px, transparent 100%);
+  color: #F8FAFC;
+}
+
+[data-theme="dark"] .app-viewport {
+  background-color: #05080E;
+}
+
+[data-theme="dark"] .app-header {
+  background: rgba(9, 14, 23, 0.85);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .btn-header-bell {
+  background: rgba(24, 38, 64, 0.8);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #F8FAFC;
+}
+
+[data-theme="dark"] .bottom-nav {
+  background: rgba(9, 14, 23, 0.92);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .hero-glass-card {
+  background: linear-gradient(145deg, rgba(24, 38, 64, 0.95) 0%, rgba(15, 26, 46, 0.92) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .schedule-glass-card,
+[data-theme="dark"] .btn-piket-action,
+[data-theme="dark"] .today-class-card,
+[data-theme="dark"] .settings-glass-panel,
+[data-theme="dark"] .notif-card,
+[data-theme="dark"] .day-selector-capsule {
+  background: linear-gradient(145deg, rgba(20, 32, 54, 0.9) 0%, rgba(14, 23, 40, 0.92) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 24px -6px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .modal-sheet {
+  background: rgba(14, 23, 40, 0.95);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+[data-theme="dark"] .modal-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .hero-meta-chip,
+[data-theme="dark"] .schedule-lecturer-info,
+[data-theme="dark"] .schedule-room-badge {
+  color: #94A3B8;
+}
+
+[data-theme="dark"] .filter-glass-pill {
+  background: rgba(24, 38, 64, 0.7);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #94A3B8;
+}
+
+[data-theme="dark"] .filter-glass-pill.active {
+  background: rgba(59, 130, 246, 0.25);
+  border-color: #3B82F6;
+  color: #60A5FA;
+}
+
+/* ==========================================================================
    CSS Reset & Base
    ========================================================================== */
 *, *::before, *::after {
@@ -1595,6 +1700,29 @@ input:checked + .slider::before {
   transition: all var(--transition-fast);
   text-align: left;
   margin-bottom: 20px;
+}
+
+.theme-option-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: var(--radius-inner);
+  background: var(--color-surface-glass);
+  border: 1px solid var(--color-border-subtle);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--transition-fast);
+}
+
+.theme-option-item:hover {
+  background: var(--color-surface-glass-strong);
+  border-color: var(--color-border-hover);
+}
+
+.theme-option-item:active {
+  transform: scale(0.98);
 }
 
 .btn-piket-action:hover {
