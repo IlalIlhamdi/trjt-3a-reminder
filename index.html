@@ -141,9 +141,9 @@
     .notif-top-action-row { display: flex; align-items: center; justify-content: space-between; }
     .notif-subtitle-text { font-size: 13px; color: var(--color-text-secondary); margin-top: 2px; }
     .btn-mark-read-link { background: none; border: none; color: var(--color-primary-blue); font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; padding: 4px 6px; }
-    .filter-pills-bar { display: flex; align-items: center; gap: 8px; margin-top: 2px; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; padding: 4px 2px; -webkit-overflow-scrolling: touch; }
+    .filter-pills-bar { display: flex; align-items: center; gap: 8px; margin-top: 2px; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; padding: 6px 2px; -webkit-overflow-scrolling: touch; flex-shrink: 0; width: 100%; box-sizing: border-box; min-height: 44px; }
     .filter-pills-bar::-webkit-scrollbar { display: none; }
-    .filter-glass-pill { padding: 7px 16px; border-radius: var(--radius-full); font-size: 12.5px; font-weight: 600; font-family: inherit; cursor: pointer; background: rgba(255, 255, 255, 0.85); border: 1px solid var(--color-border-subtle); color: var(--color-text-secondary); white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; }
+    .filter-glass-pill { padding: 8px 16px; border-radius: var(--radius-full); font-size: 12.5px; font-weight: 600; font-family: inherit; cursor: pointer; background: rgba(255, 255, 255, 0.85); border: 1px solid var(--color-border-subtle); color: var(--color-text-secondary); white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; min-height: 36px; box-sizing: border-box; line-height: 1; }
     .filter-glass-pill.active { background: var(--color-primary-blue); border-color: var(--color-primary-blue); color: #FFFFFF; font-weight: 700; box-shadow: 0 3px 10px rgba(47, 128, 237, 0.35); }
     .notif-cards-list { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
     .notif-card { background: var(--color-surface-glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--color-border-glass); border-radius: var(--radius-card); padding: 14px 16px; box-shadow: 0 10px 30px rgba(15, 61, 145, 0.06); display: flex; align-items: flex-start; gap: 12px; cursor: pointer; }
@@ -784,7 +784,7 @@
         </div>
 
         <!-- Group Filter Buttons -->
-        <div class="filter-pills-bar" style="overflow-x: auto; padding-bottom: 2px;">
+        <div class="filter-pills-bar">
           <button class="filter-glass-pill active" data-piket-filter="all" onclick="renderPiketModal('all')">Semua</button>
           <button class="filter-glass-pill" data-piket-filter="1" onclick="renderPiketModal('1')">Kel. I (Sen)</button>
           <button class="filter-glass-pill" data-piket-filter="2" onclick="renderPiketModal('2')">Kel. II (Sel)</button>
@@ -909,13 +909,13 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
-  <script src="./js/firebase-config.js?v=5.1"></script>
+  <script src="./js/firebase-config.js?v=5.2"></script>
 
   <!-- Application Scripts -->
-  <script src="./js/time-provider.js?v=5.1"></script>
-  <script src="./js/data.js?v=5.1"></script>
-  <script src="./js/drive-service.js?v=5.1"></script>
-  <script src="./js/material-service.js?v=5.1"></script>
-  <script src="./js/app.js?v=5.1"></script>
+  <script src="./js/time-provider.js?v=5.2"></script>
+  <script src="./js/data.js?v=5.2"></script>
+  <script src="./js/drive-service.js?v=5.2"></script>
+  <script src="./js/material-service.js?v=5.2"></script>
+  <script src="./js/app.js?v=5.2"></script>
 </body>
 </html>

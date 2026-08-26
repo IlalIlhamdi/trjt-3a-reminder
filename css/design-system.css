@@ -1103,8 +1103,12 @@ body {
   overflow-x: auto;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
-  padding: 4px 2px;
+  padding: 6px 2px;
   -webkit-overflow-scrolling: touch;
+  flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 44px;
 }
 
 .filter-pills-bar::-webkit-scrollbar {
@@ -1112,7 +1116,7 @@ body {
 }
 
 .filter-glass-pill {
-  padding: 7px 16px;
+  padding: 8px 16px;
   border-radius: var(--radius-full);
   font-size: 12.5px;
   font-weight: 600;
@@ -1127,6 +1131,9 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-height: 36px;
+  box-sizing: border-box;
+  line-height: 1;
 }
 
 .filter-glass-pill:hover:not(.active) {
