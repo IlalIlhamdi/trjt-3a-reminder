@@ -1,15 +1,15 @@
-const CACHE_NAME = 'trjt3a-reminder-v4.8';
+const CACHE_NAME = 'trjt3a-reminder-v4.9';
 const ASSETS = [
   './',
   './index.html',
   './css/design-system.css',
-  './css/design-system.css?v=4.8',
-  './js/firebase-config.js?v=4.8',
-  './js/drive-service.js?v=4.8',
-  './js/material-service.js?v=4.8',
-  './js/time-provider.js?v=4.8',
-  './js/data.js?v=4.8',
-  './js/app.js?v=4.8',
+  './css/design-system.css?v=4.9',
+  './js/firebase-config.js?v=4.9',
+  './js/drive-service.js?v=4.9',
+  './js/material-service.js?v=4.9',
+  './js/time-provider.js?v=4.9',
+  './js/data.js?v=4.9',
+  './js/app.js?v=4.9',
   './manifest.json',
   './favicon.svg',
   './assets/icons/favicon.svg',
