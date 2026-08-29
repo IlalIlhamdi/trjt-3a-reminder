@@ -212,14 +212,12 @@ const TRJT_SCHEDULE = {
     }
   ],
 
-  // Piket Schedule (Daftar Piket Kelas Kelompok I - V)
+  // Piket Schedule (Daftar Piket Kelas Kelompok I - V - Rotasi Mingguan)
   piket: [
     {
       groupNumber: 1,
       groupRoman: 'I',
       groupName: 'Kelompok I',
-      dayOfWeek: 1,
-      dayName: 'Senin',
       members: [
         'Aqil Ocean Difra',
         'Renka Laura',
@@ -231,8 +229,6 @@ const TRJT_SCHEDULE = {
       groupNumber: 2,
       groupRoman: 'II',
       groupName: 'Kelompok II',
-      dayOfWeek: 2,
-      dayName: 'Selasa',
       members: [
         'Lunna Auamara',
         'Nazar Alfaraby',
@@ -244,8 +240,6 @@ const TRJT_SCHEDULE = {
       groupNumber: 3,
       groupRoman: 'III',
       groupName: 'Kelompok III',
-      dayOfWeek: 3,
-      dayName: 'Rabu',
       members: [
         'Syawal Fitriadi',
         'Sarah Fonna',
@@ -256,8 +250,6 @@ const TRJT_SCHEDULE = {
       groupNumber: 4,
       groupRoman: 'IV',
       groupName: 'Kelompok IV',
-      dayOfWeek: 4,
-      dayName: 'Kamis',
       members: [
         'Nesya Zikriya',
         'Farhan Alfarisi',
@@ -268,8 +260,6 @@ const TRJT_SCHEDULE = {
       groupNumber: 5,
       groupRoman: 'V',
       groupName: 'Kelompok V',
-      dayOfWeek: 5,
-      dayName: 'Jumat',
       members: [
         'Durratul Hikmah',
         'Suheil Maulana',
@@ -277,6 +267,13 @@ const TRJT_SCHEDULE = {
       ]
     }
   ],
+
+  // Konfigurasi Rotasi Piket Mingguan: 1 kelompok bertugas selama 1 minggu (Senin - Jumat)
+  // Acuan: Pekan 24 - 30 Agustus 2026 adalah giliran Kelompok II
+  piketRotation: {
+    referenceMonday: '2026-08-24',
+    referenceGroupNumber: 2
+  },
 
   // Notifications
   initialNotifications: [

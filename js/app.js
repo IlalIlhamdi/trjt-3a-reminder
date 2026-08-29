@@ -1318,18 +1318,71 @@
       .replace(/'/g, '&#039;');
   }
 
-  // --- Daftar Piket Modal & Controller System ---
+  // --- Daftar Piket Modal & Controller System (Rotasi Mingguan: 1 Kelompok / Minggu) ---
   let activePiketFilter = 'all';
 
-  function getTodayPiketGroup() {
-    const todayDay = timeProvider.now().getDay(); // 0: Min, 1: Sen, 2: Sel, 3: Rab, 4: Kam, 5: Jum, 6: Sab
+  function getCurrentWeekPiketInfo(targetDate) {
     const piketList = window.TRJT_PIKET || (window.TRJT_SCHEDULE && window.TRJT_SCHEDULE.piket) || [];
-    return piketList.find(p => p.dayOfWeek === todayDay) || null;
+    if (!piketList.length) return null;
+
+    const rotationConfig = (window.TRJT_SCHEDULE && window.TRJT_SCHEDULE.piketRotation) || {
+      referenceMonday: '2026-08-24',
+      referenceGroupNumber: 2
+    };
+
+    const nowObj = targetDate ? new Date(targetDate) : (timeProvider ? timeProvider.now() : new Date());
+    const day = nowObj.getDay(); // 0: Min, 1: Sen, 2: Sel, 3: Rab, 4: Kam, 5: Jum, 6: Sab
+    const diffToMonday = (day === 0 ? -6 : 1 - day);
+
+    // Calculate Monday of the target week
+    const monday = new Date(nowObj);
+    monday.setDate(nowObj.getDate() + diffToMonday);
+    monday.setHours(0, 0, 0, 0);
+
+    // Reference Monday
+    let refMonParts = [2026, 8, 24];
+    if (rotationConfig.referenceMonday) {
+      const parts = rotationConfig.referenceMonday.split('-').map(Number);
+      if (parts.length === 3) refMonParts = parts;
+    }
+    const refMonday = new Date(refMonParts[0], refMonParts[1] - 1, refMonParts[2]);
+    refMonday.setHours(0, 0, 0, 0);
+
+    const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+    const diffWeeks = Math.round((monday.getTime() - refMonday.getTime()) / msPerWeek);
+
+    // Reference group index (0-based)
+    const refIndex = (rotationConfig.referenceGroupNumber || 2) - 1;
+    const totalGroups = piketList.length;
+    const currentGroupIndex = ((refIndex + diffWeeks) % totalGroups + totalGroups) % totalGroups;
+    const currentGroup = piketList[currentGroupIndex] || piketList[0];
+
+    const isWeekend = (day === 0 || day === 6);
+
+    const friday = new Date(monday);
+    friday.setDate(monday.getDate() + 4);
+
+    return {
+      group: currentGroup,
+      groupIndex: currentGroupIndex,
+      isWeekend,
+      dayOfWeek: day,
+      mondayDate: monday,
+      fridayDate: friday,
+      weekDiff: diffWeeks
+    };
+  }
+
+  function getTodayPiketGroup() {
+    const info = getCurrentWeekPiketInfo();
+    return info ? info.group : null;
   }
 
   function renderPiketBadge() {
-    const todayPiket = getTodayPiketGroup();
-    const badgeText = todayPiket ? `Hari ini: ${todayPiket.groupName}` : 'Libur piket';
+    const info = getCurrentWeekPiketInfo();
+    if (!info || !info.group) return;
+
+    const badgeText = `Minggu ini: ${info.group.groupName}`;
 
     document.querySelectorAll('#badge-piket-today-chip, .badge-piket-today-chip').forEach((el) => {
       el.innerText = badgeText;
@@ -1342,41 +1395,43 @@
     const bannerEl = document.getElementById('piket-today-banner');
     const containerEl = document.getElementById('piket-groups-container');
     const piketList = window.TRJT_PIKET || (window.TRJT_SCHEDULE && window.TRJT_SCHEDULE.piket) || [];
-    const todayPiket = getTodayPiketGroup();
-    const todayDay = timeProvider.now().getDay();
+    const info = getCurrentWeekPiketInfo();
+    const activeGroup = info ? info.group : null;
+    const isWeekend = info ? info.isWeekend : false;
 
-    // 1. Render Today's Banner
-    if (bannerEl) {
-      if (todayPiket) {
-        bannerEl.innerHTML = `
-          <div class="piket-today-banner-header">
-            <span class="piket-today-badge">
-              <i data-lucide="sparkles" style="width: 14px; height: 14px;"></i> Bertugas Hari Ini (${todayPiket.dayName})
+    // 1. Render Active Week Hero Banner
+    if (bannerEl && activeGroup) {
+      const statusTitle = isWeekend
+        ? 'Libur Akhir Pekan · Bertugas Pekan Ini:'
+        : 'Bertugas Pekan Ini (Senin – Jumat):';
+
+      const badgeHeader = isWeekend
+        ? `<span class="piket-today-badge" style="color: var(--color-text-secondary);">
+             <i data-lucide="coffee" style="width: 14px; height: 14px;"></i> Bertugas Pekan Ini (Akhir Pekan)
+           </span>`
+        : `<span class="piket-today-badge">
+             <i data-lucide="sparkles" style="width: 14px; height: 14px;"></i> Bertugas Pekan Ini (Aktif)
+           </span>`;
+
+      bannerEl.innerHTML = `
+        <div class="piket-today-banner-header">
+          ${badgeHeader}
+          <span class="piket-today-pill" style="font-weight: 800;">${escapeHtml(activeGroup.groupName)}</span>
+        </div>
+        <p class="piket-today-group-name">${statusTitle}</p>
+        <div class="piket-today-members-list">
+          ${activeGroup.members.map((name, idx) => `
+            <span class="piket-member-chip">
+              <span class="piket-member-chip-num">${idx + 1}</span>
+              <span>${escapeHtml(name)}</span>
             </span>
-            <span class="piket-today-pill">${todayPiket.groupName}</span>
-          </div>
-          <p class="piket-today-group-name">Petugas Piket Hari Ini:</p>
-          <div class="piket-today-members-list">
-            ${todayPiket.members.map((name, idx) => `
-              <span class="piket-member-chip">
-                <span class="piket-member-chip-num">${idx + 1}</span>
-                <span>${escapeHtml(name)}</span>
-              </span>
-            `).join('')}
-          </div>
-        `;
-      } else {
-        bannerEl.innerHTML = `
-          <div class="piket-today-banner-header">
-            <span class="piket-today-badge" style="color: var(--color-text-secondary);">
-              <i data-lucide="coffee" style="width: 14px; height: 14px;"></i> Akhir Pekan / Libur
-            </span>
-          </div>
-          <p class="piket-today-group-name" style="font-size: 13px; font-weight: 500; color: var(--color-text-secondary);">
-            Tidak ada jadwal piket kelas untuk hari ini. Jadwal piket aktif Senin s/d Jumat.
-          </p>
-        `;
-      }
+          `).join('')}
+        </div>
+        <div style="font-size: 11.5px; color: var(--color-text-secondary); margin-top: 4px; display: flex; align-items: center; gap: 4px;">
+          <i data-lucide="calendar-range" style="width: 13px; height: 13px; flex-shrink: 0;"></i>
+          <span>Piket bergilir 1 kelompok per minggu penuh (Senin – Jumat).</span>
+        </div>
+      `;
     }
 
     // 2. Render Groups List
@@ -1395,18 +1450,21 @@
         `;
       } else {
         containerEl.innerHTML = filtered.map((g) => {
-          const isToday = g.dayOfWeek === todayDay;
+          const isCurrentWeek = activeGroup && g.groupNumber === activeGroup.groupNumber;
           return `
-            <div class="piket-group-card ${isToday ? 'is-today' : ''}">
+            <div class="piket-group-card ${isCurrentWeek ? 'is-today' : ''}">
               <div class="piket-group-header">
                 <div class="piket-group-title-wrap">
                   <div class="piket-roman-box">${g.groupRoman}</div>
                   <div>
                     <h3 class="piket-group-title">${escapeHtml(g.groupName)}</h3>
-                    <span class="piket-day-chip">Hari ${g.dayName}</span>
+                    <span class="piket-day-chip">Piket 1 Minggu (Senin – Jumat)</span>
                   </div>
                 </div>
-                ${isToday ? `<span class="piket-today-pill">Hari Ini</span>` : ''}
+                ${isCurrentWeek
+                  ? `<span class="piket-today-pill" style="font-weight: 700;">Minggu Ini</span>`
+                  : `<span style="font-size: 11.5px; color: var(--color-text-secondary); font-weight: 600;">${g.members.length} Anggota</span>`
+                }
               </div>
 
               <div class="piket-members-grid">
@@ -1432,7 +1490,9 @@
       }
     });
 
-    if (window.lucide) window.lucide.createIcons();
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons();
+    }
   }
 
   function openPiketModal() {
@@ -1447,7 +1507,9 @@
       modal.classList.add('is-open');
       modal.style.display = 'flex';
     }
-    if (window.lucide) window.lucide.createIcons();
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons();
+    }
   }
 
   function closePiketModal() {
@@ -1982,12 +2044,17 @@
     }
   }
 
-  // Export engine for developer testing
+  // Export engine and modals for testing & global triggers
   window.evaluateScheduleState = evaluateScheduleState;
   window.processH10Reminder = processH10Reminder;
   window.triggerH10Notification = triggerH10Notification;
   window.showToast = showToast;
   window.renderSettingsUI = renderSettingsUI;
+  window.openPiketModal = openPiketModal;
+  window.closePiketModal = closePiketModal;
+  window.renderPiketModal = renderPiketModal;
+  window.renderPiketBadge = renderPiketBadge;
+  window.getCurrentWeekPiketInfo = getCurrentWeekPiketInfo;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

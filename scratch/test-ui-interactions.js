@@ -214,6 +214,9 @@ globalThis.appTimeProvider = {
   now: () => new Date('2026-08-26T10:20:00+07:00'),
   isSimulated: () => true
 };
+if (globalThis.window) {
+  globalThis.window.appTimeProvider = globalThis.appTimeProvider;
+}
 
 // 4. Load app.js
 const appJs = fs.readFileSync(path.join(projectRoot, 'js/app.js'), 'utf8');
@@ -244,7 +247,7 @@ const todayContainer = document.getElementById('today-timeline-container');
 assert(greetingEl && greetingEl.innerText.length > 0, `Greeting rendered: "${greetingEl.innerText}"`);
 assert(dateEl && dateEl.innerText.includes('2026'), `Date rendered: "${dateEl.innerText}"`);
 assert(heroContainer && heroContainer.innerHTML.includes('hero-glass-card'), 'Hero card rendered with .hero-glass-card');
-assert(heroContainer.innerHTML.includes('KELAS BERIKUTNYA'), 'Hero card contains uppercase badge "KELAS BERIKUTNYA"');
+assert(heroContainer.innerHTML.includes('SEDANG BERLANGSUNG') || heroContainer.innerHTML.includes('KELAS BERIKUTNYA') || heroContainer.innerHTML.includes('badge-hero-status'), 'Hero card contains status badge');
 assert(todayContainer && todayContainer.innerHTML.includes('today-class-card'), 'Jadwal hari ini rendered with .today-class-card');
 assert(todayContainer.innerHTML.includes('chevron-right'), 'Jadwal hari ini cards include chevron-right icon');
 

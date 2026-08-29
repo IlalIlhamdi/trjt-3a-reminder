@@ -17,43 +17,37 @@ global.window = {
         groupNumber: 1,
         groupName: "Kelompok I",
         groupRoman: "I",
-        dayOfWeek: 1,
-        dayName: "Senin",
         members: ["Aqil Ocean Difra", "Renka Laura", "Firlita Afianti", "Afriansyah Sinamo"]
       },
       {
         groupNumber: 2,
         groupName: "Kelompok II",
         groupRoman: "II",
-        dayOfWeek: 2,
-        dayName: "Selasa",
         members: ["Lunna Auamara", "Nazar Alfaraby", "Rahmat Haikal", "Muhammad Halfi Al Barizi"]
       },
       {
         groupNumber: 3,
         groupName: "Kelompok III",
         groupRoman: "III",
-        dayOfWeek: 3,
-        dayName: "Rabu",
         members: ["Syawal Fitriadi", "Sarah Fonna", "Muhammad Rais"]
       },
       {
         groupNumber: 4,
         groupName: "Kelompok IV",
         groupRoman: "IV",
-        dayOfWeek: 4,
-        dayName: "Kamis",
         members: ["Nesya Zikriya", "Farhan Alfarisi", "Ilal Ilhamdi"]
       },
       {
         groupNumber: 5,
         groupName: "Kelompok V",
         groupRoman: "V",
-        dayOfWeek: 5,
-        dayName: "Jumat",
         members: ["Durratul Hikmah", "Suheil Maulana", "Khairul Fajar Sidiq"]
       }
-    ]
+    ],
+    piketRotation: {
+      referenceMonday: '2026-08-24',
+      referenceGroupNumber: 2
+    }
   },
   lucide: { createIcons: () => {} }
 };
@@ -96,7 +90,7 @@ console.log('✅ PASS: escapeHtml correctly sanitizes strings');
 // 4. Test renderPiketModal execution
 let activePiketFilter = 'all';
 function getTodayPiketGroup() {
-  return global.window.TRJT_PIKET.find(p => p.dayOfWeek === 3); // Rabu -> Kelompok III
+  return global.window.TRJT_PIKET.find(p => p.groupNumber === 2); // Kelompok II
 }
 
 function renderPiketModal(filterGroup = activePiketFilter) {
@@ -145,8 +139,8 @@ function closePiketModal() {
 openPiketModal();
 assert.strictEqual(elements['modal-piket-schedule'].classList.contains('is-open'), true, 'Modal has is-open class');
 assert.strictEqual(elements['modal-piket-schedule'].style.display, 'flex', 'Modal style.display is flex');
-assert.ok(elements['piket-today-banner'].innerHTML.includes('Kelompok III'), 'Banner contains Kelompok III');
-assert.ok(elements['piket-groups-container'].innerHTML.includes('Syawal Fitriadi'), 'Container contains Kelompok III members');
+assert.ok(elements['piket-today-banner'].innerHTML.includes('Kelompok II'), 'Banner contains Kelompok II');
+assert.ok(elements['piket-groups-container'].innerHTML.includes('Lunna Auamara'), 'Container contains Kelompok II members');
 assert.ok(elements['piket-groups-container'].innerHTML.includes('Khairul Fajar Sidiq'), 'Container contains Kelompok V members');
 
 console.log('✅ PASS: openPiketModal renders all 5 groups and opens modal dialog flawlessly');
