@@ -317,7 +317,7 @@ const TRJT_SCHEDULE = {
       no: 1,
       initial: "IS",
       name: "Ipan Suandi, S.T., M.T.",
-      nip: "198005102005011002",
+      nip: "19800510 200501 1 002",
       courses: [
         "Praktikum Antena dan Propagasi",
         "Antena dan Propagasi"
@@ -327,7 +327,7 @@ const TRJT_SCHEDULE = {
       no: 2,
       initial: "MS",
       name: "Muhammad Syahroni, S.T., M.T.",
-      nip: "197210262006041001",
+      nip: "19721026 200604 1 001",
       courses: [
         "Jaringan Komputer Lanjut",
         "Praktikum Jaringan Komputer Lanjut"
@@ -337,7 +337,7 @@ const TRJT_SCHEDULE = {
       no: 3,
       initial: "RS",
       name: "Rachmawati, S.T., M.Eng.",
-      nip: "197908262003122001",
+      nip: "19790826 200312 2 001",
       courses: [
         "Praktikum Sistem Komunikasi Satelit dan Radar",
         "Sistem Komunikasi Satelit dan Radar"
@@ -347,7 +347,7 @@ const TRJT_SCHEDULE = {
       no: 4,
       initial: "AF",
       name: "Anita Fauziah, SST., M.T.",
-      nip: "197201291998032001",
+      nip: "19720129 199803 2 001",
       courses: [
         "Teknik Instalasi Fiber Optik",
         "Praktikum Teknik Instalasi Fiber Optik"
@@ -357,7 +357,7 @@ const TRJT_SCHEDULE = {
       no: 5,
       initial: "YS",
       name: "Yassir, S.T., M.Eng.Sc.",
-      nip: "198004192003121002",
+      nip: "19800419 200312 1 002",
       courses: [
         "Praktikum Sistem Komunikasi Seluler",
         "Sistem Komunikasi Seluler"

@@ -1735,6 +1735,16 @@
   // --- Dosen (Lecturers Directory) Controller ---
   let activeDosenSearch = '';
 
+  // Format 18-digit NIP to standard Indonesian ASN/Dosen format: YYYYMMDD YYYYMM G NNN
+  function formatNip(nip) {
+    if (!nip) return '';
+    const digitsOnly = String(nip).replace(/\D/g, '');
+    if (digitsOnly.length === 18) {
+      return `${digitsOnly.slice(0, 8)} ${digitsOnly.slice(8, 14)} ${digitsOnly.slice(14, 15)} ${digitsOnly.slice(15, 18)}`;
+    }
+    return nip;
+  }
+
   function renderDosenList(query = activeDosenSearch) {
     activeDosenSearch = query;
     const container = document.getElementById('dosen-cards-container');
@@ -1743,10 +1753,13 @@
     const dosenList = window.TRJT_DOSEN || (window.TRJT_SCHEDULE && window.TRJT_SCHEDULE.dosen) || [];
 
     const q = (query || '').toLowerCase().trim();
+    const qClean = q.replace(/\s+/g, '');
     const filtered = dosenList.filter((d) => {
       if (!q) return true;
+      const formattedNip = formatNip(d.nip || '');
+      const rawNip = (d.nip || '').replace(/\s+/g, '').toLowerCase();
       const matchName = (d.name || '').toLowerCase().includes(q);
-      const matchNip = (d.nip || '').toLowerCase().includes(q);
+      const matchNip = formattedNip.toLowerCase().includes(q) || (qClean && rawNip.includes(qClean));
       const matchInitial = (d.initial || '').toLowerCase().includes(q);
       const matchCourses = (d.courses || []).some(c => (c || '').toLowerCase().includes(q));
       return matchName || matchNip || matchInitial || matchCourses;
@@ -1762,6 +1775,7 @@
       `;
     } else {
       container.innerHTML = filtered.map((d) => {
+        const displayNip = formatNip(d.nip);
         return `
           <div class="dosen-glass-card">
             <div class="dosen-card-top">
@@ -1770,7 +1784,7 @@
                 <h3 class="dosen-name-heading">${escapeHtml(d.name)}</h3>
                 <span class="dosen-nip-badge">
                   <i data-lucide="id-card"></i>
-                  <span>NIP: ${escapeHtml(d.nip)}</span>
+                  <span>NIP: ${escapeHtml(displayNip)}</span>
                 </span>
               </div>
             </div>

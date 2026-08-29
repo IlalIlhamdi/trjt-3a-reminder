@@ -9,14 +9,14 @@ console.log('====================================================\n');
 const dataCode = fs.readFileSync('js/data.js', 'utf8');
 assert.ok(dataCode.includes('TRJT_DOSEN'), 'TRJT_DOSEN must be defined and exported in js/data.js');
 assert.ok(dataCode.includes('Ipan Suandi, S.T., M.T.'), 'Ipan Suandi must be in data.js');
-assert.ok(dataCode.includes('198005102005011002'), 'NIP for Ipan Suandi must exist');
+assert.ok(dataCode.includes('19800510 200501 1 002'), 'NIP for Ipan Suandi must be formatted in standard format');
 assert.ok(dataCode.includes('Muhammad Syahroni, S.T., M.T.'), 'Muhammad Syahroni must be in data.js');
-assert.ok(dataCode.includes('197210262006041001'), 'NIP for Muhammad Syahroni must exist');
+assert.ok(dataCode.includes('19721026 200604 1 001'), 'NIP for Muhammad Syahroni must be formatted in standard format');
 assert.ok(dataCode.includes('Rachmawati, S.T., M.Eng.'), 'Rachmawati must be in data.js');
 assert.ok(dataCode.includes('Anita Fauziah, SST., M.T.'), 'Anita Fauziah must be in data.js');
 assert.ok(dataCode.includes('Yassir, S.T., M.Eng.Sc.'), 'Yassir must be in data.js');
 assert.ok(dataCode.includes('Dr. Nelly Safitri, SST., M.Eng.Sc.'), 'Dr. Nelly Safitri must be in data.js');
-console.log('✅ PASS: All 6 lecturers with exact NIP & courses verified in js/data.js');
+console.log('✅ PASS: All 6 lecturers with standard formatted NIP & courses verified in js/data.js');
 
 // 2. Verify HTML View & Bottom Nav Tab
 const htmlCode = fs.readFileSync('index.html', 'utf8');
@@ -41,21 +41,36 @@ assert.ok(cssCode.includes('grid-template-columns: repeat(5, 1fr)'), 'bottom-nav
 console.log('✅ PASS: Glassmorphism and 5-column navigation styles verified in CSS');
 
 // 4. Runtime logic simulation
+function formatNip(nip) {
+  if (!nip) return '';
+  const digitsOnly = String(nip).replace(/\D/g, '');
+  if (digitsOnly.length === 18) {
+    return `${digitsOnly.slice(0, 8)} ${digitsOnly.slice(8, 14)} ${digitsOnly.slice(14, 15)} ${digitsOnly.slice(15, 18)}`;
+  }
+  return nip;
+}
+
+assert.strictEqual(formatNip('198005102005011002'), '19800510 200501 1 002', 'formatNip formats 18 continuous digits');
+assert.strictEqual(formatNip('19800510 200501 1 002'), '19800510 200501 1 002', 'formatNip handles already formatted string');
+
 const mockDosen = [
-  { no: 1, initial: "IS", name: "Ipan Suandi, S.T., M.T.", nip: "198005102005011002", courses: ["Praktikum Antena dan Propagasi", "Antena dan Propagasi"] },
-  { no: 2, initial: "MS", name: "Muhammad Syahroni, S.T., M.T.", nip: "197210262006041001", courses: ["Jaringan Komputer Lanjut", "Praktikum Jaringan Komputer Lanjut"] },
-  { no: 3, initial: "RS", name: "Rachmawati, S.T., M.Eng.", nip: "197908262003122001", courses: ["Praktikum Sistem Komunikasi Satelit dan Radar", "Sistem Komunikasi Satelit dan Radar"] },
-  { no: 4, initial: "AF", name: "Anita Fauziah, SST., M.T.", nip: "197201291998032001", courses: ["Teknik Instalasi Fiber Optik", "Praktikum Teknik Instalasi Fiber Optik"] },
-  { no: 5, initial: "YS", name: "Yassir, S.T., M.Eng.Sc.", nip: "198004192003121002", courses: ["Praktikum Sistem Komunikasi Seluler", "Sistem Komunikasi Seluler"] },
+  { no: 1, initial: "IS", name: "Ipan Suandi, S.T., M.T.", nip: "19800510 200501 1 002", courses: ["Praktikum Antena dan Propagasi", "Antena dan Propagasi"] },
+  { no: 2, initial: "MS", name: "Muhammad Syahroni, S.T., M.T.", nip: "19721026 200604 1 001", courses: ["Jaringan Komputer Lanjut", "Praktikum Jaringan Komputer Lanjut"] },
+  { no: 3, initial: "RS", name: "Rachmawati, S.T., M.Eng.", nip: "19790826 200312 2 001", courses: ["Praktikum Sistem Komunikasi Satelit dan Radar", "Sistem Komunikasi Satelit dan Radar"] },
+  { no: 4, initial: "AF", name: "Anita Fauziah, SST., M.T.", nip: "19720129 199803 2 001", courses: ["Teknik Instalasi Fiber Optik", "Praktikum Teknik Instalasi Fiber Optik"] },
+  { no: 5, initial: "YS", name: "Yassir, S.T., M.Eng.Sc.", nip: "19800419 200312 1 002", courses: ["Praktikum Sistem Komunikasi Seluler", "Sistem Komunikasi Seluler"] },
   { no: 6, initial: "DN", name: "Dr. Nelly Safitri, SST., M.Eng.Sc.", nip: "NIP Belum Tercatat", courses: ["Metodologi Penelitian"] }
 ];
 
 function filterDosen(query) {
   const q = (query || '').toLowerCase().trim();
+  const qClean = q.replace(/\s+/g, '');
   return mockDosen.filter((d) => {
     if (!q) return true;
+    const formattedNip = formatNip(d.nip || '');
+    const rawNip = (d.nip || '').replace(/\s+/g, '').toLowerCase();
     const matchName = d.name.toLowerCase().includes(q);
-    const matchNip = d.nip.toLowerCase().includes(q);
+    const matchNip = formattedNip.toLowerCase().includes(q) || (qClean && rawNip.includes(qClean));
     const matchInitial = d.initial.toLowerCase().includes(q);
     const matchCourses = d.courses.some(c => c.toLowerCase().includes(q));
     return matchName || matchNip || matchInitial || matchCourses;
@@ -70,17 +85,22 @@ const resYassir = filterDosen('Yassir');
 assert.strictEqual(resYassir.length, 1);
 assert.strictEqual(resYassir[0].initial, 'YS');
 
-// Test: Search by NIP
-const resNip = filterDosen('197201291998032001');
-assert.strictEqual(resNip.length, 1);
-assert.strictEqual(resNip[0].name, 'Anita Fauziah, SST., M.T.');
+// Test: Search by NIP without space
+const resNipRaw = filterDosen('197201291998032001');
+assert.strictEqual(resNipRaw.length, 1);
+assert.strictEqual(resNipRaw[0].name, 'Anita Fauziah, SST., M.T.');
+
+// Test: Search by NIP with space
+const resNipFormatted = filterDosen('19720129 199803 2 001');
+assert.strictEqual(resNipFormatted.length, 1);
+assert.strictEqual(resNipFormatted[0].name, 'Anita Fauziah, SST., M.T.');
 
 // Test: Search by course
 const resCourse = filterDosen('Radar');
 assert.strictEqual(resCourse.length, 1);
 assert.strictEqual(resCourse[0].initial, 'RS');
 
-console.log('✅ PASS: Dosen search filtering works accurately across name, NIP, initial, and courses');
+console.log('✅ PASS: Dosen search filtering works accurately across name, NIP (with/without space), initial, and courses');
 
 console.log('\n====================================================');
 console.log('🎉 ALL DOSEN DIRECTORY TESTS PASSED (100%)!');
