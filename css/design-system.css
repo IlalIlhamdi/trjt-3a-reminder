@@ -1889,82 +1889,88 @@ select,
 
 /* ==========================================================================
    DAFTAR PIKET KELAS (DUTY ROSTER)
-   - Button Piket Action Card
+   - Premium Glassmorphic Button Piket Action Card
    - Piket Modal Sheet & Today Banner
    - Kelompok I - V Glass Cards & Member Badges
    ========================================================================== */
 .btn-piket-action {
   width: 100%;
-  background: var(--color-surface-glass);
-  backdrop-filter: blur(20px) saturate(150%);
-  -webkit-backdrop-filter: blur(20px) saturate(150%);
-  border: 1px solid var(--color-border-glass);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 248, 255, 0.92) 100%);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.95);
   border-radius: var(--radius-card);
-  padding: 14px 16px;
-  box-shadow: var(--shadow-glass-card);
+  padding: 14px 18px;
+  box-shadow: 0 10px 28px -6px rgba(15, 61, 145, 0.08), 0 2px 8px rgba(15, 61, 145, 0.03), inset 0 1px 1px rgba(255, 255, 255, 1);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 14px;
   cursor: pointer;
   font-family: inherit;
   transition: all var(--transition-fast);
   text-align: left;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
 }
 
-.theme-option-item {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 14px;
-  border-radius: var(--radius-inner);
-  background: var(--color-surface-glass);
-  border: 1px solid var(--color-border-subtle);
-  cursor: pointer;
-  font-family: inherit;
-  transition: all var(--transition-fast);
-}
-
-.theme-option-item:hover {
-  background: var(--color-surface-glass-strong);
-  border-color: var(--color-border-hover);
-}
-
-.theme-option-item:active {
-  transform: scale(0.98);
+.btn-piket-action::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #2F80ED 0%, #10B981 100%);
+  border-top-left-radius: var(--radius-card);
+  border-bottom-left-radius: var(--radius-card);
+  opacity: 0.85;
 }
 
 .btn-piket-action:hover {
-  background: var(--color-surface-glass-strong);
-  border-color: var(--color-border-hover);
-  transform: translateY(-1px);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 1) 0%, rgba(235, 246, 255, 0.98) 100%);
+  border-color: rgba(191, 219, 254, 0.95);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px -4px rgba(37, 99, 235, 0.16), 0 4px 12px rgba(15, 61, 145, 0.05);
 }
 
 .btn-piket-action:active {
-  transform: scale(0.99);
+  transform: scale(0.985);
 }
 
 .btn-piket-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   min-width: 0;
   flex: 1;
 }
 
 .btn-piket-icon-box {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: var(--color-very-light-blue);
-  border: 1px solid rgba(191, 219, 254, 0.8);
-  color: var(--color-primary-blue);
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #2F80ED 0%, #1D4ED8 100%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition: transform var(--transition-fast);
+}
+
+.btn-piket-action:hover .btn-piket-icon-box {
+  transform: scale(1.05) rotate(-2deg);
+}
+
+.btn-piket-icon-box i,
+.btn-piket-icon-box svg {
+  width: 20px;
+  height: 20px;
+  color: #FFFFFF;
 }
 
 .btn-piket-text-wrap {
@@ -1978,45 +1984,97 @@ select,
 .btn-piket-title-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-  flex-wrap: nowrap;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .btn-piket-title {
-  font-size: 14.5px;
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 800;
   color: var(--color-primary-navy);
+  letter-spacing: -0.015em;
   white-space: nowrap;
-}
-
-.btn-piket-subtitle {
-  font-size: 12px;
-  color: var(--color-text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.btn-piket-chevron {
-  color: var(--color-primary-blue);
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
 }
 
 .piket-today-pill {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
-  font-size: 11px;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 11.5px;
   font-weight: 700;
   white-space: nowrap;
   flex-shrink: 0;
-  background: var(--color-success-bg);
-  border: 1px solid var(--color-success-border);
-  color: var(--color-success-text);
+  background: linear-gradient(135deg, rgba(236, 253, 245, 0.95) 0%, rgba(209, 250, 229, 0.9) 100%);
+  border: 1px solid rgba(110, 231, 183, 0.85);
+  color: #065F46;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.12);
+  letter-spacing: -0.01em;
+}
+
+.piket-today-pill::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #10B981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+  flex-shrink: 0;
+}
+
+.btn-piket-chevron {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(47, 128, 237, 0.08);
+  border: 1px solid rgba(191, 219, 254, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary-blue);
+  flex-shrink: 0;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-piket-chevron i,
+.btn-piket-chevron svg {
+  width: 16px;
+  height: 16px;
+  color: inherit;
+}
+
+.btn-piket-action:hover .btn-piket-chevron {
+  background: var(--color-primary-blue);
+  border-color: var(--color-primary-blue);
+  color: #FFFFFF;
+  transform: translateX(3px);
+  box-shadow: 0 3px 8px rgba(47, 128, 237, 0.35);
+}
+
+/* Dark Mode Overrides for Piket Action Card */
+[data-theme="dark"] .btn-piket-action {
+  background: linear-gradient(135deg, rgba(22, 33, 54, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%);
+  border-color: rgba(59, 130, 246, 0.25);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .btn-piket-title {
+  color: #F1F5F9;
+}
+
+[data-theme="dark"] .piket-today-pill {
+  background: rgba(6, 78, 59, 0.45);
+  border-color: rgba(52, 211, 153, 0.35);
+  color: #6EE7B7;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .btn-piket-chevron {
+  background: rgba(30, 58, 138, 0.4);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #93C5FD;
 }
 
 /* Piket Today Banner Inside Modal */
