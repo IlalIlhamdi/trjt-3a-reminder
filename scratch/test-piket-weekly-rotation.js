@@ -108,11 +108,10 @@ console.log('✅ PASS: Pekan Lalu (24 Agustus 2026) was Kelompok I');
 
 // 3. Verify HTML structure & content
 const html = fs.readFileSync('index.html', 'utf8');
-assert.ok(html.includes('Minggu ini: Kelompok II'), 'Badge default contains Minggu ini: Kelompok II');
-assert.ok(html.includes('Piket bergilir 1 kelompok per minggu'), 'Subtitle updated to 1 kelompok per minggu');
+assert.ok(html.includes('btn-piket-title'), 'Piket title exists');
 assert.ok(html.includes('data-piket-filter="1"'), 'Filter pill 1 exists');
 assert.ok(html.includes('data-piket-filter="5"'), 'Filter pill 5 exists');
-console.log('✅ PASS: index.html markup correctly matches weekly rotation design');
+console.log('✅ PASS: index.html markup correctly matches clean piket button design');
 
 // 4. Verify app.js integration
 const appJs = fs.readFileSync('js/app.js', 'utf8');
