@@ -1051,55 +1051,126 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding-top: 2px;
+  gap: 10px;
+  margin-top: 4px;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, rgba(239, 246, 255, 0.95) 0%, rgba(224, 242, 254, 0.85) 100%);
+  border: 1px solid rgba(186, 220, 255, 0.9);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px -2px rgba(37, 99, 235, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: all var(--transition-fast);
 }
 
 .schedule-lecturer-info {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12.5px;
-  color: #334155;
-  font-weight: 500;
+  gap: 8px;
   min-width: 0;
   flex: 1;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.schedule-lecturer-info i {
+.schedule-lecturer-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 1.5px solid rgba(191, 219, 254, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary-blue);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.12);
+  flex-shrink: 0;
+}
+
+.schedule-lecturer-avatar i,
+.schedule-lecturer-avatar svg {
   width: 14px;
   height: 14px;
   color: var(--color-primary-blue);
-  flex-shrink: 0;
+}
+
+.schedule-lecturer-name {
+  font-size: 12.5px;
+  color: #1E3A8A;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: -0.01em;
 }
 
 .btn-schedule-mat {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 5px 12px;
+  padding: 6px 13px;
   font-size: 11.5px;
-  font-weight: 600;
-  color: var(--color-primary-blue);
-  background: linear-gradient(135deg, rgba(235, 244, 254, 1), rgba(219, 234, 254, 0.85));
-  border: 1px solid rgba(191, 219, 254, 0.9);
+  font-weight: 700;
+  color: #FFFFFF;
+  background: linear-gradient(135deg, #2F80ED 0%, #1D4ED8 100%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 9px;
   cursor: pointer;
-  transition: all var(--transition-fast);
   flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(47, 128, 237, 0.08);
+  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition: all var(--transition-fast);
+  letter-spacing: 0.01em;
+  text-decoration: none;
+}
+
+.btn-schedule-mat i,
+.btn-schedule-mat svg {
+  width: 13px;
+  height: 13px;
+  color: #FFFFFF;
 }
 
 .btn-schedule-mat:hover {
-  background: var(--color-primary-blue);
+  background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(37, 99, 235, 0.38);
   color: #FFFFFF;
 }
 
 .btn-schedule-mat:active {
-  transform: scale(0.95);
+  transform: scale(0.96);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+}
+
+/* Dark Mode Overrides for Schedule Lecturer Row */
+[data-theme="dark"] .schedule-lecturer-row {
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.3) 0%, rgba(15, 23, 42, 0.5) 100%);
+  border-color: rgba(59, 130, 246, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .schedule-lecturer-avatar {
+  background: rgba(30, 58, 138, 0.7);
+  border-color: rgba(96, 165, 250, 0.4);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="dark"] .schedule-lecturer-avatar i,
+[data-theme="dark"] .schedule-lecturer-avatar svg {
+  color: #93C5FD;
+}
+
+[data-theme="dark"] .schedule-lecturer-name {
+  color: #DBEAFE;
+}
+
+[data-theme="dark"] .btn-schedule-mat {
+  background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
+  border-color: rgba(147, 197, 253, 0.35);
+  box-shadow: 0 3px 10px rgba(59, 130, 246, 0.35);
+  color: #FFFFFF;
+}
+
+[data-theme="dark"] .btn-schedule-mat:hover {
+  background: linear-gradient(135deg, #60A5FA 0%, #2563EB 100%);
+  color: #FFFFFF;
 }
 
 /* ==========================================================================

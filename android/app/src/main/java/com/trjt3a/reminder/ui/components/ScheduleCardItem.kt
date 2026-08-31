@@ -118,22 +118,39 @@ fun ScheduleCardItem(
                     )
                 )
 
-                // Lecturer
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                // Lecturer Row in Blue Capsule Container
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(VeryLightBlue)
+                        .padding(horizontal = 10.dp, vertical = 6.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Person,
-                        contentDescription = null,
-                        tint = TextSecondary,
-                        modifier = Modifier.size(15.dp)
-                    )
-                    Text(
-                        text = schedule.displayLecturer,
-                        fontSize = 14.sp,
-                        color = TextSecondary
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(22.dp)
+                                .clip(RoundedCornerShape(11.dp))
+                                .background(SurfaceWhite),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Person,
+                                contentDescription = null,
+                                tint = PrimaryBlue,
+                                modifier = Modifier.size(13.dp)
+                            )
+                        }
+                        Text(
+                            text = schedule.displayLecturer,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = DeepBlue
+                        )
+                    }
                 }
 
                 // Bottom Metadata (Room Detail e.g. Lab name or Gedung III)

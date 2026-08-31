@@ -45,7 +45,7 @@ global.window = {
       }
     ],
     piketRotation: {
-      referenceMonday: '2026-08-24',
+      referenceMonday: '2026-08-31',
       referenceGroupNumber: 2
     }
   },

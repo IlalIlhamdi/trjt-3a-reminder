@@ -20,7 +20,7 @@ const rotationConfig = windowMock.TRJT_SCHEDULE.piketRotation;
 assert.strictEqual(Array.isArray(piketList), true, 'piketList must be an array');
 assert.strictEqual(piketList.length, 5, 'Must have 5 groups (Kelompok I to V)');
 assert.strictEqual(rotationConfig.referenceGroupNumber, 2, 'Reference group is Kelompok 2');
-assert.strictEqual(rotationConfig.referenceMonday, '2026-08-24', 'Reference Monday is 2026-08-24');
+assert.strictEqual(rotationConfig.referenceMonday, '2026-08-31', 'Reference Monday is 2026-08-31');
 
 console.log('✅ PASS: data.js contains 5 groups and correct piketRotation config');
 
@@ -57,54 +57,54 @@ function getCurrentWeekPiketInfo(targetDate, customConfig = rotationConfig, cust
   };
 }
 
-// Test case A: Senin 24 Agustus 2026 (Pekan 1 Acuan) -> Kelompok II
-const resA = getCurrentWeekPiketInfo(new Date('2026-08-24T09:00:00+07:00'));
-assert.strictEqual(resA.groupNumber, 2, '24 Aug 2026 must be Kelompok II');
+// Test case A: Senin 31 Agustus 2026 (Pekan Acuan) -> Kelompok II
+const resA = getCurrentWeekPiketInfo(new Date('2026-08-31T09:00:00+07:00'));
+assert.strictEqual(resA.groupNumber, 2, '31 Aug 2026 must be Kelompok II');
 assert.strictEqual(resA.isWeekend, false);
-console.log('✅ PASS: Senin 24 Agustus 2026 is Kelompok II');
+console.log('✅ PASS: Senin 31 Agustus 2026 is Kelompok II');
 
-// Test case B: Rabu 26 Agustus 2026 (Tengah Pekan) -> Kelompok II
-const resB = getCurrentWeekPiketInfo(new Date('2026-08-26T14:30:00+07:00'));
-assert.strictEqual(resB.groupNumber, 2, '26 Aug 2026 must still be Kelompok II');
+// Test case B: Rabu 2 September 2026 (Tengah Pekan) -> Kelompok II
+const resB = getCurrentWeekPiketInfo(new Date('2026-09-02T14:30:00+07:00'));
+assert.strictEqual(resB.groupNumber, 2, '02 Sep 2026 must still be Kelompok II');
 assert.strictEqual(resB.isWeekend, false);
-console.log('✅ PASS: Rabu 26 Agustus 2026 is Kelompok II');
+console.log('✅ PASS: Rabu 02 September 2026 is Kelompok II');
 
-// Test case C: Sabtu 29 Agustus 2026 (Akhir Pekan) -> Kelompok II (Weekend flag true)
-const resC = getCurrentWeekPiketInfo(new Date('2026-08-29T21:30:00+07:00'));
-assert.strictEqual(resC.groupNumber, 2, '29 Aug 2026 (Saturday) must still be Kelompok II');
+// Test case C: Sabtu 5 September 2026 (Akhir Pekan) -> Kelompok II (Weekend flag true)
+const resC = getCurrentWeekPiketInfo(new Date('2026-09-05T21:30:00+07:00'));
+assert.strictEqual(resC.groupNumber, 2, '05 Sep 2026 (Saturday) must still be Kelompok II');
 assert.strictEqual(resC.isWeekend, true, 'Weekend flag must be true');
-console.log('✅ PASS: Sabtu 29 Agustus 2026 is Kelompok II (Akhir Pekan)');
+console.log('✅ PASS: Sabtu 05 September 2026 is Kelompok II (Akhir Pekan)');
 
-// Test case D: Minggu 30 Agustus 2026 (Akhir Pekan) -> Kelompok II
-const resD = getCurrentWeekPiketInfo(new Date('2026-08-30T10:00:00+07:00'));
-assert.strictEqual(resD.groupNumber, 2, '30 Aug 2026 (Sunday) must still be Kelompok II');
+// Test case D: Minggu 6 September 2026 (Akhir Pekan) -> Kelompok II
+const resD = getCurrentWeekPiketInfo(new Date('2026-09-06T10:00:00+07:00'));
+assert.strictEqual(resD.groupNumber, 2, '06 Sep 2026 (Sunday) must still be Kelompok II');
 assert.strictEqual(resD.isWeekend, true);
-console.log('✅ PASS: Minggu 30 Agustus 2026 is Kelompok II');
+console.log('✅ PASS: Minggu 06 September 2026 is Kelompok II');
 
-// Test case E: Senin 31 Agustus 2026 (Pekan Berikutnya) -> Kelompok III
-const resE = getCurrentWeekPiketInfo(new Date('2026-08-31T08:00:00+07:00'));
-assert.strictEqual(resE.groupNumber, 3, '31 Aug 2026 must be Kelompok III');
-console.log('✅ PASS: Senin 31 Agustus 2026 is Kelompok III');
+// Test case E: Senin 7 September 2026 (Pekan Berikutnya) -> Kelompok III
+const resE = getCurrentWeekPiketInfo(new Date('2026-09-07T08:00:00+07:00'));
+assert.strictEqual(resE.groupNumber, 3, '07 Sep 2026 must be Kelompok III');
+console.log('✅ PASS: Senin 07 September 2026 is Kelompok III');
 
-// Test case F: Senin 7 September 2026 -> Kelompok IV
-const resF = getCurrentWeekPiketInfo(new Date('2026-09-07T08:00:00+07:00'));
-assert.strictEqual(resF.groupNumber, 4, '07 Sep 2026 must be Kelompok IV');
-console.log('✅ PASS: Senin 7 September 2026 is Kelompok IV');
+// Test case F: Senin 14 September 2026 -> Kelompok IV
+const resF = getCurrentWeekPiketInfo(new Date('2026-09-14T08:00:00+07:00'));
+assert.strictEqual(resF.groupNumber, 4, '14 Sep 2026 must be Kelompok IV');
+console.log('✅ PASS: Senin 14 September 2026 is Kelompok IV');
 
-// Test case G: Senin 14 September 2026 -> Kelompok V
-const resG = getCurrentWeekPiketInfo(new Date('2026-09-14T08:00:00+07:00'));
-assert.strictEqual(resG.groupNumber, 5, '14 Sep 2026 must be Kelompok V');
-console.log('✅ PASS: Senin 14 September 2026 is Kelompok V');
+// Test case G: Senin 21 September 2026 -> Kelompok V
+const resG = getCurrentWeekPiketInfo(new Date('2026-09-21T08:00:00+07:00'));
+assert.strictEqual(resG.groupNumber, 5, '21 Sep 2026 must be Kelompok V');
+console.log('✅ PASS: Senin 21 September 2026 is Kelompok V');
 
-// Test case H: Senin 21 September 2026 -> Kelompok I (Rotasi berulang)
-const resH = getCurrentWeekPiketInfo(new Date('2026-09-21T08:00:00+07:00'));
-assert.strictEqual(resH.groupNumber, 1, '21 Sep 2026 must loop back to Kelompok I');
-console.log('✅ PASS: Senin 21 September 2026 rotates back to Kelompok I');
+// Test case H: Senin 28 September 2026 -> Kelompok I (Rotasi berulang)
+const resH = getCurrentWeekPiketInfo(new Date('2026-09-28T08:00:00+07:00'));
+assert.strictEqual(resH.groupNumber, 1, '28 Sep 2026 must loop back to Kelompok I');
+console.log('✅ PASS: Senin 28 September 2026 rotates back to Kelompok I');
 
-// Test case I: Pekan Lalu (Senin 17 Agustus 2026) -> Kelompok I
-const resI = getCurrentWeekPiketInfo(new Date('2026-08-17T08:00:00+07:00'));
-assert.strictEqual(resI.groupNumber, 1, '17 Aug 2026 must be Kelompok I');
-console.log('✅ PASS: Pekan Lalu (17 Agustus 2026) was Kelompok I');
+// Test case I: Pekan Lalu (Senin 24 Agustus 2026) -> Kelompok I
+const resI = getCurrentWeekPiketInfo(new Date('2026-08-24T08:00:00+07:00'));
+assert.strictEqual(resI.groupNumber, 1, '24 Aug 2026 was Kelompok I');
+console.log('✅ PASS: Pekan Lalu (24 Agustus 2026) was Kelompok I');
 
 // 3. Verify HTML structure & content
 const html = fs.readFileSync('index.html', 'utf8');

@@ -269,9 +269,9 @@ const TRJT_SCHEDULE = {
   ],
 
   // Konfigurasi Rotasi Piket Mingguan: 1 kelompok bertugas selama 1 minggu (Senin - Jumat)
-  // Acuan: Pekan 24 - 30 Agustus 2026 adalah giliran Kelompok II
+  // Acuan: Pekan 31 Agustus - 6 September 2026 adalah giliran Kelompok II
   piketRotation: {
-    referenceMonday: '2026-08-24',
+    referenceMonday: '2026-08-31',
     referenceGroupNumber: 2
   },
 

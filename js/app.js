@@ -565,11 +565,14 @@
             
             <div class="schedule-lecturer-row">
               <div class="schedule-lecturer-info">
-                <i data-lucide="user"></i>
-                <span>${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}</span>
+                <span class="schedule-lecturer-avatar">
+                  <i data-lucide="user"></i>
+                </span>
+                <span class="schedule-lecturer-name">${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}</span>
               </div>
-              <button class="btn-schedule-mat" onclick="window.openCourseMaterialsModal('${item.id}', '${item.courseName.replace(/'/g, "\\'")}', '${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName).replace(/'/g, "\\'")}', '${item.roomCode}')">
-                <i data-lucide="folder" style="width: 13px; height: 13px;"></i> Materi
+              <button class="btn-schedule-mat" onclick="window.openCourseMaterialsModal('${item.id}', '${item.courseName.replace(/'/g, "\\'")}', '${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName).replace(/'/g, "\\'")}', '${item.roomCode}')" title="Lihat Materi Perkuliahan">
+                <i data-lucide="folder"></i>
+                <span>Materi</span>
               </button>
             </div>
           </div>
@@ -1326,7 +1329,7 @@
     if (!piketList.length) return null;
 
     const rotationConfig = (window.TRJT_SCHEDULE && window.TRJT_SCHEDULE.piketRotation) || {
-      referenceMonday: '2026-08-24',
+      referenceMonday: '2026-08-31',
       referenceGroupNumber: 2
     };
 
@@ -1340,7 +1343,7 @@
     monday.setHours(0, 0, 0, 0);
 
     // Reference Monday
-    let refMonParts = [2026, 8, 24];
+    let refMonParts = [2026, 8, 31];
     if (rotationConfig.referenceMonday) {
       const parts = rotationConfig.referenceMonday.split('-').map(Number);
       if (parts.length === 3) refMonParts = parts;
