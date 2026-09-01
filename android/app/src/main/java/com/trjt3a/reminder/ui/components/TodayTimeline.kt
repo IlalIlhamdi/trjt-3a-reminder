@@ -2,6 +2,7 @@ package com.trjt3a.reminder.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,21 +12,25 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material.icons.outlined.Coffee
+import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,17 +38,12 @@ import com.trjt3a.reminder.data.model.ClassStatus
 import com.trjt3a.reminder.data.model.Schedule
 import com.trjt3a.reminder.ui.theme.BorderCard
 import com.trjt3a.reminder.ui.theme.BorderColor
-import com.trjt3a.reminder.ui.theme.BorderSubtle
-import com.trjt3a.reminder.ui.theme.DeepBlue
 import com.trjt3a.reminder.ui.theme.PrimaryBlue
-import com.trjt3a.reminder.ui.theme.StatusCompleted
-import com.trjt3a.reminder.ui.theme.StatusCompletedBg
-import com.trjt3a.reminder.ui.theme.StatusCompletedText
+import com.trjt3a.reminder.ui.theme.SoftBlue
 import com.trjt3a.reminder.ui.theme.StatusSuccess
 import com.trjt3a.reminder.ui.theme.StatusSuccessBg
+import com.trjt3a.reminder.ui.theme.StatusSuccessBorder
 import com.trjt3a.reminder.ui.theme.StatusSuccessText
-import com.trjt3a.reminder.ui.theme.SurfaceWhite
-import com.trjt3a.reminder.ui.theme.TextPrimary
 import com.trjt3a.reminder.ui.theme.TextSecondary
 import com.trjt3a.reminder.ui.theme.VeryLightBlue
 
@@ -52,16 +52,46 @@ fun TodayTimeline(
     todaySchedules: List<Schedule>,
     currentScheduleId: String?,
     completedScheduleIds: Set<String>,
+    onMaterialClick: (Schedule) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    if (todaySchedules.isEmpty()) {
+        Card(
+            modifier = modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Coffee,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(24.dp)
+                )
+                Text(
+                    text = "Tidak ada agenda perkuliahan hari ini.",
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+        return
+    }
+
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        todaySchedules.forEachIndexed { index, schedule ->
+        todaySchedules.forEach { schedule ->
             val isCurrent = schedule.id == currentScheduleId
             val isCompleted = completedScheduleIds.contains(schedule.id)
-            val isLast = index == todaySchedules.lastIndex
 
             val status = when {
                 isCurrent -> ClassStatus.IN_PROGRESS
@@ -69,164 +99,107 @@ fun TodayTimeline(
                 else -> ClassStatus.UPCOMING
             }
 
-            TimelineItem(
+            TodayClassCard(
                 schedule = schedule,
                 status = status,
-                showConnector = !isLast
+                onClick = { onMaterialClick(schedule) }
             )
         }
     }
 }
 
 @Composable
-private fun TimelineItem(
+private fun TodayClassCard(
     schedule: Schedule,
     status: ClassStatus,
-    showConnector: Boolean
+    onClick: () -> Unit
 ) {
-    val stripColor = when (status) {
-        ClassStatus.IN_PROGRESS -> StatusSuccess
-        ClassStatus.COMPLETED -> StatusCompleted
-        else -> PrimaryBlue
+    val (circleBg, circleBorder, iconVector, iconTint) = when (status) {
+        ClassStatus.IN_PROGRESS -> Tuple4(
+            VeryLightBlue,
+            SoftBlue,
+            Icons.Outlined.PlayArrow,
+            PrimaryBlue
+        )
+        ClassStatus.COMPLETED -> Tuple4(
+            StatusSuccessBg,
+            StatusSuccessBorder,
+            Icons.Outlined.Check,
+            StatusSuccessText
+        )
+        else -> Tuple4(
+            VeryLightBlue,
+            SoftBlue,
+            Icons.Outlined.Schedule,
+            PrimaryBlue
+        )
     }
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
-        verticalAlignment = Alignment.Top
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
+            .clickable { onClick() },
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
-        // Time Column on Left
-        Column(
-            modifier = Modifier.width(64.dp),
-            horizontalAlignment = Alignment.End
-        ) {
-            Text(
-                text = schedule.formattedStartTime,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-                color = if (status == ClassStatus.IN_PROGRESS) PrimaryBlue else TextPrimary
-            )
-            Text(
-                text = schedule.formattedEndTime,
-                fontSize = 12.sp,
-                color = TextSecondary
-            )
-        }
-
-        // Card on Right with Left Accent Strip
-        Card(
+        Row(
             modifier = Modifier
-                .weight(1f)
-                .border(1.dp, BorderCard, RoundedCornerShape(18.dp)),
-            shape = RoundedCornerShape(18.dp),
-            colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = if (status == ClassStatus.IN_PROGRESS) 4.dp else 2.dp
-            )
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(modifier = Modifier.fillMaxWidth()) {
-                // 4dp Left Strip
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Circle Icon
                 Box(
                     modifier = Modifier
-                        .width(4.dp)
-                        .height(110.dp)
-                        .background(stripColor)
-                )
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(14.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(circleBg)
+                        .border(1.dp, circleBorder, CircleShape),
+                    contentAlignment = Alignment.Center
                 ) {
+                    Icon(
+                        imageVector = iconVector,
+                        contentDescription = null,
+                        tint = iconTint,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+
+                // Info Text
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        text = schedule.formattedTimeRange,
+                        fontSize = 12.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (status == ClassStatus.IN_PROGRESS) PrimaryBlue else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
                     Text(
                         text = schedule.courseName,
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = TextPrimary
-                        )
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        lineHeight = 18.sp
                     )
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Person,
-                            contentDescription = null,
-                            tint = TextSecondary,
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Text(
-                            text = schedule.displayLecturer,
-                            fontSize = 13.sp,
-                            color = TextSecondary
-                        )
-                    }
-
-                    HorizontalDivider(
-                        color = BorderSubtle,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // Location badge
-                        Row(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(VeryLightBlue)
-                                .padding(horizontal = 6.dp, vertical = 2.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.LocationOn,
-                                contentDescription = null,
-                                tint = PrimaryBlue,
-                                modifier = Modifier.size(12.dp)
-                            )
-                            Text(
-                                text = schedule.displayRoom,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = DeepBlue
-                            )
-                        }
-
-                        // Status Tag
-                        when (status) {
-                            ClassStatus.IN_PROGRESS -> {
-                                Text(
-                                    text = "● Sedang Berlangsung",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = StatusSuccessText
-                                )
-                            }
-                            ClassStatus.COMPLETED -> {
-                                Text(
-                                    text = "Selesai",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = StatusCompletedText
-                                )
-                            }
-                            else -> {
-                                Text(
-                                    text = "Akan Datang",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = PrimaryBlue
-                                )
-                            }
-                        }
-                    }
                 }
             }
+
+            Icon(
+                imageVector = Icons.Outlined.ChevronRight,
+                contentDescription = "Detail",
+                tint = PrimaryBlue,
+                modifier = Modifier.size(18.dp)
+            )
         }
     }
 }
+
+private data class Tuple4<A, B, C, D>(val a: A, val b: B, val c: C, val d: D)

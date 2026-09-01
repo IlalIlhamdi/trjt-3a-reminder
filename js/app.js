@@ -14,7 +14,7 @@
   })();
 
   // --- Version check & Cache Storage Auto-Purge ---
-  const CURRENT_APP_VERSION = '5.3';
+  const CURRENT_APP_VERSION = '5.4';
   try {
     const savedVer = localStorage.getItem('trjt_app_version');
     if (savedVer !== CURRENT_APP_VERSION) {
@@ -1643,6 +1643,32 @@
     });
   }
 
+  function setupScrollHideBottomNav() {
+    let lastScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    let ticking = false;
+
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+          const bottomNav = document.querySelector('.bottom-nav');
+          if (bottomNav) {
+            if (currentScrollY > lastScrollY + 6 && currentScrollY > 40) {
+              // Scrolling down -> hide bottom bar
+              bottomNav.classList.add('nav-hidden');
+            } else if (currentScrollY < lastScrollY - 6) {
+              // Scrolling up -> show bottom bar
+              bottomNav.classList.remove('nav-hidden');
+            }
+          }
+          lastScrollY = Math.max(0, currentScrollY);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }, { passive: true });
+  }
+
   window.openMahasiswaModal = openMahasiswaModal;
   window.closeMahasiswaModal = closeMahasiswaModal;
   window.renderMahasiswaModal = renderMahasiswaModal;
@@ -2048,6 +2074,7 @@
     renderSettingsUI();
     renderPiketBadge();
     setupDragScroll();
+    setupScrollHideBottomNav();
     tick();
 
     setInterval(tick, 1000);

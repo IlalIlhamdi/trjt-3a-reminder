@@ -157,10 +157,6 @@
   color: #93C5FD;
 }
 
-[data-theme="dark"] .nav-item.active::after {
-  background-color: #60A5FA;
-}
-
 [data-theme="dark"] .hero-glass-card {
   background: linear-gradient(145deg, rgba(24, 38, 64, 0.95) 0%, rgba(15, 26, 46, 0.92) 100%);
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -1665,15 +1661,6 @@ input:checked + .slider::before {
 
 .nav-item.active .nav-icon-wrap i {
   stroke-width: 2.3;
-}
-
-.nav-item.active::after {
-  content: '';
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background-color: var(--color-primary-blue);
-  margin-top: 1px;
 }
 
 .nav-badge-dot {

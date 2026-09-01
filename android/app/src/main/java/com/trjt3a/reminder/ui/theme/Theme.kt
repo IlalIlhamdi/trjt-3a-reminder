@@ -15,10 +15,12 @@ import androidx.core.view.WindowCompat
 private val LightColorScheme = lightColorScheme(
     primary = PrimaryBlue,
     onPrimary = Color.White,
-    primaryContainer = SoftBlue,
-    onPrimaryContainer = DeepBlue,
+    primaryContainer = VeryLightBlue,
+    onPrimaryContainer = PrimaryNavy,
     secondary = DeepBlue,
     onSecondary = Color.White,
+    secondaryContainer = SoftBlue,
+    onSecondaryContainer = DeepBlue,
     background = LightBackground,
     onBackground = TextPrimary,
     surface = SurfaceWhite,
@@ -32,35 +34,44 @@ private val LightColorScheme = lightColorScheme(
 private val DarkColorScheme = darkColorScheme(
     primary = PrimaryBlue,
     onPrimary = Color.White,
-    primaryContainer = DeepBlue,
-    onPrimaryContainer = SoftBlue,
+    primaryContainer = Color(0xFF1E293B),
+    onPrimaryContainer = Color(0xFF93C5FD),
     secondary = SoftBlue,
-    onSecondary = Color.White,
-    background = Color(0xFF0F172A),
-    onBackground = Color(0xFFF8FAFC),
-    surface = Color(0xFF172033),
-    onSurface = Color(0xFFF8FAFC),
-    surfaceVariant = Color(0xFF1E293B),
-    onSurfaceVariant = Color(0xFF94A3B8),
-    outline = Color(0xFF334155),
+    onSecondary = PrimaryNavy,
+    secondaryContainer = Color(0xFF0F3D91),
+    onSecondaryContainer = Color(0xFFDCEEFF),
+    background = DarkBackground,
+    onBackground = DarkTextPrimary,
+    surface = DarkSurface,
+    onSurface = DarkTextPrimary,
+    surfaceVariant = DarkSurfacePanel,
+    onSurfaceVariant = DarkTextSecondary,
+    outline = DarkBorder,
     outlineVariant = Color(0xFF1E293B)
 )
 
 @Composable
 fun TRJT3AReminderTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    themeMode: ThemeMode = ThemeMode.LIGHT,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val isSystemDark = isSystemInDarkTheme()
+    val isDark = when (themeMode) {
+        ThemeMode.LIGHT -> false
+        ThemeMode.DARK -> true
+        ThemeMode.SYSTEM -> isSystemDark
+    }
+
+    val colorScheme = if (isDark) DarkColorScheme else LightColorScheme
     val view = LocalView.current
 
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.surface.toArgb()
-            window.navigationBarColor = colorScheme.surface.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
-            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !darkTheme
+            window.statusBarColor = android.graphics.Color.TRANSPARENT
+            window.navigationBarColor = android.graphics.Color.TRANSPARENT
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !isDark
+            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !isDark
         }
     }
 

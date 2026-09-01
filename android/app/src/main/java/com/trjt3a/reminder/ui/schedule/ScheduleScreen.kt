@@ -1,6 +1,7 @@
 package com.trjt3a.reminder.ui.schedule
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,20 +16,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.WbSunny
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.outlined.EventBusy
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,133 +34,150 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.trjt3a.reminder.data.model.Schedule
+import com.trjt3a.reminder.ui.components.CourseMaterialsDialog
+import com.trjt3a.reminder.ui.components.PiketBannerActionCard
+import com.trjt3a.reminder.ui.components.PiketScheduleDialog
 import com.trjt3a.reminder.ui.components.ScheduleCardItem
 import com.trjt3a.reminder.ui.components.SegmentedDaySelector
 import com.trjt3a.reminder.ui.theme.BorderCard
-import com.trjt3a.reminder.ui.theme.LightBackground
 import com.trjt3a.reminder.ui.theme.PrimaryBlue
+import com.trjt3a.reminder.ui.theme.SoftBlue
 import com.trjt3a.reminder.ui.theme.SurfaceWhite
 import com.trjt3a.reminder.ui.theme.TextPrimary
 import com.trjt3a.reminder.ui.theme.TextSecondary
 import com.trjt3a.reminder.ui.theme.VeryLightBlue
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScheduleScreen(
     viewModel: ScheduleViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    Scaffold(
-        topBar = {
-            Surface(
-                color = MaterialTheme.colorScheme.surface,
-                shadowElevation = 2.dp
-            ) {
-                TopAppBar(
-                    title = {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "Jadwal Mingguan",
-                                style = MaterialTheme.typography.titleLarge.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 20.sp,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            )
+    var showPiketDialog by remember { mutableStateOf(false) }
+    var selectedScheduleForMaterial by remember { mutableStateOf<Schedule?>(null) }
 
-                            Box(
-                                modifier = Modifier
-                                    .padding(end = 16.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(VeryLightBlue)
-                                    .padding(horizontal = 10.dp, vertical = 4.dp)
-                            ) {
-                                Text(
-                                    text = "Semester 5",
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = PrimaryBlue
-                                )
-                            }
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    )
-                )
-            }
-        },
-        containerColor = MaterialTheme.colorScheme.background
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 20.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        // Title & Semester Badge Row
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // Day Segmented Selector
-            SegmentedDaySelector(
-                days = uiState.days,
-                selectedDayId = uiState.selectedDayId,
-                onDaySelected = { viewModel.selectDay(it) }
+            Text(
+                text = "Jadwal mingguan",
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    letterSpacing = (-0.3).sp
+                )
             )
 
-            // Schedules List or Empty State
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(99.dp))
+                    .background(VeryLightBlue)
+                    .border(1.dp, SoftBlue, RoundedCornerShape(99.dp))
+                    .padding(horizontal = 12.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = "Semester 5",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = PrimaryBlue
+                )
+            }
+        }
+
+        // Day Segmented Selector Capsule
+        SegmentedDaySelector(
+            days = uiState.days,
+            selectedDayId = uiState.selectedDayId,
+            onDaySelected = { viewModel.selectDay(it) }
+        )
+
+        // Schedules List
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
             if (uiState.schedulesForSelectedDay.isNotEmpty()) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    items(uiState.schedulesForSelectedDay, key = { it.id }) { schedule ->
-                        ScheduleCardItem(schedule = schedule)
-                    }
-                    item {
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
+                items(uiState.schedulesForSelectedDay, key = { it.id }) { schedule ->
+                    ScheduleCardItem(
+                        schedule = schedule,
+                        onMaterialClick = { selectedScheduleForMaterial = it }
+                    )
+                }
+
+                item {
+                    PiketBannerActionCard(
+                        onClick = { showPiketDialog = true },
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
                 }
             } else {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 24.dp),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                ) {
+                item {
+                    // Empty state for day without classes
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(32.dp),
+                            .padding(vertical = 32.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Outlined.WbSunny,
-                            contentDescription = null,
-                            tint = PrimaryBlue,
-                            modifier = Modifier.size(36.dp)
-                        )
+                        Box(
+                            modifier = Modifier
+                                .size(56.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(SurfaceWhite)
+                                .border(1.dp, BorderCard, RoundedCornerShape(16.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.EventBusy,
+                                contentDescription = null,
+                                tint = PrimaryBlue,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
                         Text(
-                            text = "Tidak Ada Jadwal Kuliah",
+                            text = "Tidak Ada Kuliah",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextPrimary
                         )
                         Text(
-                            text = "Hari ini libur / tidak ada sesi perkuliahan.",
-                            fontSize = 14.sp,
+                            text = "Tidak ada jadwal perkuliahan terjadwal untuk hari ini.",
+                            fontSize = 13.sp,
                             color = TextSecondary,
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 32.dp)
                         )
                     }
                 }
             }
         }
+    }
+
+    // Piket Schedule Dialog
+    if (showPiketDialog) {
+        PiketScheduleDialog(
+            onDismissRequest = { showPiketDialog = false }
+        )
+    }
+
+    // Material Details Dialog
+    selectedScheduleForMaterial?.let { schedule ->
+        CourseMaterialsDialog(
+            schedule = schedule,
+            onDismissRequest = { selectedScheduleForMaterial = null }
+        )
     }
 }

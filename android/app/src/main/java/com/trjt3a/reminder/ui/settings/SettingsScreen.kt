@@ -1,7 +1,9 @@
 package com.trjt3a.reminder.ui.settings
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,13 +18,21 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.NotificationsActive
+import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.People
+import androidx.compose.material.icons.outlined.School
 import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material.icons.outlined.Sync
 import androidx.compose.material.icons.outlined.Vibration
 import androidx.compose.material.icons.outlined.VolumeUp
+import androidx.compose.material.icons.outlined.WbSunny
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,18 +47,26 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.trjt3a.reminder.ui.components.MahasiswaListDialog
+import com.trjt3a.reminder.ui.components.ThemeSelectionDialog
 import com.trjt3a.reminder.ui.theme.BorderCard
+import com.trjt3a.reminder.ui.theme.BorderColor
 import com.trjt3a.reminder.ui.theme.BorderSubtle
 import com.trjt3a.reminder.ui.theme.DeepBlue
 import com.trjt3a.reminder.ui.theme.LightBackground
@@ -57,11 +75,13 @@ import com.trjt3a.reminder.ui.theme.SoftBlue
 import com.trjt3a.reminder.ui.theme.StatusCompletedBg
 import com.trjt3a.reminder.ui.theme.StatusCompletedText
 import com.trjt3a.reminder.ui.theme.StatusSuccessBg
+import com.trjt3a.reminder.ui.theme.StatusSuccessBorder
 import com.trjt3a.reminder.ui.theme.StatusSuccessText
 import com.trjt3a.reminder.ui.theme.SurfaceWhite
 import com.trjt3a.reminder.ui.theme.TextMuted
 import com.trjt3a.reminder.ui.theme.TextPrimary
 import com.trjt3a.reminder.ui.theme.TextSecondary
+import com.trjt3a.reminder.ui.theme.ThemeMode
 import com.trjt3a.reminder.ui.theme.VeryLightBlue
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,138 +90,99 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
-    Scaffold(
-        topBar = {
-            Surface(
-                color = MaterialTheme.colorScheme.surface,
-                shadowElevation = 2.dp
+    var showThemeDialog by remember { mutableStateOf(false) }
+    var showMahasiswaDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(uiState.testNotificationSent) {
+        if (uiState.testNotificationSent) {
+            Toast.makeText(context, "Notifikasi tes berhasil dikirim ke tab Notifikasi!", Toast.LENGTH_SHORT).show()
+            viewModel.resetTestNotificationStatus()
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Title & Version Badge Row
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                TopAppBar(
-                    title = {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "Pengaturan",
-                                style = MaterialTheme.typography.titleLarge.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 20.sp,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .padding(end = 16.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(StatusCompletedBg)
-                                    .padding(horizontal = 8.dp, vertical = 3.dp)
-                            ) {
-                                Text(
-                                    text = uiState.appVersion,
-                                    fontSize = 11.sp,
-                                    color = StatusCompletedText,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            }
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface
+                Text(
+                    text = "Pengaturan",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        letterSpacing = (-0.3).sp
                     )
                 )
-            }
-        },
-        containerColor = MaterialTheme.colorScheme.background
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-            // Academic Profile Card
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(1.dp, BorderCard, RoundedCornerShape(18.dp)),
-                shape = RoundedCornerShape(18.dp),
-                colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(VeryLightBlue)
-                            .border(1.dp, SoftBlue, RoundedCornerShape(14.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "3A",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = PrimaryBlue
-                        )
-                    }
 
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(2.dp)
-                    ) {
-                        Text(
-                            text = "TRJT 3A — Semester 5",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = DeepBlue
-                            )
-                        )
-                        Text(
-                            text = "Teknologi Rekayasa Jaringan Telekomunikasi",
-                            fontSize = 12.sp,
-                            color = TextSecondary,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Text(
-                            text = "Jurusan Teknik Elektro · Politeknik Negeri Lhokseumawe",
-                            fontSize = 11.sp,
-                            color = TextMuted
-                        )
-                    }
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(99.dp))
+                        .background(VeryLightBlue)
+                        .border(1.dp, SoftBlue, RoundedCornerShape(99.dp))
+                        .padding(horizontal = 12.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = uiState.appVersion,
+                        fontSize = 12.sp,
+                        color = PrimaryBlue,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
 
-            // Section 1: PENGINGAT
-            SettingsSection(title = "PENGINGAT") {
+            Text(
+                text = "Atur pengalaman pengingat kelas",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        // PANEL 1: Notifikasi & Alarm
+            SettingsSection(title = "NOTIFIKASI & ALARM") {
+                SettingInfoRow(
+                    icon = Icons.Outlined.Notifications,
+                    title = "Izin Notifikasi",
+                    subtitle = "Status penerimaan notifikasi",
+                    badgeText = "Diizinkan",
+                    badgeBg = StatusSuccessBg,
+                    badgeBorder = StatusSuccessBorder,
+                    badgeTextCol = StatusSuccessText
+                )
+
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, modifier = Modifier.padding(start = 68.dp))
+
                 SettingSwitchRow(
                     icon = Icons.Outlined.NotificationsActive,
                     title = "Pengingat H-10 Menit",
-                    subtitle = "Notifikasi otomatis 10 menit sebelum kuliah",
+                    subtitle = "Notifikasi otomatis 10 menit sebelum kelas",
                     checked = uiState.h10ReminderEnabled,
                     onCheckedChange = { viewModel.toggleH10Reminder(it) }
                 )
 
-                HorizontalDivider(color = BorderSubtle, modifier = Modifier.padding(start = 60.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, modifier = Modifier.padding(start = 68.dp))
 
                 SettingSwitchRow(
                     icon = Icons.Outlined.VolumeUp,
-                    title = "Suara",
+                    title = "Suara Alarm",
                     subtitle = "Efek audio pengingat jadwal",
                     checked = uiState.soundEnabled,
                     onCheckedChange = { viewModel.toggleSound(it) }
                 )
 
-                HorizontalDivider(color = BorderSubtle, modifier = Modifier.padding(start = 60.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, modifier = Modifier.padding(start = 68.dp))
 
                 SettingSwitchRow(
                     icon = Icons.Outlined.Vibration,
@@ -210,57 +191,114 @@ fun SettingsScreen(
                     checked = uiState.vibrationEnabled,
                     onCheckedChange = { viewModel.toggleVibration(it) }
                 )
+
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, modifier = Modifier.padding(start = 68.dp))
+
+                // Button Tes Notifikasi
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(14.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Button(
+                        onClick = { viewModel.sendTestNotification() },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = VeryLightBlue)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Notifications,
+                            contentDescription = null,
+                            tint = PrimaryBlue,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.size(8.dp))
+                        Text(
+                            text = "Tes notifikasi",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = PrimaryBlue
+                        )
+                    }
+                }
             }
 
-            // Section 2: TAMPILAN
+            // PANEL 2: Tampilan
             SettingsSection(title = "TAMPILAN") {
-                SettingSwitchRow(
-                    icon = Icons.Outlined.DarkMode,
-                    title = "Tema Gelap",
-                    subtitle = "Gunakan tema gelap saat malam",
-                    checked = uiState.isDarkMode,
-                    onCheckedChange = { viewModel.toggleDarkMode(it) }
+                val themeLabel = when (uiState.themeMode) {
+                    ThemeMode.LIGHT -> "Terang"
+                    ThemeMode.DARK -> "Gelap"
+                    ThemeMode.SYSTEM -> "Otomatis"
+                }
+
+                SettingActionRow(
+                    icon = when (uiState.themeMode) {
+                        ThemeMode.DARK -> Icons.Outlined.DarkMode
+                        ThemeMode.LIGHT -> Icons.Outlined.WbSunny
+                        ThemeMode.SYSTEM -> Icons.Outlined.Palette
+                    },
+                    title = "Tema",
+                    subtitle = "Kenyamanan visual antarmuka",
+                    valueText = themeLabel,
+                    onClick = { showThemeDialog = true }
                 )
             }
 
-            // Section 3: APLIKASI
+            // PANEL 3: Aplikasi & Akademik
             SettingsSection(title = "APLIKASI") {
-                SettingInfoRow(
-                    icon = Icons.Outlined.Sync,
-                    title = "Sinkronisasi Jadwal",
-                    subtitle = "Pembaruan otomatis saat online",
-                    badgeText = "Aktif",
-                    badgeBg = StatusSuccessBg,
-                    badgeTextCol = StatusSuccessText
+                SettingActionRow(
+                    icon = Icons.Outlined.People,
+                    title = "Daftar Mahasiswa TRJT 3A",
+                    subtitle = "17 Mahasiswa Aktif & Kelompok Piket",
+                    valueText = "Lihat",
+                    onClick = { showMahasiswaDialog = true }
                 )
 
-                HorizontalDivider(color = BorderSubtle, modifier = Modifier.padding(start = 60.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, modifier = Modifier.padding(start = 68.dp))
 
                 SettingInfoRow(
-                    icon = Icons.Outlined.Storage,
-                    title = "Cache Offline",
-                    subtitle = "Jadwal tetap dapat diakses tanpa internet",
-                    badgeText = "Tersedia",
+                    icon = Icons.Outlined.School,
+                    title = "Semester",
+                    subtitle = "Semester 5 · TA 2026/2027",
+                    badgeText = "Aktif",
                     badgeBg = VeryLightBlue,
+                    badgeBorder = SoftBlue,
                     badgeTextCol = PrimaryBlue
                 )
 
-                HorizontalDivider(color = BorderSubtle, modifier = Modifier.padding(start = 60.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, modifier = Modifier.padding(start = 68.dp))
 
                 SettingInfoRow(
                     icon = Icons.Outlined.Info,
                     title = "Versi Aplikasi",
-                    subtitle = "TRJT 3A Reminder Native Android",
+                    subtitle = "TRJT 3A Class Reminder Native",
                     badgeText = uiState.appVersion,
-                    badgeBg = StatusCompletedBg,
-                    badgeTextCol = StatusCompletedText
+                    badgeBg = MaterialTheme.colorScheme.surfaceVariant,
+                    badgeBorder = MaterialTheme.colorScheme.outlineVariant,
+                    badgeTextCol = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
         }
+
+        // Theme Dialog
+        if (showThemeDialog) {
+            ThemeSelectionDialog(
+                currentMode = uiState.themeMode,
+                onModeSelected = { viewModel.setThemeMode(it) },
+                onDismissRequest = { showThemeDialog = false }
+            )
+        }
+
+        // Mahasiswa List Dialog
+        if (showMahasiswaDialog) {
+            MahasiswaListDialog(
+                onDismissRequest = { showMahasiswaDialog = false }
+            )
+        }
     }
-}
 
 @Composable
 private fun SettingsSection(
@@ -272,9 +310,9 @@ private fun SettingsSection(
     ) {
         Text(
             text = title,
-            fontSize = 12.sp,
+            fontSize = 11.5.sp,
             fontWeight = FontWeight.Bold,
-            color = TextSecondary,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             letterSpacing = 0.5.sp,
             modifier = Modifier.padding(start = 4.dp)
         )
@@ -282,9 +320,9 @@ private fun SettingsSection(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, BorderCard, RoundedCornerShape(18.dp)),
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(18.dp)),
             shape = RoundedCornerShape(18.dp),
-            colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
@@ -313,7 +351,8 @@ private fun SettingSwitchRow(
             modifier = Modifier
                 .size(40.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(VeryLightBlue),
+                .background(VeryLightBlue)
+                .border(1.dp, SoftBlue, RoundedCornerShape(12.dp)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -327,14 +366,14 @@ private fun SettingSwitchRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                fontSize = 15.sp,
+                fontSize = 14.5.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = TextPrimary
+                color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = subtitle,
                 fontSize = 12.sp,
-                color = TextSecondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
@@ -352,17 +391,17 @@ private fun SettingSwitchRow(
 }
 
 @Composable
-private fun SettingInfoRow(
+private fun SettingActionRow(
     icon: ImageVector,
     title: String,
     subtitle: String,
-    badgeText: String,
-    badgeBg: Color,
-    badgeTextCol: Color
+    valueText: String,
+    onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable { onClick() }
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp)
@@ -371,7 +410,8 @@ private fun SettingInfoRow(
             modifier = Modifier
                 .size(40.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(VeryLightBlue),
+                .background(VeryLightBlue)
+                .border(1.dp, SoftBlue, RoundedCornerShape(12.dp)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -385,28 +425,95 @@ private fun SettingInfoRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                fontSize = 15.sp,
+                fontSize = 14.5.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = TextPrimary
+                color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = subtitle,
                 fontSize = 12.sp,
-                color = TextSecondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = valueText,
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.Medium
+            )
+            Icon(
+                imageVector = Icons.Outlined.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(18.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun SettingInfoRow(
+    icon: ImageVector,
+    title: String,
+    subtitle: String,
+    badgeText: String,
+    badgeBg: Color,
+    badgeBorder: Color,
+    badgeTextCol: Color
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
         Box(
             modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .background(badgeBg)
-                .padding(horizontal = 10.dp, vertical = 4.dp)
+                .size(40.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(VeryLightBlue)
+                .border(1.dp, SoftBlue, RoundedCornerShape(12.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = PrimaryBlue,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                fontSize = 14.5.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = subtitle,
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        Surface(
+            shape = RoundedCornerShape(8.dp),
+            color = badgeBg,
+            border = androidx.compose.foundation.BorderStroke(1.dp, badgeBorder)
         ) {
             Text(
                 text = badgeText,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = badgeTextCol
+                fontSize = 11.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = badgeTextCol,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
             )
         }
     }

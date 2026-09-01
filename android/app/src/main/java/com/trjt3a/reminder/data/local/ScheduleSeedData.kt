@@ -1,11 +1,16 @@
 package com.trjt3a.reminder.data.local
 
 import com.trjt3a.reminder.data.model.ClassDay
+import com.trjt3a.reminder.data.model.Dosen
 import com.trjt3a.reminder.data.model.NotificationCategory
 import com.trjt3a.reminder.data.model.NotificationItem
+import com.trjt3a.reminder.data.model.PiketGroup
 import com.trjt3a.reminder.data.model.Schedule
+import com.trjt3a.reminder.data.model.Student
 
 object ScheduleSeedData {
+
+    const val GOOGLE_DRIVE_FOLDER_URL = "https://drive.google.com/drive/folders/1W7F5rWsNNq-nsLUF1emnOj4eJsYSShzW?usp=drive_link"
 
     val roomMap = mapOf(
         "L10" to "Lab. HF & Propagasi",
@@ -22,7 +27,7 @@ object ScheduleSeedData {
         "ISD" to "Ipan Suandi, S.T., M.T.",
         "MSY" to "Muhammad Syahroni, S.T., M.T.",
         "RCM" to "Rachmawati, S.T., M.Eng.",
-        "ANF" to "Anita Fauziah, S.ST., M.T.",
+        "ANF" to "Anita Fauziah, SST., M.T.",
         "YS" to "Yassir, S.T., M.Eng.Sc.",
         "NEL" to "Dr. Nelly Safitri, SST., M.Eng.Sc."
     )
@@ -188,6 +193,144 @@ object ScheduleSeedData {
             endTime = "12:00"
         )
     )
+
+    // ==========================================
+    // DAFTAR DOSEN PENGAMPU TRJT 3A (SEMESTER 5)
+    // ==========================================
+    val dosenList = listOf(
+        Dosen(
+            no = 1,
+            initial = "IS",
+            name = "Ipan Suandi, S.T., M.T.",
+            nip = "19800510 200501 1 002",
+            courses = listOf(
+                "Praktikum Antena dan Propagasi",
+                "Antena dan Propagasi"
+            )
+        ),
+        Dosen(
+            no = 2,
+            initial = "MS",
+            name = "Muhammad Syahroni, S.T., M.T.",
+            nip = "19721026 200604 1 001",
+            courses = listOf(
+                "Jaringan Komputer Lanjut",
+                "Praktikum Jaringan Komputer Lanjut"
+            )
+        ),
+        Dosen(
+            no = 3,
+            initial = "RS",
+            name = "Rachmawati, S.T., M.Eng.",
+            nip = "19790826 200312 2 001",
+            courses = listOf(
+                "Praktikum Sistem Komunikasi Satelit dan Radar",
+                "Sistem Komunikasi Satelit dan Radar"
+            )
+        ),
+        Dosen(
+            no = 4,
+            initial = "AF",
+            name = "Anita Fauziah, SST., M.T.",
+            nip = "19720129 199803 2 001",
+            courses = listOf(
+                "Teknik Instalasi Fiber Optik",
+                "Praktikum Teknik Instalasi Fiber Optik"
+            )
+        ),
+        Dosen(
+            no = 5,
+            initial = "YS",
+            name = "Yassir, S.T., M.Eng.Sc.",
+            nip = "19800419 200312 1 002",
+            courses = listOf(
+                "Praktikum Sistem Komunikasi Seluler",
+                "Sistem Komunikasi Seluler"
+            )
+        ),
+        Dosen(
+            no = 6,
+            initial = "DN",
+            name = "Dr. Nelly Safitri, SST., M.Eng.Sc.",
+            nip = "NIP Belum Tercatat",
+            courses = listOf(
+                "Metodologi Penelitian"
+            )
+        )
+    )
+
+    // ==========================================
+    // DAFTAR PIKET KELAS KELOMPOK I - V
+    // ==========================================
+    val piketGroups = listOf(
+        PiketGroup(
+            groupNumber = 1,
+            groupRoman = "I",
+            groupName = "Kelompok I",
+            members = listOf(
+                "Aqil Ocean Difra",
+                "Renka Laura",
+                "Firlita Afianti",
+                "Afriansyah Sinamo"
+            )
+        ),
+        PiketGroup(
+            groupNumber = 2,
+            groupRoman = "II",
+            groupName = "Kelompok II",
+            members = listOf(
+                "Lunna Auamara",
+                "Nazar Alfaraby",
+                "Rahmat Haikal",
+                "Muhammad Halfi Al Barizi"
+            )
+        ),
+        PiketGroup(
+            groupNumber = 3,
+            groupRoman = "III",
+            groupName = "Kelompok III",
+            members = listOf(
+                "Syawal Fitriadi",
+                "Sarah Fonna",
+                "Muhammad Rais"
+            )
+        ),
+        PiketGroup(
+            groupNumber = 4,
+            groupRoman = "IV",
+            groupName = "Kelompok IV",
+            members = listOf(
+                "Nesya Zikriya",
+                "Farhan Alfarisi",
+                "Ilal Ilhamdi"
+            )
+        ),
+        PiketGroup(
+            groupNumber = 5,
+            groupRoman = "V",
+            groupName = "Kelompok V",
+            members = listOf(
+                "Durratul Hikmah",
+                "Suheil Maulana",
+                "Khairul Fajar Sidiq"
+            )
+        )
+    )
+
+    // ==========================================
+    // DAFTAR 17 MAHASISWA AKTIF TRJT 3A
+    // ==========================================
+    val students: List<Student> by lazy {
+        piketGroups.flatMap { group ->
+            group.members.map { name ->
+                Student(
+                    name = name,
+                    groupNumber = group.groupNumber,
+                    groupRoman = group.groupRoman
+                )
+            }
+        }.sortedBy { it.name }
+    }
 
     val initialNotifications = listOf(
         NotificationItem(

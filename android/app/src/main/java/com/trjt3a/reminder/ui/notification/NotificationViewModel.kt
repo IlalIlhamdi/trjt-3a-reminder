@@ -11,12 +11,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class NotificationUiState(
-    val notifications: List<NotificationItem> = emptyList(),
+    val allNotifications: List<NotificationItem> = emptyList(),
+    val filteredNotifications: List<NotificationItem> = emptyList(),
+    val filterType: String = "all", // "all" or "unread"
     val unreadCount: Int = 0
 )
 
 class NotificationViewModel(
-    private val notificationRepository: NotificationRepository = NotificationRepository()
+    private val repository: NotificationRepository = NotificationRepository()
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(NotificationUiState())
@@ -24,11 +26,17 @@ class NotificationViewModel(
 
     init {
         viewModelScope.launch {
-            notificationRepository.notifications.collect { list ->
+            repository.notifications.collect { list ->
                 val unread = list.count { !it.isRead }
+                val filtered = if (_uiState.value.filterType == "unread") {
+                    list.filter { !it.isRead }
+                } else {
+                    list
+                }
                 _uiState.update {
                     it.copy(
-                        notifications = list,
+                        allNotifications = list,
+                        filteredNotifications = filtered,
                         unreadCount = unread
                     )
                 }
@@ -36,11 +44,21 @@ class NotificationViewModel(
         }
     }
 
+    fun setFilter(filter: String) {
+        val list = _uiState.value.allNotifications
+        val filtered = if (filter == "unread") {
+            list.filter { !it.isRead }
+        } else {
+            list
+        }
+        _uiState.update { it.copy(filterType = filter, filteredNotifications = filtered) }
+    }
+
     fun markAsRead(id: String) {
-        notificationRepository.markAsRead(id)
+        repository.markAsRead(id)
     }
 
     fun markAllAsRead() {
-        notificationRepository.markAllAsRead()
+        repository.markAllAsRead()
     }
 }

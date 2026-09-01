@@ -19,8 +19,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val isDark by ThemeManager.isDarkMode.collectAsState()
-            TRJT3AReminderTheme(darkTheme = isDark) {
+            val themeMode by ThemeManager.themeMode.collectAsState()
+            TRJT3AReminderTheme(themeMode = themeMode) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

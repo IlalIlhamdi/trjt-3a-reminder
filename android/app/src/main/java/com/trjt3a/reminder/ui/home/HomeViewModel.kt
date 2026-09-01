@@ -9,10 +9,8 @@ import com.trjt3a.reminder.data.repository.ScheduleRepository
 import com.trjt3a.reminder.utils.JakartaTimeProvider
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -20,12 +18,13 @@ import java.time.ZonedDateTime
 
 data class HomeUiState(
     val currentDateTime: ZonedDateTime = JakartaTimeProvider.now(),
-    val greeting: String = "Selamat pagi 👋",
+    val greeting: String = "Selamat malam",
     val formattedDate: String = "",
     val todaySchedules: List<Schedule> = emptyList(),
     val inProgressSchedule: Schedule? = null,
     val nextUpcomingSchedule: Schedule? = null,
     val currentStatus: ClassStatus = ClassStatus.UPCOMING,
+    val statusChipText: String = "Semua kelas hari ini selesai",
     val countdownText: String = "00 : 00 : 00",
     val progressPercent: Float = 0f,
     val completedCount: Int = 0,
@@ -87,7 +86,7 @@ class HomeViewModel(
             }
         }
 
-        // Find upcoming on next academic day if no classes today
+        // Find upcoming on next academic day if no upcoming today
         var nextDayName: String? = null
         var nextDayUpcomingSchedule: Schedule? = null
 
@@ -106,9 +105,13 @@ class HomeViewModel(
         var countdownText = "00 : 00 : 00"
         var progressPercent = 0f
         var status = ClassStatus.UPCOMING
+        var chipText = "Semua kelas hari ini selesai"
 
-        if (inProgress != null) {
+        if (todaySchedules.isEmpty()) {
+            chipText = "Libur / Tidak ada kelas"
+        } else if (inProgress != null) {
             status = ClassStatus.IN_PROGRESS
+            chipText = "Sedang berlangsung"
             val startMin = JakartaTimeProvider.parseTimeToMinutes(inProgress.startTime)
             val endMin = JakartaTimeProvider.parseTimeToMinutes(inProgress.endTime)
             val totalSec = (endMin - startMin) * 60
@@ -125,21 +128,34 @@ class HomeViewModel(
 
             if (remainingSec in 1..600) {
                 status = ClassStatus.STARTING_SOON_H10
+                chipText = "10 menit lagi"
             } else {
                 status = ClassStatus.UPCOMING
+                chipText = "Belum dimulai"
             }
             countdownText = JakartaTimeProvider.formatCountdown(remainingSec.coerceAtLeast(0L))
+        } else if (completedIds.size == todaySchedules.size && todaySchedules.isNotEmpty()) {
+            status = ClassStatus.COMPLETED
+            chipText = "Semua kelas hari ini selesai"
+        }
+
+        val greetingRaw = when (now.hour) {
+            in 4..10 -> "Selamat pagi"
+            in 11..14 -> "Selamat siang"
+            in 15..17 -> "Selamat sore"
+            else -> "Selamat malam"
         }
 
         _uiState.update {
             it.copy(
                 currentDateTime = now,
-                greeting = JakartaTimeProvider.getGreeting(now.hour),
+                greeting = greetingRaw,
                 formattedDate = JakartaTimeProvider.formatIndonesianDate(now),
                 todaySchedules = todaySchedules,
                 inProgressSchedule = inProgress,
                 nextUpcomingSchedule = nextUpcoming,
                 currentStatus = status,
+                statusChipText = chipText,
                 countdownText = countdownText,
                 progressPercent = progressPercent,
                 completedCount = completedIds.size,
