@@ -1045,14 +1045,14 @@ body {
 
 .schedule-lecturer-row {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-top: 4px;
-  padding: 8px 12px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 10px 12px;
   background: linear-gradient(135deg, rgba(239, 246, 255, 0.95) 0%, rgba(224, 242, 254, 0.85) 100%);
   border: 1px solid rgba(186, 220, 255, 0.9);
-  border-radius: 12px;
+  border-radius: 14px;
   box-shadow: 0 2px 8px -2px rgba(37, 99, 235, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
   transition: all var(--transition-fast);
 }
@@ -1061,9 +1061,8 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
   min-width: 0;
-  flex: 1;
-  overflow: hidden;
 }
 
 .schedule-lecturer-avatar {
@@ -1088,29 +1087,34 @@ body {
 }
 
 .schedule-lecturer-name {
-  font-size: 12.5px;
+  font-size: 13px;
   color: #1E3A8A;
-  font-weight: 600;
+  font-weight: 700;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   letter-spacing: -0.01em;
+  flex: 1;
 }
 
 .btn-schedule-mat {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
-  padding: 6px 13px;
+  padding: 0 8px;
+  height: 32px;
+  box-sizing: border-box;
   font-size: 11.5px;
   font-weight: 700;
+  line-height: 1;
   color: #FFFFFF;
-  background: linear-gradient(135deg, #2F80ED 0%, #1D4ED8 100%);
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 9px;
   cursor: pointer;
   flex-shrink: 0;
-  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.22);
   transition: all var(--transition-fast);
   letter-spacing: 0.01em;
   text-decoration: none;
@@ -1118,21 +1122,25 @@ body {
 
 .btn-schedule-mat i,
 .btn-schedule-mat svg {
-  width: 13px;
-  height: 13px;
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  min-height: 14px;
+  stroke-width: 2.2;
   color: #FFFFFF;
+  display: block;
 }
 
 .btn-schedule-mat:hover {
-  background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+  background: linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%);
   transform: translateY(-1px);
-  box-shadow: 0 5px 14px rgba(37, 99, 235, 0.38);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
   color: #FFFFFF;
 }
 
 .btn-schedule-mat:active {
   transform: scale(0.96);
-  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
 }
 
 /* Dark Mode Overrides for Schedule Lecturer Row */
@@ -1140,6 +1148,10 @@ body {
   background: linear-gradient(135deg, rgba(30, 58, 138, 0.3) 0%, rgba(15, 23, 42, 0.5) 100%);
   border-color: rgba(59, 130, 246, 0.3);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .btn-schedule-actions-row {
+  border-top-color: rgba(59, 130, 246, 0.25);
 }
 
 [data-theme="dark"] .schedule-lecturer-avatar {
@@ -1158,15 +1170,15 @@ body {
 }
 
 [data-theme="dark"] .btn-schedule-mat {
-  background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
-  border-color: rgba(147, 197, 253, 0.35);
-  box-shadow: 0 3px 10px rgba(59, 130, 246, 0.35);
+  background: linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%);
+  border-color: rgba(96, 165, 250, 0.4);
+  box-shadow: 0 2px 6px rgba(29, 78, 216, 0.3);
   color: #FFFFFF;
 }
 
 [data-theme="dark"] .btn-schedule-mat:hover {
-  background: linear-gradient(135deg, #60A5FA 0%, #2563EB 100%);
-  color: #FFFFFF;
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+  border-color: #93C5FD;
 }
 
 /* ==========================================================================
@@ -1217,18 +1229,21 @@ body {
   gap: 8px;
   margin-top: 2px;
   overflow-x: auto;
+  overflow-y: hidden;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
-  padding: 6px 2px;
+  padding: 6px 4px 10px 4px;
   -webkit-overflow-scrolling: touch;
   flex-shrink: 0;
   width: 100%;
   box-sizing: border-box;
-  min-height: 44px;
+  min-height: 52px;
 }
 
 .filter-pills-bar::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
+  width: 0;
+  height: 0;
 }
 
 .filter-glass-pill {
@@ -2518,5 +2533,671 @@ select,
   border-color: rgba(255, 255, 255, 0.08);
 }
 
+/* ==========================================================================
+   Course Assignments & Task Tracking System (TRJT 3A)
+   ========================================================================== */
 
+.btn-schedule-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  padding-top: 8px;
+  border-top: 1px solid rgba(186, 220, 255, 0.6);
+}
 
+.btn-schedule-actions-row > button {
+  flex: 1 1 0;
+  height: 32px;
+  min-height: 32px;
+  max-height: 32px;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  border-radius: 9px;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  line-height: 1;
+  white-space: nowrap;
+  border: 1px solid;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+}
+
+.btn-schedule-actions-row > button i,
+.btn-schedule-actions-row > button svg {
+  width: 14px !important;
+  height: 14px !important;
+  min-width: 14px !important;
+  min-height: 14px !important;
+  max-width: 14px !important;
+  max-height: 14px !important;
+  stroke-width: 2.2 !important;
+  flex-shrink: 0 !important;
+  display: block !important;
+}
+
+.btn-schedule-actions-row > button span {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.btn-schedule-tugas {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 8px;
+  height: 32px;
+  box-sizing: border-box;
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-primary-blue);
+  background: rgba(235, 244, 254, 0.95);
+  border: 1px solid rgba(191, 219, 254, 0.9);
+  border-radius: 9px;
+  cursor: pointer;
+  flex-shrink: 0;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  box-shadow: 0 2px 6px rgba(47, 128, 237, 0.08);
+}
+
+.btn-schedule-tugas i,
+.btn-schedule-tugas svg {
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  min-height: 14px;
+  stroke-width: 2.2;
+  display: block;
+}
+
+.btn-schedule-tugas:hover {
+  background: #FFFFFF;
+  border-color: var(--color-primary-blue);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(47, 128, 237, 0.16);
+}
+
+.btn-schedule-tugas.has-tasks {
+  background: linear-gradient(135deg, rgba(254, 243, 199, 0.95), rgba(254, 215, 170, 0.85));
+  border-color: rgba(245, 158, 11, 0.6);
+  color: #B45309;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.16);
+}
+
+.btn-schedule-tugas.has-tasks:hover {
+  background: #FFFBEB;
+  border-color: #D97706;
+}
+
+.badge-task-counter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 800;
+  background: #D97706;
+  color: #FFFFFF;
+  margin-left: 2px;
+}
+
+/* Deadline Badges */
+.badge-deadline {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.badge-deadline i {
+  width: 12px;
+  height: 12px;
+}
+
+.badge-deadline-critical {
+  background: rgba(254, 242, 242, 0.95);
+  border: 1px solid rgba(254, 202, 202, 0.95);
+  color: #DC2626;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.12);
+}
+
+.badge-deadline-urgent {
+  background: rgba(255, 247, 237, 0.95);
+  border: 1px solid rgba(254, 215, 170, 0.95);
+  color: #D97706;
+}
+
+.badge-deadline-warning {
+  background: rgba(254, 252, 232, 0.95);
+  border: 1px solid rgba(254, 240, 138, 0.95);
+  color: #B45309;
+}
+
+.badge-deadline-normal {
+  background: rgba(235, 244, 254, 0.9);
+  border: 1px solid rgba(191, 219, 254, 0.9);
+  color: #1D4ED8;
+}
+
+.badge-deadline-passed {
+  background: rgba(241, 245, 249, 0.9);
+  border: 1px solid rgba(203, 213, 225, 0.9);
+  color: #64748B;
+}
+
+/* Assignment Cards */
+.assignment-card {
+  background: var(--color-surface-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--color-border-glass);
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: 0 4px 16px rgba(15, 61, 145, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.assignment-card:hover {
+  border-color: rgba(191, 219, 254, 0.9);
+  transform: translateY(-1px);
+}
+
+.assignment-card.completed {
+  opacity: 0.72;
+  background: rgba(248, 250, 252, 0.75);
+}
+
+.assignment-card.completed .assignment-card-title {
+  text-decoration: line-through;
+  color: var(--color-text-muted);
+}
+
+.assignment-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.assignment-card-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.task-check-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(147, 197, 253, 0.9);
+  background: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: transparent;
+  transition: all var(--transition-fast);
+}
+
+.task-check-btn:hover {
+  border-color: var(--color-primary-blue);
+  transform: scale(1.08);
+}
+
+.task-check-btn.checked {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: #FFFFFF;
+}
+
+.assignment-card-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.assignment-course-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-primary-blue);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.assignment-card-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--color-primary-navy);
+  line-height: 1.35;
+}
+
+.assignment-card-desc {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 1.35;
+  margin-top: 2px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.assignment-meta-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(220, 235, 252, 0.6);
+  font-size: 11.5px;
+}
+
+.assignment-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(241, 245, 249, 0.9);
+  color: #475569;
+}
+
+.btn-task-delete {
+  background: none;
+  border: none;
+  color: #94A3B8;
+  cursor: pointer;
+  padding: 3px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.btn-task-delete:hover {
+  color: #DC2626;
+  background: rgba(254, 242, 242, 0.9);
+}
+
+/* Home Section Widget: Tugas & Deadline */
+.tugas-home-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.tugas-header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(254, 243, 199, 0.9);
+  border: 1px solid rgba(251, 191, 36, 0.8);
+  color: #B45309;
+}
+
+/* Segmented Type Selector in Add Assignment Form */
+.task-type-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  background: rgba(244, 248, 254, 0.7);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid rgba(220, 235, 252, 0.8);
+}
+
+.task-type-btn {
+  padding: 8px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: inherit;
+  transition: all var(--transition-fast);
+}
+
+.task-type-btn.active {
+  background: #FFFFFF;
+  color: var(--color-primary-navy);
+  box-shadow: 0 2px 6px rgba(15, 61, 145, 0.08);
+  font-weight: 700;
+}
+
+/* Dark Theme Overrides */
+[data-theme="dark"] .btn-schedule-tugas {
+  background: rgba(30, 58, 138, 0.35);
+  border-color: rgba(59, 130, 246, 0.4);
+  color: #93C5FD;
+}
+
+[data-theme="dark"] .btn-schedule-tugas:hover {
+  background: rgba(37, 99, 235, 0.3);
+  border-color: #60A5FA;
+}
+
+[data-theme="dark"] .btn-schedule-tugas.has-tasks {
+  background: rgba(180, 83, 9, 0.25);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #FDE68A;
+}
+
+[data-theme="dark"] .assignment-card {
+  background: rgba(18, 28, 48, 0.78);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .assignment-card.completed {
+  background: rgba(15, 23, 42, 0.7);
+}
+
+[data-theme="dark"] .task-check-btn {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: rgba(71, 85, 105, 0.8);
+}
+
+[data-theme="dark"] .task-type-selector {
+  background: rgba(15, 23, 42, 0.6);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .task-type-btn.active {
+  background: rgba(30, 41, 59, 0.95);
+  color: #F8FAFC;
+}
+
+/* Stack input modals on top of list/course modals */
+#modal-add-assignment,
+#modal-upload-material,
+#modal-admin-add-task {
+  z-index: 150 !important;
+}
+
+/* ==========================================================================
+   Course Practical Groups (Kelompok Praktikum per Mata Kuliah TRJT 3A)
+   ========================================================================== */
+
+.btn-schedule-group {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 8px;
+  height: 32px;
+  box-sizing: border-box;
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1;
+  color: #047857;
+  background: rgba(236, 253, 245, 0.95);
+  border: 1px solid rgba(167, 243, 208, 0.9);
+  border-radius: 9px;
+  cursor: pointer;
+  flex-shrink: 0;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.08);
+}
+
+.btn-schedule-group:hover {
+  background: #FFFFFF;
+  border-color: #10B981;
+  color: #065F46;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.16);
+}
+
+.btn-schedule-group i,
+.btn-schedule-group svg {
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  min-height: 14px;
+  stroke-width: 2.2;
+  display: block;
+}
+
+.practical-group-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(220, 235, 252, 0.85);
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 4px 16px rgba(15, 61, 145, 0.06);
+  transition: all var(--transition-fast);
+}
+
+.practical-group-card:hover {
+  border-color: rgba(167, 243, 208, 0.9);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.1);
+}
+
+.practical-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.practical-group-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge-group-num {
+  font-size: 11px;
+  font-weight: 800;
+  color: #065F46;
+  background: linear-gradient(135deg, rgba(209, 250, 229, 0.95), rgba(167, 243, 208, 0.85));
+  border: 1px solid rgba(110, 231, 183, 0.8);
+  padding: 3px 8px;
+  border-radius: 8px;
+}
+
+.practical-group-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-primary-navy);
+}
+
+.badge-group-count {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.btn-copy-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 8px;
+  background: rgba(241, 245, 249, 0.9);
+  border: 1px solid rgba(203, 213, 225, 0.8);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-copy-group:hover {
+  background: #FFFFFF;
+  color: var(--color-primary-navy);
+  border-color: var(--color-primary-blue);
+}
+
+.btn-copy-group.copied {
+  background: #ECFDF5;
+  color: #059669;
+  border-color: #6EE7B7;
+}
+
+.practical-group-members {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.practical-group-member-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: rgba(248, 250, 252, 0.8);
+  border: 1px solid transparent;
+  transition: all var(--transition-fast);
+}
+
+.practical-group-member-item:hover {
+  background: #FFFFFF;
+  border-color: rgba(226, 232, 240, 0.9);
+}
+
+.practical-group-member-item.is-matched {
+  background: rgba(236, 253, 245, 0.95);
+  border-color: rgba(110, 231, 183, 0.9);
+  box-shadow: 0 0 0 1.5px rgba(16, 185, 129, 0.35);
+}
+
+.member-idx {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  width: 14px;
+}
+
+.member-avatar-init {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-very-light-blue);
+  color: var(--color-primary-blue);
+  flex-shrink: 0;
+}
+
+.practical-group-member-item.is-matched .member-avatar-init {
+  background: #10B981;
+  color: #FFFFFF;
+}
+
+.member-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-primary-navy);
+  flex: 1;
+}
+
+.practical-group-member-item.is-matched .member-name {
+  color: #065F46;
+  font-weight: 700;
+}
+
+/* Dark Mode Overrides for Practical Groups */
+[data-theme="dark"] .btn-schedule-group {
+  background: rgba(6, 78, 59, 0.35);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #6EE7B7;
+}
+
+[data-theme="dark"] .btn-schedule-group:hover {
+  background: rgba(5, 150, 105, 0.3);
+  border-color: #34D399;
+}
+
+[data-theme="dark"] .practical-group-card {
+  background: rgba(18, 28, 48, 0.85);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="dark"] .practical-group-name {
+  color: #F8FAFC;
+}
+
+[data-theme="dark"] .badge-group-num {
+  background: rgba(6, 78, 59, 0.6);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #A7F3D0;
+}
+
+[data-theme="dark"] .btn-copy-group {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: rgba(71, 85, 105, 0.7);
+  color: #CBD5E1;
+}
+
+[data-theme="dark"] .practical-group-member-item {
+  background: rgba(30, 41, 59, 0.5);
+}
+
+[data-theme="dark"] .member-name {
+  color: #F1F5F9;
+}
+
+[data-theme="dark"] .practical-group-member-item.is-matched {
+  background: rgba(6, 78, 59, 0.4);
+  border-color: rgba(52, 211, 153, 0.5);
+}

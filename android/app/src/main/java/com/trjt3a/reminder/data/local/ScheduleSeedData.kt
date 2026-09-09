@@ -270,8 +270,7 @@ object ScheduleSeedData {
             members = listOf(
                 "Aqil Ocean Difra",
                 "Renka Laura",
-                "Firlita Afianti",
-                "Afriansyah Sinamo"
+                "Firlita Afianti"
             )
         ),
         PiketGroup(

@@ -25,7 +25,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <!-- Design System Stylesheet & Critical Inlined Styles -->
-  <link rel="stylesheet" href="./css/design-system.css?v=5.4">
+  <link rel="stylesheet" href="./css/design-system.css?v=5.9">
   <style>
     /* Critical Glassmorphism Inlined Styles for Instant Guaranteed Rendering */
     :root {
@@ -133,19 +133,23 @@
     .schedule-room-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; background: rgba(244, 248, 254, 0.9); border: 1px solid rgba(220, 235, 252, 0.9); border-radius: 8px; font-size: 11.5px; font-weight: 600; color: #334155; white-space: nowrap; flex-shrink: 0; }
     .schedule-room-badge i { width: 13px; height: 13px; color: var(--color-primary-blue); flex-shrink: 0; }
     .schedule-subject-heading { font-size: 1.125rem; font-weight: 800; color: var(--color-primary-navy); line-height: 1.35; letter-spacing: -0.015em; }
-    .schedule-lecturer-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 4px; padding: 8px 12px; background: linear-gradient(135deg, rgba(239, 246, 255, 0.95) 0%, rgba(224, 242, 254, 0.85) 100%); border: 1px solid rgba(186, 220, 255, 0.9); border-radius: 12px; box-shadow: 0 2px 8px -2px rgba(37, 99, 235, 0.08); }
-    .schedule-lecturer-info { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; overflow: hidden; }
+    .schedule-lecturer-row { display: flex; flex-direction: column; align-items: stretch; gap: 8px; margin-top: 6px; padding: 10px 12px; background: linear-gradient(135deg, rgba(239, 246, 255, 0.95) 0%, rgba(224, 242, 254, 0.85) 100%); border: 1px solid rgba(186, 220, 255, 0.9); border-radius: 14px; box-shadow: 0 2px 8px -2px rgba(37, 99, 235, 0.08); }
+    .schedule-lecturer-info { display: flex; align-items: center; gap: 8px; width: 100%; min-width: 0; }
     .schedule-lecturer-avatar { width: 26px; height: 26px; border-radius: 50%; background: #FFFFFF; border: 1.5px solid rgba(191, 219, 254, 0.95); display: flex; align-items: center; justify-content: center; color: var(--color-primary-blue); box-shadow: 0 2px 6px rgba(37, 99, 235, 0.12); flex-shrink: 0; }
     .schedule-lecturer-avatar i { width: 14px; height: 14px; color: var(--color-primary-blue); }
-    .schedule-lecturer-name { font-size: 12.5px; color: #1E3A8A; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .btn-schedule-mat { display: inline-flex; align-items: center; gap: 5px; padding: 6px 13px; font-size: 11.5px; font-weight: 700; color: #FFFFFF; background: linear-gradient(135deg, #2F80ED 0%, #1D4ED8 100%); border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 9px; cursor: pointer; flex-shrink: 0; box-shadow: 0 3px 10px rgba(37, 99, 235, 0.28); text-decoration: none; }
-    .btn-schedule-mat i { width: 13px; height: 13px; color: #FFFFFF; }
+    .schedule-lecturer-name { font-size: 13px; color: #1E3A8A; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+    .btn-schedule-actions-row { display: flex; align-items: center; gap: 6px; width: 100%; box-sizing: border-box; padding-top: 8px; border-top: 1px solid rgba(186, 220, 255, 0.6); }
+    .btn-schedule-actions-row > button { flex: 1 1 0; height: 32px; min-height: 32px; max-height: 32px; box-sizing: border-box; margin: 0; padding: 0 6px; font-size: 11.5px; font-weight: 700; border-radius: 9px; min-width: 0; display: inline-flex; align-items: center; justify-content: center; gap: 5px; line-height: 1; white-space: nowrap; border: 1px solid; cursor: pointer; }
+    .btn-schedule-actions-row > button i, .btn-schedule-actions-row > button svg { width: 14px !important; height: 14px !important; min-width: 14px !important; min-height: 14px !important; stroke-width: 2.2 !important; flex-shrink: 0 !important; display: block !important; }
+    .btn-schedule-actions-row > button span { display: inline-flex; align-items: center; line-height: 1; font-size: 11.5px; font-weight: 700; }
+    .btn-schedule-mat { color: #FFFFFF; background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); border: 1px solid rgba(255, 255, 255, 0.25); box-shadow: 0 2px 6px rgba(37, 99, 235, 0.22); }
+    .btn-schedule-tugas { color: var(--color-primary-blue); background: rgba(235, 244, 254, 0.95); border: 1px solid rgba(191, 219, 254, 0.9); box-shadow: 0 2px 6px rgba(47, 128, 237, 0.08); }
+    .btn-schedule-group { color: #047857; background: rgba(236, 253, 245, 0.95); border: 1px solid rgba(167, 243, 208, 0.9); box-shadow: 0 2px 6px rgba(16, 185, 129, 0.08); }
     .notif-header-box { display: flex; flex-direction: column; gap: 2px; }
     .notif-top-action-row { display: flex; align-items: center; justify-content: space-between; }
     .notif-subtitle-text { font-size: 13px; color: var(--color-text-secondary); margin-top: 2px; }
-    .btn-mark-read-link { background: none; border: none; color: var(--color-primary-blue); font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; padding: 4px 6px; }
-    .filter-pills-bar { display: flex; align-items: center; gap: 8px; margin-top: 2px; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; padding: 6px 2px; -webkit-overflow-scrolling: touch; flex-shrink: 0; width: 100%; box-sizing: border-box; min-height: 44px; }
-    .filter-pills-bar::-webkit-scrollbar { display: none; }
+    .filter-pills-bar { display: flex; align-items: center; gap: 8px; margin-top: 2px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -ms-overflow-style: none; padding: 6px 4px 10px 4px; -webkit-overflow-scrolling: touch; flex-shrink: 0; width: 100%; box-sizing: border-box; min-height: 52px; }
+    .filter-pills-bar::-webkit-scrollbar { display: none; width: 0; height: 0; }
     .filter-glass-pill { padding: 8px 16px; border-radius: var(--radius-full); font-size: 12.5px; font-weight: 600; font-family: inherit; cursor: pointer; background: rgba(255, 255, 255, 0.85); border: 1px solid var(--color-border-subtle); color: var(--color-text-secondary); white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; min-height: 36px; box-sizing: border-box; line-height: 1; }
     .filter-glass-pill.active { background: var(--color-primary-blue); border-color: var(--color-primary-blue); color: #FFFFFF; font-weight: 700; box-shadow: 0 3px 10px rgba(47, 128, 237, 0.35); }
     .notif-cards-list { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
@@ -195,6 +199,7 @@
     .nav-badge-dot { position: absolute; top: -2px; right: -3px; width: 7px; height: 7px; background-color: var(--color-primary-blue); border-radius: 50%; border: 1.5px solid #FFFFFF; display: none; }
     .modal-backdrop { position: fixed; inset: 0; background: rgba(15, 41, 66, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 100; display: none; align-items: flex-end; justify-content: center; }
     .modal-backdrop.is-open { display: flex; }
+    #modal-add-assignment, #modal-upload-material { z-index: 150 !important; }
     .modal-sheet { width: 100%; max-width: 480px; max-height: 85vh; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(24px); border-top-left-radius: 28px; border-top-right-radius: 28px; border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 -12px 40px rgba(15, 61, 145, 0.15); display: flex; flex-direction: column; overflow: hidden; }
     .modal-drag-handle { width: 40px; height: 4px; background: #CBD5E1; border-radius: 9999px; margin: 10px auto 0 auto; }
     .modal-header { padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(220, 235, 252, 0.7); }
@@ -298,6 +303,26 @@
               <!-- Dynamically populated by renderTodayTimeline() -->
             </div>
 
+            <!-- Section: Tugas & Deadline Mendatang (Beranda) -->
+            <div id="section-tugas-home" class="tugas-home-section" style="margin-top: 16px;">
+              <div class="section-header-row">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <h2 class="section-main-title">Tugas & Deadline</h2>
+                  <span id="badge-home-tasks-count" class="tugas-header-badge">0 Tugas</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <button type="button" class="btn-mark-read-link" onclick="openAllAssignmentsModal()" style="font-size: 12px; font-weight: 700;">Lihat Semua</button>
+                  <button type="button" class="btn-schedule-tugas" onclick="openAddAssignmentModal()" style="padding: 4px 10px; font-size: 11.5px;">
+                    <i data-lucide="plus" style="width: 12px; height: 12px;"></i> Tambah
+                  </button>
+                </div>
+              </div>
+
+              <div id="home-upcoming-tasks-container" class="weekly-cards-list" style="gap: 10px; margin-top: 4px;">
+                <!-- Dynamically populated by renderUpcomingTasksWidget() -->
+              </div>
+            </div>
+
             <!-- Button Daftar Piket Kelas (Beranda) -->
             <div style="margin-top: 14px;">
               <button class="btn-piket-action" onclick="openPiketModal()" type="button" aria-label="Lihat Daftar Piket Kelas">
@@ -309,6 +334,26 @@
                     <div class="btn-piket-title-row">
                       <span class="btn-piket-title">Daftar Piket Kelas</span>
                       <span class="piket-today-pill badge-piket-today-chip">Minggu ini: Kelompok II</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="btn-piket-chevron">
+                  <i data-lucide="chevron-right"></i>
+                </div>
+              </button>
+            </div>
+
+            <!-- Button Kelompok Praktikum MK (Beranda) -->
+            <div style="margin-top: 10px;">
+              <button class="btn-piket-action btn-group-action" onclick="openCourseGroupsModal()" type="button" aria-label="Lihat Kelompok Praktikum Mata Kuliah">
+                <div class="btn-piket-left">
+                  <div class="btn-piket-icon-box" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.28);">
+                    <i data-lucide="users" style="width: 20px; height: 20px;"></i>
+                  </div>
+                  <div class="btn-piket-text-wrap">
+                    <div class="btn-piket-title-row">
+                      <span class="btn-piket-title">Kelompok Praktikum MK</span>
+                      <span class="piket-today-pill" style="background: rgba(236, 253, 245, 0.95); border-color: rgba(110, 231, 183, 0.85); color: #065F46;">4 Mata Kuliah</span>
                     </div>
                   </div>
                 </div>
@@ -583,13 +628,12 @@
             </div>
 
           </div>
-
-          <!-- Toast Container for Real-time Feedback -->
-          <div id="toast-container" class="toast-container"></div>
-
         </section>
 
       </main>
+
+      <!-- Toast Container for Real-time Feedback (Globally Active) -->
+      <div id="toast-container" class="toast-container"></div>
 
       <!-- Bottom Navigation (Fixed Glass Bar, 4 Items, Safe Area) -->
       <nav class="bottom-nav">
@@ -889,7 +933,7 @@
           </div>
           <div>
             <h2 style="font-size: 15px; font-weight: 700; color: var(--color-primary-navy); line-height: 1.25;">Daftar Mahasiswa TRJT 3A</h2>
-            <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 2px;">17 Mahasiswa Aktif · Semester 5</p>
+            <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 2px;">16 Mahasiswa Aktif · Semester 5</p>
           </div>
         </div>
         <button id="btn-close-mahasiswa-modal" class="btn-close-modal" onclick="closeMahasiswaModal()" aria-label="Tutup">
@@ -912,19 +956,315 @@
     </div>
   </div>
 
+  <!-- ==========================================
+       MODAL 6: TAMBAH / INPUT TUGAS KULIAH
+       ========================================== -->
+  <div id="modal-add-assignment" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-sheet">
+      <div class="modal-drag-handle"></div>
+      
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="brand-logo-box" style="background: rgba(254, 243, 199, 0.9); border-color: #FDE68A; color: #D97706;">
+            <i data-lucide="file-plus" style="width: 20px; height: 20px;"></i>
+          </div>
+          <div>
+            <h2 id="modal-add-task-title" style="font-size: 15px; font-weight: 700; color: var(--color-primary-navy); line-height: 1.25;">Tambah Tugas Kuliah</h2>
+            <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 2px;">Tersinkron otomatis ke seluruh kelas TRJT 3A</p>
+          </div>
+        </div>
+        <button id="btn-close-add-task-modal" class="btn-close-modal" onclick="closeAddAssignmentModal()" aria-label="Tutup">
+          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+        </button>
+      </div>
+
+      <form id="form-add-assignment" class="modal-body">
+        <!-- Mata Kuliah Selector -->
+        <div class="form-group">
+          <label for="task-input-course" class="form-label">Mata Kuliah <span style="color: #DC2626;">*</span></label>
+          <select id="task-input-course" class="form-input" required style="font-size: 13px; padding: 10px 12px;">
+            <option value="">Pilih Mata Kuliah...</option>
+            <option value="Praktikum Antena dan Propagasi">Praktikum Antena dan Propagasi</option>
+            <option value="Jaringan Komputer Lanjut">Jaringan Komputer Lanjut</option>
+            <option value="Praktikum Jaringan Komputer Lanjut">Praktikum Jaringan Komputer Lanjut</option>
+            <option value="Praktikum Sistem Komunikasi Satelit dan Radar">Praktikum Sistem Komunikasi Satelit dan Radar</option>
+            <option value="Teknik Instalasi Fiber Optik">Teknik Instalasi Fiber Optik</option>
+            <option value="Praktikum Teknik Instalasi Fiber Optik">Praktikum Teknik Instalasi Fiber Optik</option>
+            <option value="Antena dan Propagasi">Antena dan Propagasi</option>
+            <option value="Praktikum Sistem Komunikasi Seluler">Praktikum Sistem Komunikasi Seluler</option>
+            <option value="Sistem Komunikasi Satelit dan Radar">Sistem Komunikasi Satelit dan Radar</option>
+            <option value="Sistem Komunikasi Seluler">Sistem Komunikasi Seluler</option>
+            <option value="Metodologi Penelitian">Metodologi Penelitian</option>
+          </select>
+        </div>
+
+        <!-- Judul Tugas -->
+        <div class="form-group">
+          <label for="task-input-title" class="form-label">Judul / Nama Tugas <span style="color: #DC2626;">*</span></label>
+          <input type="text" id="task-input-title" class="form-input" placeholder="Contoh: Laporan Bab 1 Karakteristik Antena" required>
+        </div>
+
+        <!-- Tanggal & Jam Pengumpulan (Deadline) -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="form-group">
+            <label for="task-input-due-date" class="form-label">Batas Tanggal <span style="color: #DC2626;">*</span></label>
+            <input type="date" id="task-input-due-date" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label for="task-input-due-time" class="form-label">Jam Kumpul</label>
+            <input type="time" id="task-input-due-time" class="form-input" value="23:59">
+          </div>
+        </div>
+
+        <!-- Tipe Tugas (Individu / Kelompok) -->
+        <div class="form-group">
+          <label class="form-label">Tipe Pengerjaan</label>
+          <div class="task-type-selector">
+            <button type="button" id="btn-type-individu" class="task-type-btn active" data-type="individu" onclick="selectTaskType('individu')">
+              <i data-lucide="user" style="width: 15px; height: 15px;"></i> Individu
+            </button>
+            <button type="button" id="btn-type-kelompok" class="task-type-btn" data-type="kelompok" onclick="selectTaskType('kelompok')">
+              <i data-lucide="users" style="width: 15px; height: 15px;"></i> Kelompok
+            </button>
+          </div>
+          <input type="hidden" id="task-input-type" value="individu">
+        </div>
+
+        <!-- Tempat / Media Pengumpulan -->
+        <div class="form-group">
+          <label for="task-input-method" class="form-label">Media / Tempat Pengumpulan</label>
+          <select id="task-input-method" class="form-input" style="font-size: 13px; padding: 10px 12px;">
+            <option value="lab">Kumpul Fisik di Lab / Ruang Kuliah</option>
+            <option value="classroom">Google Classroom</option>
+            <option value="email">Email Dosen Pengampu</option>
+            <option value="drive">Folder Google Drive</option>
+            <option value="lainnya">Lainnya / Sesuai Instruksi</option>
+          </select>
+        </div>
+
+        <!-- Keterangan Tambahan Tempat Kumpul / Catatan Ruangan -->
+        <div class="form-group">
+          <label for="task-input-place" class="form-label">Keterangan Tempat / Link Kumpul (Opsional)</label>
+          <input type="text" id="task-input-place" class="form-input" placeholder="Contoh: Meja Dosen Lab HF Lt. 2 atau link Classroom">
+        </div>
+
+        <!-- Instruksi / Deskripsi Tugas -->
+        <div class="form-group">
+          <label for="task-input-desc" class="form-label">Instruksi & Catatan Tugas (Opsional)</label>
+          <textarea id="task-input-desc" class="form-input" rows="3" placeholder="Tuliskan format file, ketentuan pengerjaan, bab laporan..." style="resize: vertical; min-height: 65px;"></textarea>
+        </div>
+
+        <!-- Nama Penginput (Opsional) -->
+        <div class="form-group">
+          <label for="task-input-author" class="form-label">Penginput Tugas (Opsional)</label>
+          <input type="text" id="task-input-author" class="form-input" placeholder="Contoh: Komti TRJT 3A / Nama Mahasiswa">
+        </div>
+
+        <button type="submit" id="btn-submit-task" class="btn-submit-upload" style="margin-top: 4px;">
+          <i data-lucide="check-circle" style="width: 18px; height: 18px;"></i>
+          <span>Simpan Tugas Kuliah</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL 7: DAFTAR TUGAS PER MATA KULIAH
+       ========================================== -->
+  <div id="modal-course-assignments" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-sheet">
+      <div class="modal-drag-handle"></div>
+      
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1;">
+          <div class="brand-logo-box" style="background: rgba(254, 243, 199, 0.9); border-color: #FDE68A; color: #D97706; flex-shrink: 0;">
+            <i data-lucide="clipboard-check" style="width: 20px; height: 20px;"></i>
+          </div>
+          <div style="min-width: 0; flex: 1;">
+            <h2 id="course-task-modal-name" style="font-size: 15px; font-weight: 700; color: var(--color-primary-navy); line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Tugas Mata Kuliah</h2>
+            <p id="course-task-modal-meta" style="font-size: 12px; color: var(--color-text-secondary); margin-top: 2px;">Dosen Pengampu · Ruang</p>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <button id="btn-course-jump-groups" class="btn-schedule-group" style="padding: 6px 10px; font-size: 12px; display: none;" onclick="jumpToCourseGroupsFromTaskModal()" title="Lihat Pembagian Kelompok Praktikum">
+            <i data-lucide="users" style="width: 14px; height: 14px;"></i> Kelompok
+          </button>
+          <button id="btn-course-task-add" class="btn-schedule-tugas" style="padding: 6px 10px; font-size: 12px;" onclick="openAddAssignmentModal()">
+            <i data-lucide="plus" style="width: 14px; height: 14px;"></i> Tambah
+          </button>
+          <button id="btn-close-course-task-modal" class="btn-close-modal" onclick="closeCourseAssignmentsModal()" aria-label="Tutup">
+            <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-body">
+        <!-- Filter Tabs: Semua, Belum Selesai, Selesai -->
+        <div class="filter-pills-bar">
+          <button class="filter-glass-pill active" id="filter-course-task-all" data-filter="all" onclick="filterCourseTasks('all')">Semua (<span id="count-course-task-all">0</span>)</button>
+          <button class="filter-glass-pill" id="filter-course-task-active" data-filter="active" onclick="filterCourseTasks('active')">Belum Selesai (<span id="count-course-task-active">0</span>)</button>
+          <button class="filter-glass-pill" id="filter-course-task-completed" data-filter="completed" onclick="filterCourseTasks('completed')">Selesai (<span id="count-course-task-completed">0</span>)</button>
+        </div>
+
+        <!-- Task List Container -->
+        <div id="course-tasks-list-container" style="display: flex; flex-direction: column; gap: 10px; min-height: 120px;">
+          <!-- Populated dynamically -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="course-tasks-empty-state" class="empty-state-card" style="padding: 28px 16px; display: none; text-align: center;">
+          <div class="hero-clock-circle" style="width: 44px; height: 44px; margin: 0 auto 8px auto; background: rgba(236, 253, 245, 0.9); border-color: rgba(167, 243, 208, 0.9); color: #059669;">
+            <i data-lucide="check-check" style="width: 22px; height: 22px;"></i>
+          </div>
+          <p style="font-weight: 700; font-size: 14px; color: var(--color-primary-navy);">Tidak Ada Tugas Aktif</p>
+          <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 3px;">Seluruh tugas untuk mata kuliah ini telah selesai atau belum ada tugas baru.</p>
+          <button type="button" class="btn-schedule-tugas" onclick="openAddAssignmentModal()" style="margin: 14px auto 0 auto; display: inline-flex; padding: 7px 14px; font-size: 12.5px;">
+            <i data-lucide="plus" style="width: 14px; height: 14px;"></i> Tambah Tugas Baru
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL 8: PUSAT SEMUA TUGAS KULIAH (HUB)
+       ========================================== -->
+  <div id="modal-all-assignments" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-sheet">
+      <div class="modal-drag-handle"></div>
+      
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="brand-logo-box" style="background: rgba(254, 243, 199, 0.9); border-color: #FDE68A; color: #D97706;">
+            <i data-lucide="check-square" style="width: 20px; height: 20px;"></i>
+          </div>
+          <div>
+            <h2 style="font-size: 15px; font-weight: 700; color: var(--color-primary-navy); line-height: 1.25;">Pusat Tugas TRJT 3A</h2>
+            <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 2px;">Daftar tugas & tenggat waktu seluruh mata kuliah</p>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button class="btn-schedule-tugas" onclick="openAddAssignmentModal()" style="padding: 6px 11px; font-size: 12px;">
+            <i data-lucide="plus" style="width: 14px; height: 14px;"></i> Tambah
+          </button>
+          <button class="btn-close-modal" onclick="closeAllAssignmentsModal()" aria-label="Tutup">
+            <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-body">
+        <!-- Search & Course Filter -->
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="position: relative;">
+            <i data-lucide="search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--color-text-muted);"></i>
+            <input type="text" id="all-tasks-search-input" class="form-input" placeholder="Cari judul tugas atau mata kuliah..." style="width: 100%; padding-left: 36px; padding-top: 8px; padding-bottom: 8px; border-radius: 12px; font-size: 13px;">
+          </div>
+
+          <div style="display: flex; gap: 8px;">
+            <select id="all-tasks-filter-course" class="form-input" style="flex: 1; font-size: 12.5px; padding: 7px 10px; border-radius: 10px;">
+              <option value="">Semua Mata Kuliah</option>
+              <option value="Praktikum Antena dan Propagasi">Praktikum Antena & Propagasi</option>
+              <option value="Jaringan Komputer Lanjut">Jaringan Komputer Lanjut</option>
+              <option value="Praktikum Jaringan Komputer Lanjut">Praktikum Jaringan Komputer Lanjut</option>
+              <option value="Praktikum Sistem Komunikasi Satelit dan Radar">Praktikum Sis. Kom. Satelit</option>
+              <option value="Teknik Instalasi Fiber Optik">Teknik Instalasi Fiber Optik</option>
+              <option value="Praktikum Teknik Instalasi Fiber Optik">Praktikum Fiber Optik</option>
+              <option value="Antena dan Propagasi">Antena dan Propagasi</option>
+              <option value="Praktikum Sistem Komunikasi Seluler">Praktikum Komunikasi Seluler</option>
+              <option value="Sistem Komunikasi Satelit dan Radar">Sis. Komunikasi Satelit & Radar</option>
+              <option value="Sistem Komunikasi Seluler">Sistem Komunikasi Seluler</option>
+              <option value="Metodologi Penelitian">Metodologi Penelitian</option>
+            </select>
+          </div>
+
+          <!-- Filter Pills: Status -->
+          <div class="filter-pills-bar" style="margin-top: 2px;">
+            <button class="filter-glass-pill active" id="filter-all-tasks-all" data-filter="all" onclick="filterAllTasks('all')">Semua (<span id="count-all-tasks-all">0</span>)</button>
+            <button class="filter-glass-pill" id="filter-all-tasks-pending" data-filter="pending" onclick="filterAllTasks('pending')">Belum Selesai (<span id="count-all-tasks-pending">0</span>)</button>
+            <button class="filter-glass-pill" id="filter-all-tasks-completed" data-filter="completed" onclick="filterAllTasks('completed')">Sudah Selesai (<span id="count-all-tasks-completed">0</span>)</button>
+          </div>
+        </div>
+
+        <!-- All Tasks List Container -->
+        <div id="all-tasks-list-container" style="display: flex; flex-direction: column; gap: 10px; min-height: 140px; margin-top: 4px;">
+          <!-- Populated dynamically -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="all-tasks-empty-state" class="empty-state-card" style="padding: 28px 16px; display: none; text-align: center;">
+          <p style="font-weight: 700; font-size: 14px; color: var(--color-primary-navy);">Tidak Ada Tugas Ditemukan</p>
+          <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 3px;">Tidak ada tugas yang sesuai dengan pencarian atau filter yang dipilih.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL 9: KELOMPOK PRAKTIKUM MATA KULIAH
+       ========================================== -->
+  <div id="modal-course-groups" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-sheet">
+      <div class="modal-drag-handle"></div>
+      
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1;">
+          <div class="brand-logo-box" style="background: rgba(209, 250, 229, 0.9); border-color: #A7F3D0; color: #059669; flex-shrink: 0;">
+            <i data-lucide="users" style="width: 20px; height: 20px;"></i>
+          </div>
+          <div style="min-width: 0; flex: 1;">
+            <h2 id="course-groups-modal-title" style="font-size: 15px; font-weight: 700; color: var(--color-primary-navy); line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Kelompok Praktikum</h2>
+            <p id="course-groups-modal-meta" style="font-size: 12px; color: var(--color-text-secondary); margin-top: 2px;">Dosen Pengampu · Ruang Lab</p>
+          </div>
+        </div>
+        <button id="btn-close-course-groups-modal" class="btn-close-modal" onclick="closeCourseGroupsModal()" aria-label="Tutup">
+          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+        </button>
+      </div>
+
+      <div class="modal-body" style="padding: 14px 18px 24px 18px; display: flex; flex-direction: column; gap: 12px;">
+        <!-- Course Selector Pills -->
+        <div class="filter-pills-bar" id="course-groups-pills" style="margin-top: 0; margin-bottom: 4px; padding: 6px 4px 10px 4px;">
+          <button type="button" class="filter-glass-pill active" data-course-key="praktikum-teknik-instalasi-fiber-optik" onclick="selectCourseGroupsTab('praktikum-teknik-instalasi-fiber-optik')">Praktikum TIFO</button>
+          <button type="button" class="filter-glass-pill" data-course-key="praktikum-sistem-komunikasi-seluler" onclick="selectCourseGroupsTab('praktikum-sistem-komunikasi-seluler')">Praktikum Seluler</button>
+          <button type="button" class="filter-glass-pill" data-course-key="praktikum-sistem-komunikasi-satelit-dan-radar" onclick="selectCourseGroupsTab('praktikum-sistem-komunikasi-satelit-dan-radar')">Praktikum Satelit</button>
+          <button type="button" class="filter-glass-pill" data-course-key="praktikum-antena-dan-propagasi" onclick="selectCourseGroupsTab('praktikum-antena-dan-propagasi')">Praktikum Antena</button>
+        </div>
+
+        <!-- Search Bar: Cari Nama Mahasiswa -->
+        <div style="position: relative;">
+          <i data-lucide="search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--color-text-muted);"></i>
+          <input type="text" id="course-groups-search-input" placeholder="Cari nama Anda atau anggota kelompok..." style="width: 100%; padding: 9px 12px 9px 36px; border-radius: 12px; background: var(--color-surface-glass); border: 1px solid var(--color-border-subtle); color: var(--color-text-primary); font-family: inherit; font-size: 13px; outline: none; box-sizing: border-box;">
+        </div>
+
+        <!-- Groups Cards Container -->
+        <div id="course-groups-list-container" style="display: flex; flex-direction: column; gap: 12px; min-height: 140px; max-height: 55vh; overflow-y: auto; padding-right: 2px;">
+          <!-- Populated dynamically by renderCourseGroups() -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="course-groups-empty-state" class="empty-state-card" style="padding: 24px 16px; display: none; text-align: center;">
+          <p style="font-weight: 700; font-size: 14px; color: var(--color-primary-navy);">Mahasiswa Tidak Ditemukan</p>
+          <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 3px;">Tidak ada anggota yang cocok dengan kata kunci pencarian pada mata kuliah ini.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Firebase App & Services (v10 compat SDK) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
-  <script src="./js/firebase-config.js?v=5.4"></script>
+  <script src="./js/firebase-config.js?v=5.9"></script>
 
   <!-- Application Scripts -->
-  <script src="./js/time-provider.js?v=5.4"></script>
-  <script src="./js/data.js?v=5.4"></script>
-  <script src="./js/drive-service.js?v=5.4"></script>
-  <script src="./js/material-service.js?v=5.4"></script>
-  <script src="./js/app.js?v=5.4"></script>
+  <script src="./js/time-provider.js?v=5.9"></script>
+  <script src="./js/data.js?v=5.9"></script>
+  <script src="./js/drive-service.js?v=5.9"></script>
+  <script src="./js/material-service.js?v=5.9"></script>
+  <script src="./js/assignment-service.js?v=5.9"></script>
+  <script src="./js/app.js?v=5.9"></script>
 </body>
 </html>

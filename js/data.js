@@ -221,8 +221,7 @@ const TRJT_SCHEDULE = {
       members: [
         'Aqil Ocean Difra',
         'Renka Laura',
-        'Firlita Afianti',
-        'Afriansyah Sinamo'
+        'Firlita Afianti'
       ]
     },
     {
@@ -372,15 +371,282 @@ const TRJT_SCHEDULE = {
         "Metodologi Penelitian"
       ]
     }
-  ]
+  ],
+
+  // ==========================================
+  // PEMBAGIAN KELOMPOK PRAKTIKUM TRJT 3A
+  // ==========================================
+  practicalGroups: {
+    'praktikum-teknik-instalasi-fiber-optik': {
+      courseId: 'rabu-praktikum-teknik-instalasi-fiber-optik',
+      courseName: 'Praktikum Teknik Instalasi Fiber Optik',
+      shortName: 'Praktikum TIFO',
+      lecturer: 'Anita Fauziah, S.ST., M.T.',
+      room: 'Lab. Transmisi (L23)',
+      groups: [
+        {
+          groupNumber: 1,
+          groupName: 'Kelompok 1',
+          members: [
+            'Ilal Ilhamdi',
+            'Syawal Fitriadi',
+            'Nesya Zikriya',
+            'Muhammad Halfi Al Barizi'
+          ]
+        },
+        {
+          groupNumber: 2,
+          groupName: 'Kelompok 2',
+          members: [
+            'Aqil Ocean Difra',
+            'Durratul Hikmah',
+            'Firlita Afianti',
+            'Renka Laura'
+          ]
+        },
+        {
+          groupNumber: 3,
+          groupName: 'Kelompok 3',
+          members: [
+            'Rahmat Haikal',
+            'Farhan Alfarisyi',
+            'Sarah Fonna',
+            'Nazar Alfaraby'
+          ]
+        },
+        {
+          groupNumber: 4,
+          groupName: 'Kelompok 4',
+          members: [
+            'Lunna Auamara',
+            'Muhammad Rais',
+            'Suheil Maulana',
+            'Khairul Fajar Sidiq'
+          ]
+        }
+      ]
+    },
+    'praktikum-sistem-komunikasi-seluler': {
+      courseId: 'kamis-praktikum-sistem-komunikasi-seluler',
+      courseName: 'Praktikum Sistem Komunikasi Seluler',
+      shortName: 'Praktikum Seluler',
+      lecturer: 'Yassir, S.T., M.Eng.Sc.',
+      room: 'Lab. Jaringan Telekomunikasi (L11)',
+      groups: [
+        {
+          groupNumber: 1,
+          groupName: 'Kelompok 1',
+          members: [
+            'Rahmat Haikal',
+            'Nesya Zikriya',
+            'Sarah Fonna',
+            'Muhammad Halfi Al Barizi'
+          ]
+        },
+        {
+          groupNumber: 2,
+          groupName: 'Kelompok 2',
+          members: [
+            'Ilal Ilhamdi',
+            'Renka Laura',
+            'Syawal Fitriadi',
+            'Muhammad Rais'
+          ]
+        },
+        {
+          groupNumber: 3,
+          groupName: 'Kelompok 3',
+          members: [
+            'Aqil Ocean Difra',
+            'Firlita Afianti',
+            'Nazar Alfaraby',
+            'Lunna Auamara'
+          ]
+        },
+        {
+          groupNumber: 4,
+          groupName: 'Kelompok 4',
+          members: [
+            'Khairul Fajar Sidiq',
+            'Suheil Maulana',
+            'Durratul Hikmah',
+            'Farhan Alfarisyi'
+          ]
+        }
+      ]
+    },
+    'praktikum-sistem-komunikasi-satelit-dan-radar': {
+      courseId: 'selasa-praktikum-sistem-komunikasi-satelit-dan-radar',
+      courseName: 'Praktikum Sistem Komunikasi Satelit dan Radar',
+      shortName: 'Praktikum Satelit & Radar',
+      lecturer: 'Rachmawati, S.T., M.Eng.',
+      room: 'Lab. HF & Propagasi (L10)',
+      groups: [
+        {
+          groupNumber: 1,
+          groupName: 'Kelompok 1',
+          members: [
+            'Aqil Ocean Difra',
+            'Durratul Hikmah',
+            'Firlita Afianti',
+            'Suheil Maulana'
+          ]
+        },
+        {
+          groupNumber: 2,
+          groupName: 'Kelompok 2',
+          members: [
+            'Khairul Fajar Sidiq',
+            'Muhammad Rais',
+            'Nazar Alfaraby',
+            'Renka Laura'
+          ]
+        },
+        {
+          groupNumber: 3,
+          groupName: 'Kelompok 3',
+          members: [
+            'Ilal Ilhamdi',
+            'Sarah Fonna',
+            'Syawal Fitriadi',
+            'Farhan Alfarisyi'
+          ]
+        },
+        {
+          groupNumber: 4,
+          groupName: 'Kelompok 4',
+          members: [
+            'Rahmat Haikal',
+            'Nesya Zikriya',
+            'Lunna Auamara',
+            'Muhammad Halfi Al Barizi'
+          ]
+        }
+      ]
+    },
+    'praktikum-antena-dan-propagasi': {
+      courseId: 'senin-praktikum-antena-dan-propagasi',
+      courseName: 'Praktikum Antena dan Propagasi',
+      shortName: 'Praktikum Antena',
+      lecturer: 'Ipan Suandi, S.T., M.T.',
+      room: 'Lab. HF & Propagasi (L10)',
+      groups: [
+        {
+          groupNumber: 1,
+          groupName: 'Kelompok 1',
+          members: [
+            'Aqil Ocean Difra',
+            'Renka Laura',
+            'Firlita Afianti'
+          ]
+        },
+        {
+          groupNumber: 2,
+          groupName: 'Kelompok 2',
+          members: [
+            'Lunna Auamara',
+            'Nazar Alfaraby',
+            'Rahmat Haikal',
+            'Muhammad Halfi Al Barizi'
+          ]
+        },
+        {
+          groupNumber: 3,
+          groupName: 'Kelompok 3',
+          members: [
+            'Syawal Fitriadi',
+            'Sarah Fonna',
+            'Muhammad Rais'
+          ]
+        },
+        {
+          groupNumber: 4,
+          groupName: 'Kelompok 4',
+          members: [
+            'Nesya Zikriya',
+            'Farhan Alfarisyi',
+            'Ilal Ilhamdi'
+          ]
+        },
+        {
+          groupNumber: 5,
+          groupName: 'Kelompok 5',
+          members: [
+            'Durratul Hikmah',
+            'Suheil Maulana',
+            'Khairul Fajar Sidiq'
+          ]
+        }
+      ]
+    }
+  }
 };
+
+function getCoursePracticalGroups(courseNameOrId) {
+  if (!courseNameOrId) return null;
+  const q = courseNameOrId.toLowerCase().trim();
+  const groupsObj = TRJT_SCHEDULE.practicalGroups || {};
+  for (const key in groupsObj) {
+    const item = groupsObj[key];
+    const cName = (item.courseName || '').toLowerCase();
+    const cId = (item.courseId || '').toLowerCase();
+    const sName = (item.shortName || '').toLowerCase();
+    if (key === q || cName.includes(q) || q.includes(cName) || cId.includes(q) || q.includes(cId) || sName.includes(q)) {
+      return item;
+    }
+  }
+  return null;
+}
+
+function getStudentPracticalGroups(studentName) {
+  if (!studentName) return [];
+  const q = studentName.toLowerCase().trim();
+  const results = [];
+  const groupsObj = TRJT_SCHEDULE.practicalGroups || {};
+  for (const key in groupsObj) {
+    const courseData = groupsObj[key];
+    courseData.groups.forEach((grp) => {
+      const match = grp.members.some((m) => m.toLowerCase().includes(q) || q.includes(m.toLowerCase()));
+      if (match) {
+        results.push({
+          courseKey: key,
+          courseName: courseData.courseName,
+          shortName: courseData.shortName,
+          lecturer: courseData.lecturer,
+          room: courseData.room,
+          groupNumber: grp.groupNumber,
+          groupName: grp.groupName,
+          members: grp.members
+        });
+      }
+    });
+  }
+  return results;
+}
 
 const TRJT_PIKET = TRJT_SCHEDULE.piket;
 const TRJT_DOSEN = TRJT_SCHEDULE.dosen;
+const TRJT_PRACTICAL_GROUPS = TRJT_SCHEDULE.practicalGroups;
 
-window.roomMap = roomMap;
-window.lecturerMap = lecturerMap;
-window.TRJT_SCHEDULE = TRJT_SCHEDULE;
-window.TRJT_PIKET = TRJT_PIKET;
-window.TRJT_DOSEN = TRJT_DOSEN;
+if (typeof window !== 'undefined') {
+  window.roomMap = roomMap;
+  window.lecturerMap = lecturerMap;
+  window.TRJT_SCHEDULE = TRJT_SCHEDULE;
+  window.TRJT_PIKET = TRJT_PIKET;
+  window.TRJT_DOSEN = TRJT_DOSEN;
+  window.TRJT_PRACTICAL_GROUPS = TRJT_PRACTICAL_GROUPS;
+  window.getCoursePracticalGroups = getCoursePracticalGroups;
+  window.getStudentPracticalGroups = getStudentPracticalGroups;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    TRJT_SCHEDULE,
+    TRJT_PIKET,
+    TRJT_DOSEN,
+    TRJT_PRACTICAL_GROUPS,
+    getCoursePracticalGroups,
+    getStudentPracticalGroups
+  };
+}
 

@@ -14,7 +14,7 @@
   })();
 
   // --- Version check & Cache Storage Auto-Purge ---
-  const CURRENT_APP_VERSION = '5.4';
+  const CURRENT_APP_VERSION = '5.7';
   try {
     const savedVer = localStorage.getItem('trjt_app_version');
     if (savedVer !== CURRENT_APP_VERSION) {
@@ -465,15 +465,21 @@
           iconName = 'check';
         }
 
+        const courseTasks = window.TRJT_ASSIGNMENTS ? window.TRJT_ASSIGNMENTS.getAssignmentsForCourse(item.courseName) : [];
+        const pendingTasks = courseTasks.filter((t) => window.TRJT_ASSIGNMENTS && !window.TRJT_ASSIGNMENTS.isPersonalCompleted(t.id));
+        const taskBadgeTodayHtml = pendingTasks.length > 0 
+          ? `<span class="badge-deadline badge-deadline-warning" style="margin-left: 6px; padding: 1px 6px; font-size: 10px; vertical-align: middle;"><i data-lucide="clipboard-check" style="width: 10px; height: 10px;"></i> ${pendingTasks.length} Tugas</span>` 
+          : '';
+
         return `
-          <div class="today-class-card" onclick="window.openCourseMaterialsModal('${item.id}', '${item.courseName.replace(/'/g, "\\'")}', '${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName).replace(/'/g, "\\'")}', '${item.roomCode}')">
+          <div class="today-class-card" onclick="window.openCourseAssignmentsModal('${item.courseName.replace(/'/g, "\\'")}', '${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName).replace(/'/g, "\\'")}', '${item.roomCode}')">
             <div class="today-card-left">
               <div class="today-status-circle ${circleClass}">
                 <i data-lucide="${iconName}" style="width: 16px; height: 16px;"></i>
               </div>
               <div class="today-card-info">
                 <span class="today-card-time">${item.startTime.replace(':', '.')} – ${item.endTime.replace(':', '.')}</span>
-                <span class="today-card-title">${item.courseName}</span>
+                <span class="today-card-title">${item.courseName} ${taskBadgeTodayHtml}</span>
               </div>
             </div>
             <i data-lucide="chevron-right" class="today-card-chevron"></i>
@@ -548,6 +554,12 @@
 
         const roomDisplay = item.roomCode ? `${item.roomCode} · ${cleanRoomName}` : cleanRoomName;
 
+        const courseTasks = window.TRJT_ASSIGNMENTS ? window.TRJT_ASSIGNMENTS.getAssignmentsForCourse(item.courseName) : [];
+        const pendingTasks = courseTasks.filter((t) => window.TRJT_ASSIGNMENTS && !window.TRJT_ASSIGNMENTS.isPersonalCompleted(t.id));
+        const hasTasks = pendingTasks.length > 0;
+        const taskBadgeClass = hasTasks ? 'has-tasks' : '';
+        const taskBadgeHtml = hasTasks ? `<span class="badge-task-counter">${pendingTasks.length}</span>` : '';
+
         return `
           <div class="schedule-glass-card">
             <div class="schedule-top-meta-row">
@@ -570,10 +582,23 @@
                 </span>
                 <span class="schedule-lecturer-name">${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}</span>
               </div>
-              <button class="btn-schedule-mat" onclick="window.openCourseMaterialsModal('${item.id}', '${item.courseName.replace(/'/g, "\\'")}', '${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName).replace(/'/g, "\\'")}', '${item.roomCode}')" title="Lihat Materi Perkuliahan">
-                <i data-lucide="folder"></i>
-                <span>Materi</span>
-              </button>
+              <div class="btn-schedule-actions-row">
+                <button class="btn-schedule-tugas ${taskBadgeClass}" onclick="window.openCourseAssignmentsModal('${item.courseName.replace(/'/g, "\\'")}', '${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName).replace(/'/g, "\\'")}', '${item.roomCode}')" title="Lihat Tugas Kuliah">
+                  <i data-lucide="clipboard-check"></i>
+                  <span>Tugas</span>
+                  ${taskBadgeHtml}
+                </button>
+                <button class="btn-schedule-mat" onclick="window.openCourseMaterialsModal('${item.id}', '${item.courseName.replace(/'/g, "\\'")}', '${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName).replace(/'/g, "\\'")}', '${item.roomCode}')" title="Lihat Materi Perkuliahan">
+                  <i data-lucide="folder"></i>
+                  <span>Materi</span>
+                </button>
+                ${(window.getCoursePracticalGroups && window.getCoursePracticalGroups(item.courseName)) ? `
+                  <button class="btn-schedule-group" onclick="window.openCourseGroupsModal('${item.courseName.replace(/'/g, "\\'")}')" title="Lihat Kelompok Praktikum">
+                    <i data-lucide="users"></i>
+                    <span>Kelompok</span>
+                  </button>
+                ` : ''}
+              </div>
             </div>
           </div>
         `;
@@ -1308,6 +1333,79 @@
         if (e.target === modalMahasiswa) closeMahasiswaModal();
       });
     }
+
+    // Assignment Modals Backdrop Clicks
+    const modalAddAssignment = document.getElementById('modal-add-assignment');
+    if (modalAddAssignment) {
+      modalAddAssignment.addEventListener('click', (e) => {
+        if (e.target === modalAddAssignment) closeAddAssignmentModal();
+      });
+    }
+
+    const modalCourseAssignments = document.getElementById('modal-course-assignments');
+    if (modalCourseAssignments) {
+      modalCourseAssignments.addEventListener('click', (e) => {
+        if (e.target === modalCourseAssignments) closeCourseAssignmentsModal();
+      });
+    }
+
+    const modalAllAssignments = document.getElementById('modal-all-assignments');
+    if (modalAllAssignments) {
+      modalAllAssignments.addEventListener('click', (e) => {
+        if (e.target === modalAllAssignments) closeAllAssignmentsModal();
+      });
+    }
+
+    // All Tasks Modal Filter Listeners
+    const searchAllTasks = document.getElementById('all-tasks-search-input');
+    if (searchAllTasks) {
+      searchAllTasks.addEventListener('input', (e) => {
+        activeAllTasksSearch = e.target.value;
+        renderAllAssignmentsList();
+      });
+    }
+
+    const courseFilterAllTasks = document.getElementById('all-tasks-filter-course');
+    if (courseFilterAllTasks) {
+      courseFilterAllTasks.addEventListener('change', (e) => {
+        activeAllTasksCourse = e.target.value;
+        renderAllAssignmentsList();
+      });
+    }
+
+    // Form Add Assignment Submit Listener
+    const formAddAssignment = document.getElementById('form-add-assignment');
+    if (formAddAssignment) {
+      formAddAssignment.addEventListener('submit', (e) => {
+        handleSaveAssignment(e);
+      });
+    }
+
+    // Course Groups Modal Backdrop & Search Listeners
+    const modalCourseGroups = document.getElementById('modal-course-groups');
+    if (modalCourseGroups) {
+      modalCourseGroups.addEventListener('click', (e) => {
+        if (e.target === modalCourseGroups) closeCourseGroupsModal();
+      });
+    }
+
+    const searchCourseGroups = document.getElementById('course-groups-search-input');
+    if (searchCourseGroups) {
+      searchCourseGroups.addEventListener('input', (e) => {
+        activeCourseGroupSearch = e.target.value;
+        renderCourseGroups();
+      });
+    }
+
+    // Listen to assignment updates (realtime sync / local updates)
+    window.addEventListener('trjt:assignments-updated', () => {
+      renderUpcomingTasksWidget();
+      renderWeeklySchedule();
+      if (activeCourseTaskCourse) renderCourseAssignmentsList();
+      if (document.getElementById('modal-all-assignments')?.classList.contains('is-open')) {
+        renderAllAssignmentsList();
+      }
+    });
   }
 
   // --- HTML sanitization helper ---
@@ -2047,6 +2145,476 @@
   window.openCourseMaterialsModal = openCourseMaterialsModal;
   window.closeCourseMaterialsModal = closeCourseMaterialsModal;
 
+  // ==========================================
+  // --- Course Assignments Controller System ---
+  // ==========================================
+  let activeCourseTaskCourse = null;
+  window.activeCourseTaskCourse = null;
+  let activeCourseTaskFilter = 'all';
+  let activeAllTasksFilter = 'all';
+  let activeAllTasksCourse = '';
+  let activeAllTasksSearch = '';
+
+  function openAddAssignmentModal(defaultCourseName) {
+    const modal = document.getElementById('modal-add-assignment');
+    const form = document.getElementById('form-add-assignment');
+    if (form) form.reset();
+
+    // Safely resolve course target (handles undefined, Event object, or string)
+    let courseTarget = '';
+    if (typeof defaultCourseName === 'string' && defaultCourseName.trim()) {
+      courseTarget = defaultCourseName.trim();
+    } else if (activeCourseTaskCourse && typeof activeCourseTaskCourse.courseName === 'string') {
+      courseTarget = activeCourseTaskCourse.courseName.trim();
+    }
+
+    const courseSelect = document.getElementById('task-input-course');
+    if (courseSelect) {
+      if (courseTarget) {
+        let matched = false;
+        for (let i = 0; i < courseSelect.options.length; i++) {
+          const val = courseSelect.options[i].value.toLowerCase();
+          const target = courseTarget.toLowerCase();
+          if (val.includes(target) || target.includes(val)) {
+            courseSelect.selectedIndex = i;
+            matched = true;
+            break;
+          }
+        }
+        if (!matched) courseSelect.selectedIndex = 0;
+      } else {
+        courseSelect.selectedIndex = 0;
+      }
+    }
+
+    // Default due date to 3 days ahead
+    const d = new Date();
+    d.setDate(d.getDate() + 3);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const dateInput = document.getElementById('task-input-due-date');
+    if (dateInput) dateInput.value = `${yyyy}-${mm}-${dd}`;
+
+    const timeInput = document.getElementById('task-input-due-time');
+    if (timeInput) timeInput.value = '23:59';
+
+    selectTaskType('individu');
+
+    if (modal) modal.classList.add('is-open');
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  function closeAddAssignmentModal() {
+    const modal = document.getElementById('modal-add-assignment');
+    if (modal) modal.classList.remove('is-open');
+  }
+
+  function selectTaskType(type) {
+    const hidden = document.getElementById('task-input-type');
+    const btnIndividu = document.getElementById('btn-type-individu');
+    const btnKelompok = document.getElementById('btn-type-kelompok');
+
+    const cleanType = type === 'kelompok' ? 'kelompok' : 'individu';
+    if (hidden) hidden.value = cleanType;
+    if (btnIndividu && btnKelompok) {
+      if (cleanType === 'kelompok') {
+        btnKelompok.classList.add('active');
+        btnIndividu.classList.remove('active');
+      } else {
+        btnIndividu.classList.add('active');
+        btnKelompok.classList.remove('active');
+      }
+    }
+  }
+
+  let isSavingAssignment = false;
+  async function handleSaveAssignment(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    if (isSavingAssignment) return;
+
+    const course = document.getElementById('task-input-course')?.value;
+    const title = document.getElementById('task-input-title')?.value;
+    const dueDate = document.getElementById('task-input-due-date')?.value;
+    const dueTime = document.getElementById('task-input-due-time')?.value || '23:59';
+    const type = document.getElementById('task-input-type')?.value || 'individu';
+    const submissionMethod = document.getElementById('task-input-method')?.value || 'lab';
+    const submissionPlace = document.getElementById('task-input-place')?.value || '';
+    const description = document.getElementById('task-input-desc')?.value || '';
+    const createdBy = document.getElementById('task-input-author')?.value || 'Mahasiswa TRJT 3A';
+
+    if (!course || !title || !dueDate) {
+      showToast('⚠️ Mohon lengkapi mata kuliah, judul, dan tanggal batas pengumpulan.', 'warning');
+      return;
+    }
+
+    if (!window.TRJT_ASSIGNMENTS) {
+      showToast('❌ Sistem tugas belum siap. Mohon muat ulang halaman.', 'error');
+      return;
+    }
+
+    const submitBtn = document.getElementById('btn-submit-task');
+    let origBtnHtml = '';
+    if (submitBtn) {
+      origBtnHtml = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i data-lucide="loader-2" style="width: 18px; height: 18px;"></i><span>Menyimpan Tugas...</span>';
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    try {
+      isSavingAssignment = true;
+      await window.TRJT_ASSIGNMENTS.createAssignment({
+        courseName: course,
+        title: title,
+        dueDate: dueDate,
+        dueTime: dueTime,
+        type: type,
+        submissionMethod: submissionMethod,
+        submissionPlace: submissionPlace,
+        description: description,
+        createdBy: createdBy
+      });
+
+      showToast('✅ Tugas berhasil ditambahkan!', 'success');
+      closeAddAssignmentModal();
+
+      renderUpcomingTasksWidget();
+      renderWeeklySchedule();
+      if (activeCourseTaskCourse) renderCourseAssignmentsList();
+      if (document.getElementById('modal-all-assignments')?.classList.contains('is-open')) {
+        renderAllAssignmentsList();
+      }
+    } catch (err) {
+      console.error('Error saving assignment:', err);
+      showToast('❌ Gagal menyimpan tugas: ' + (err.message || err), 'error');
+    } finally {
+      isSavingAssignment = false;
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = origBtnHtml;
+        if (window.lucide) window.lucide.createIcons();
+      }
+    }
+  }
+
+  function openCourseAssignmentsModal(courseName, lecturer, room) {
+    activeCourseTaskCourse = { courseName, lecturer, room };
+    window.activeCourseTaskCourse = activeCourseTaskCourse;
+    activeCourseTaskFilter = 'all';
+
+    const modal = document.getElementById('modal-course-assignments');
+    const nameEl = document.getElementById('course-task-modal-name');
+    const metaEl = document.getElementById('course-task-modal-meta');
+
+    if (nameEl) nameEl.innerText = courseName;
+    if (metaEl) metaEl.innerText = `${lecturer || 'Dosen Pengampu'} · Ruang ${room || '-'}`;
+
+    const btnJumpGroups = document.getElementById('btn-course-jump-groups');
+    if (btnJumpGroups) {
+      const hasGroups = window.getCoursePracticalGroups ? !!window.getCoursePracticalGroups(courseName) : false;
+      btnJumpGroups.style.display = hasGroups ? 'inline-flex' : 'none';
+    }
+
+    document.querySelectorAll('#modal-course-assignments .filter-glass-pill').forEach((pill) => {
+      if (pill.getAttribute('data-filter') === 'all') pill.classList.add('active');
+      else pill.classList.remove('active');
+    });
+
+    renderCourseAssignmentsList();
+
+    if (modal) modal.classList.add('is-open');
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  function jumpToCourseGroupsFromTaskModal() {
+    if (activeCourseTaskCourse && activeCourseTaskCourse.courseName) {
+      openCourseGroupsModal(activeCourseTaskCourse.courseName);
+    } else {
+      openCourseGroupsModal();
+    }
+  }
+
+  function closeCourseAssignmentsModal() {
+    const modal = document.getElementById('modal-course-assignments');
+    if (modal) modal.classList.remove('is-open');
+  }
+
+  function filterCourseTasks(filter) {
+    activeCourseTaskFilter = filter;
+    document.querySelectorAll('#modal-course-assignments .filter-glass-pill').forEach((pill) => {
+      if (pill.getAttribute('data-filter') === filter) pill.classList.add('active');
+      else pill.classList.remove('active');
+    });
+    renderCourseAssignmentsList();
+  }
+
+  function renderCourseAssignmentsList() {
+    const container = document.getElementById('course-tasks-list-container');
+    const emptyState = document.getElementById('course-tasks-empty-state');
+    const countAll = document.getElementById('count-course-task-all');
+    const countActive = document.getElementById('count-course-task-active');
+    const countCompleted = document.getElementById('count-course-task-completed');
+
+    if (!container || !activeCourseTaskCourse || !window.TRJT_ASSIGNMENTS) return;
+
+    const allForCourse = window.TRJT_ASSIGNMENTS.getAssignmentsForCourse(activeCourseTaskCourse.courseName);
+    const activeTasks = allForCourse.filter((t) => !window.TRJT_ASSIGNMENTS.isPersonalCompleted(t.id));
+    const completedTasks = allForCourse.filter((t) => window.TRJT_ASSIGNMENTS.isPersonalCompleted(t.id));
+
+    if (countAll) countAll.innerText = allForCourse.length;
+    if (countActive) countActive.innerText = activeTasks.length;
+    if (countCompleted) countCompleted.innerText = completedTasks.length;
+
+    let displayList = allForCourse;
+    if (activeCourseTaskFilter === 'active') displayList = activeTasks;
+    else if (activeCourseTaskFilter === 'completed') displayList = completedTasks;
+
+    if (displayList.length === 0) {
+      container.innerHTML = '';
+      if (emptyState) emptyState.style.display = 'block';
+      return;
+    }
+
+    if (emptyState) emptyState.style.display = 'none';
+    container.innerHTML = displayList.map((task) => buildAssignmentCardHtml(task, false)).join('');
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  function openAllAssignmentsModal() {
+    activeAllTasksFilter = 'all';
+    activeAllTasksCourse = '';
+    activeAllTasksSearch = '';
+
+    const modal = document.getElementById('modal-all-assignments');
+    const searchInput = document.getElementById('all-tasks-search-input');
+    const courseSelect = document.getElementById('all-tasks-filter-course');
+
+    if (searchInput) searchInput.value = '';
+    if (courseSelect) courseSelect.value = '';
+
+    document.querySelectorAll('#modal-all-assignments .filter-glass-pill').forEach((p) => {
+      if (p.getAttribute('data-filter') === 'all') p.classList.add('active');
+      else p.classList.remove('active');
+    });
+
+    renderAllAssignmentsList();
+
+    if (modal) modal.classList.add('is-open');
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  function closeAllAssignmentsModal() {
+    const modal = document.getElementById('modal-all-assignments');
+    if (modal) modal.classList.remove('is-open');
+  }
+
+  function filterAllTasks(status) {
+    activeAllTasksFilter = status;
+    document.querySelectorAll('#modal-all-assignments .filter-glass-pill').forEach((p) => {
+      if (p.getAttribute('data-filter') === status) p.classList.add('active');
+      else p.classList.remove('active');
+    });
+    renderAllAssignmentsList();
+  }
+
+  function renderAllAssignmentsList() {
+    const container = document.getElementById('all-tasks-list-container');
+    const emptyState = document.getElementById('all-tasks-empty-state');
+    const countAll = document.getElementById('count-all-tasks-all');
+    const countPending = document.getElementById('count-all-tasks-pending');
+    const countCompleted = document.getElementById('count-all-tasks-completed');
+
+    if (!container || !window.TRJT_ASSIGNMENTS) return;
+
+    let allTasks = window.TRJT_ASSIGNMENTS.getAllAssignments();
+
+    if (activeAllTasksCourse) {
+      allTasks = allTasks.filter((t) => (t.courseName || '').toLowerCase().includes(activeAllTasksCourse.toLowerCase()));
+    }
+
+    if (activeAllTasksSearch.trim()) {
+      const q = activeAllTasksSearch.toLowerCase().trim();
+      allTasks = allTasks.filter((t) => 
+        (t.title && t.title.toLowerCase().includes(q)) ||
+        (t.courseName && t.courseName.toLowerCase().includes(q)) ||
+        (t.description && t.description.toLowerCase().includes(q))
+      );
+    }
+
+    const pending = allTasks.filter((t) => !window.TRJT_ASSIGNMENTS.isPersonalCompleted(t.id));
+    const completed = allTasks.filter((t) => window.TRJT_ASSIGNMENTS.isPersonalCompleted(t.id));
+
+    if (countAll) countAll.innerText = allTasks.length;
+    if (countPending) countPending.innerText = pending.length;
+    if (countCompleted) countCompleted.innerText = completed.length;
+
+    let displayList = allTasks;
+    if (activeAllTasksFilter === 'pending') displayList = pending;
+    else if (activeAllTasksFilter === 'completed') displayList = completed;
+
+    if (displayList.length === 0) {
+      container.innerHTML = '';
+      if (emptyState) emptyState.style.display = 'block';
+      return;
+    }
+
+    if (emptyState) emptyState.style.display = 'none';
+    container.innerHTML = displayList.map((task) => buildAssignmentCardHtml(task, true)).join('');
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  function buildAssignmentCardHtml(task, showCoursePill = false) {
+    if (!window.TRJT_ASSIGNMENTS) return '';
+    const isDone = window.TRJT_ASSIGNMENTS.isPersonalCompleted(task.id);
+    const deadlineInfo = window.TRJT_ASSIGNMENTS.formatDeadlineCountdown(task.dueDate, task.dueTime);
+
+    const checkClass = isDone ? 'checked' : '';
+    const checkIcon = isDone ? '<i data-lucide="check" style="width: 14px; height: 14px;"></i>' : '';
+    const cardDoneClass = isDone ? 'completed' : '';
+
+    const typeIcon = task.type === 'kelompok' ? 'users' : 'user';
+    const typeLabel = task.type === 'kelompok' ? 'Kelompok' : 'Individu';
+
+    let methodIcon = 'map-pin';
+    let methodLabel = task.submissionPlace || 'Kumpul Fisik';
+    if (task.submissionMethod === 'classroom') {
+      methodIcon = 'globe';
+      if (!task.submissionPlace) methodLabel = 'Google Classroom';
+    } else if (task.submissionMethod === 'email') {
+      methodIcon = 'mail';
+      if (!task.submissionPlace) methodLabel = 'Email Dosen';
+    } else if (task.submissionMethod === 'drive') {
+      methodIcon = 'hard-drive';
+      if (!task.submissionPlace) methodLabel = 'Google Drive';
+    }
+
+    const coursePillHtml = showCoursePill ? `
+      <div class="assignment-course-pill">
+        <i data-lucide="book-open" style="width: 12px; height: 12px;"></i>
+        <span>${task.courseName}</span>
+      </div>
+    ` : '';
+
+    const descHtml = task.description ? `
+      <p class="assignment-card-desc" title="${task.description}">${task.description}</p>
+    ` : '';
+
+    return `
+      <div class="assignment-card ${cardDoneClass}" id="task-card-${task.id}">
+        <div class="assignment-card-header">
+          <div class="assignment-card-left">
+            <button type="button" class="task-check-btn ${checkClass}" onclick="toggleAssignmentTask('${task.id}')" title="${isDone ? 'Tandai belum selesai' : 'Tandai selesai'}">
+              ${checkIcon}
+            </button>
+            <div class="assignment-card-body">
+              ${coursePillHtml}
+              <h4 class="assignment-card-title">${task.title}</h4>
+              ${descHtml}
+            </div>
+          </div>
+          <div class="badge-deadline ${deadlineInfo.badgeClass}" title="${deadlineInfo.fullText || ''}">
+            <i data-lucide="clock"></i>
+            <span>${deadlineInfo.text}</span>
+          </div>
+        </div>
+
+        <div class="assignment-meta-footer">
+          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <span class="assignment-type-badge">
+              <i data-lucide="${typeIcon}" style="width: 11px; height: 11px;"></i>
+              ${typeLabel}
+            </span>
+            <span class="assignment-type-badge" title="${methodLabel}">
+              <i data-lucide="${methodIcon}" style="width: 11px; height: 11px;"></i>
+              <span style="max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${methodLabel}</span>
+            </span>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 11px; color: var(--color-text-muted);" title="Batas waktu: ${deadlineInfo.fullText || ''}">
+              ${deadlineInfo.fullText || ''}
+            </span>
+            <button type="button" class="btn-task-delete" onclick="deleteAssignmentTask('${task.id}')" title="Hapus tugas ini">
+              <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderUpcomingTasksWidget() {
+    const container = document.getElementById('home-upcoming-tasks-container');
+    const badgeCount = document.getElementById('badge-home-tasks-count');
+    if (!container || !window.TRJT_ASSIGNMENTS) return;
+
+    const stats = window.TRJT_ASSIGNMENTS.getAssignmentStats();
+    if (badgeCount) {
+      badgeCount.innerText = `${stats.pending} Tugas`;
+      if (stats.pending === 0) {
+        badgeCount.style.background = 'rgba(236, 253, 245, 0.9)';
+        badgeCount.style.borderColor = 'rgba(167, 243, 208, 0.8)';
+        badgeCount.style.color = '#059669';
+      } else {
+        badgeCount.style.background = 'rgba(254, 243, 199, 0.9)';
+        badgeCount.style.borderColor = 'rgba(251, 191, 36, 0.8)';
+        badgeCount.style.color = '#B45309';
+      }
+    }
+
+    const upcoming = window.TRJT_ASSIGNMENTS.getUpcomingAssignments(3);
+
+    if (upcoming.length === 0) {
+      container.innerHTML = `
+        <div class="today-class-card" style="padding: 16px; justify-content: center; gap: 10px; cursor: default;">
+          <div class="today-status-circle finished" style="width: 32px; height: 32px;">
+            <i data-lucide="check" style="width: 16px; height: 16px;"></i>
+          </div>
+          <div>
+            <p style="font-size: 13.5px; font-weight: 700; color: var(--color-primary-navy);">Semua tugas selesai!</p>
+            <p style="font-size: 11.5px; color: var(--color-text-secondary); margin-top: 1px;">Tidak ada tanggungan tugas kuliah aktif saat ini.</p>
+          </div>
+        </div>
+      `;
+      if (window.lucide) window.lucide.createIcons();
+      return;
+    }
+
+    container.innerHTML = upcoming.map((task) => buildAssignmentCardHtml(task, true)).join('');
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  function toggleAssignmentTask(taskId) {
+    if (!window.TRJT_ASSIGNMENTS) return;
+    const isNowDone = window.TRJT_ASSIGNMENTS.togglePersonalCompletion(taskId);
+    if (isNowDone) {
+      showToast('🎉 Tugas ditandai selesai!', 'success');
+    } else {
+      showToast('↩️ Tugas ditandai belum selesai', 'info');
+    }
+    renderUpcomingTasksWidget();
+    renderWeeklySchedule();
+    if (activeCourseTaskCourse) renderCourseAssignmentsList();
+    if (document.getElementById('modal-all-assignments')?.classList.contains('is-open')) {
+      renderAllAssignmentsList();
+    }
+  }
+
+  function deleteAssignmentTask(taskId) {
+    if (!window.TRJT_ASSIGNMENTS) return;
+    if (confirm('Apakah Anda yakin ingin menghapus tugas ini?')) {
+      window.TRJT_ASSIGNMENTS.deleteAssignment(taskId);
+      showToast('🗑️ Tugas berhasil dihapus.', 'info');
+      renderUpcomingTasksWidget();
+      renderWeeklySchedule();
+      if (activeCourseTaskCourse) renderCourseAssignmentsList();
+      if (document.getElementById('modal-all-assignments')?.classList.contains('is-open')) {
+        renderAllAssignmentsList();
+      }
+    }
+  }
+
   function tick() {
     const scheduleData = evaluateScheduleState(timeProvider, window.TRJT_SCHEDULE);
     void processH10Reminder(scheduleData).catch(console.error);
@@ -2069,6 +2637,7 @@
     state.selectedWeeklyDayId = (todayDay >= 1 && todayDay <= 5) ? todayDay : 1;
 
     renderWeeklySchedule();
+    renderUpcomingTasksWidget();
     renderNotifications();
     renderDosenList();
     renderSettingsUI();
@@ -2088,6 +2657,186 @@
     }
   }
 
+  // ==========================================
+  // --- Course Practical Groups Controller ---
+  // ==========================================
+  let activeCourseGroupKey = 'praktikum-teknik-instalasi-fiber-optik';
+  let activeCourseGroupSearch = '';
+
+  function openCourseGroupsModal(courseNameOrKey) {
+    activeCourseGroupSearch = '';
+    const searchInput = document.getElementById('course-groups-search-input');
+    if (searchInput) searchInput.value = '';
+
+    if (courseNameOrKey) {
+      const found = window.getCoursePracticalGroups ? window.getCoursePracticalGroups(courseNameOrKey) : null;
+      if (found) {
+        const groupsObj = window.TRJT_PRACTICAL_GROUPS || (window.TRJT_SCHEDULE && window.TRJT_SCHEDULE.practicalGroups) || {};
+        for (const k in groupsObj) {
+          if (groupsObj[k].courseName === found.courseName) {
+            activeCourseGroupKey = k;
+            break;
+          }
+        }
+      } else if (window.TRJT_PRACTICAL_GROUPS && window.TRJT_PRACTICAL_GROUPS[courseNameOrKey]) {
+        activeCourseGroupKey = courseNameOrKey;
+      }
+    }
+
+    updateCourseGroupsPillsUI();
+    renderCourseGroups();
+
+    const modal = document.getElementById('modal-course-groups');
+    if (modal) {
+      modal.classList.add('is-open');
+    }
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  function closeCourseGroupsModal() {
+    const modal = document.getElementById('modal-course-groups');
+    if (modal) modal.classList.remove('is-open');
+  }
+
+  function selectCourseGroupsTab(courseKey) {
+    activeCourseGroupKey = courseKey;
+    updateCourseGroupsPillsUI();
+    renderCourseGroups();
+  }
+
+  function updateCourseGroupsPillsUI() {
+    document.querySelectorAll('#course-groups-pills .filter-glass-pill').forEach((pill) => {
+      if (pill.getAttribute('data-course-key') === activeCourseGroupKey) {
+        pill.classList.add('active');
+        if (typeof pill.scrollIntoView === 'function') {
+          pill.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+      } else {
+        pill.classList.remove('active');
+      }
+    });
+  }
+
+  function renderCourseGroups() {
+    const container = document.getElementById('course-groups-list-container');
+    const emptyState = document.getElementById('course-groups-empty-state');
+    const titleEl = document.getElementById('course-groups-modal-title');
+    const metaEl = document.getElementById('course-groups-modal-meta');
+
+    if (!container) return;
+
+    const groupsObj = window.TRJT_PRACTICAL_GROUPS || (window.TRJT_SCHEDULE && window.TRJT_SCHEDULE.practicalGroups) || {};
+    const courseData = groupsObj[activeCourseGroupKey];
+
+    if (!courseData) {
+      container.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--color-text-secondary);">Data kelompok tidak ditemukan.</div>';
+      return;
+    }
+
+    if (titleEl) titleEl.innerText = courseData.courseName;
+    if (metaEl) metaEl.innerText = `${courseData.lecturer} · ${courseData.room}`;
+
+    const query = (activeCourseGroupSearch || '').toLowerCase().trim();
+    const groups = courseData.groups || [];
+
+    let anyGroupVisible = false;
+
+    const html = groups.map((grp, grpIdx) => {
+      const hasMatch = !query || grp.members.some((m) => m.toLowerCase().includes(query));
+      if (hasMatch) anyGroupVisible = true;
+
+      const membersHtml = grp.members.map((name, idx) => {
+        const isMatched = query && name.toLowerCase().includes(query);
+        const initials = name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+
+        return `
+          <div class="practical-group-member-item ${isMatched ? 'is-matched' : ''}">
+            <span class="member-idx">${idx + 1}.</span>
+            <span class="member-avatar-init">${initials}</span>
+            <span class="member-name">${escapeHtml(name)}</span>
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div class="practical-group-card" style="${hasMatch ? '' : 'display: none;'}">
+          <div class="practical-group-header">
+            <div class="practical-group-title-row">
+              <span class="badge-group-num">${grp.groupName}</span>
+              <span class="badge-group-count">${grp.members.length} Mahasiswa</span>
+            </div>
+            <button type="button" class="btn-copy-group" onclick="copyGroupMembers('${activeCourseGroupKey}', ${grpIdx}, this)" title="Salin daftar anggota">
+              <i data-lucide="copy" style="width: 12px; height: 12px;"></i>
+              <span>Salin</span>
+            </button>
+          </div>
+          <div class="practical-group-members">
+            ${membersHtml}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    container.innerHTML = html;
+
+    if (emptyState) {
+      emptyState.style.display = (!anyGroupVisible && query) ? 'block' : 'none';
+    }
+
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  function copyGroupMembers(courseKey, groupIdx, btnElement) {
+    const groupsObj = window.TRJT_PRACTICAL_GROUPS || (window.TRJT_SCHEDULE && window.TRJT_SCHEDULE.practicalGroups) || {};
+    const courseData = groupsObj[courseKey];
+    if (!courseData || !courseData.groups[groupIdx]) return;
+
+    const grp = courseData.groups[groupIdx];
+    let copyText = `*${courseData.courseName}*\n*${grp.groupName}* (${grp.members.length} Mahasiswa)\n`;
+    copyText += `Dosen: ${courseData.lecturer}\nRuang: ${courseData.room}\n\n`;
+    copyText += `Anggota:\n`;
+    grp.members.forEach((m, i) => {
+      copyText += `${i + 1}. ${m}\n`;
+    });
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(copyText).then(() => {
+        showToast(`✅ Anggota ${grp.groupName} berhasil disalin!`, 'success');
+        if (btnElement) {
+          const orig = btnElement.innerHTML;
+          btnElement.classList.add('copied');
+          btnElement.innerHTML = '<i data-lucide="check" style="width: 12px; height: 12px;"></i><span>Tersalin!</span>';
+          if (window.lucide) window.lucide.createIcons();
+          setTimeout(() => {
+            btnElement.classList.remove('copied');
+            btnElement.innerHTML = orig;
+            if (window.lucide) window.lucide.createIcons();
+          }, 2000);
+        }
+      }).catch(() => {
+        fallbackCopyText(copyText);
+      });
+    } else {
+      fallbackCopyText(copyText);
+    }
+  }
+
+  function fallbackCopyText(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand('copy');
+      showToast('✅ Daftar anggota berhasil disalin!', 'success');
+    } catch (e) {
+      prompt('Salin teks di bawah ini:', text);
+    }
+    document.body.removeChild(textarea);
+  }
+
   // Export engine and modals for testing & global triggers
   window.evaluateScheduleState = evaluateScheduleState;
   window.processH10Reminder = processH10Reminder;
@@ -2099,6 +2848,29 @@
   window.renderPiketModal = renderPiketModal;
   window.renderPiketBadge = renderPiketBadge;
   window.getCurrentWeekPiketInfo = getCurrentWeekPiketInfo;
+
+  window.openAddAssignmentModal = openAddAssignmentModal;
+  window.closeAddAssignmentModal = closeAddAssignmentModal;
+  window.selectTaskType = selectTaskType;
+  window.handleSaveAssignment = handleSaveAssignment;
+  window.openCourseAssignmentsModal = openCourseAssignmentsModal;
+  window.closeCourseAssignmentsModal = closeCourseAssignmentsModal;
+  window.filterCourseTasks = filterCourseTasks;
+  window.renderCourseAssignmentsList = renderCourseAssignmentsList;
+  window.openAllAssignmentsModal = openAllAssignmentsModal;
+  window.closeAllAssignmentsModal = closeAllAssignmentsModal;
+  window.filterAllTasks = filterAllTasks;
+  window.renderAllAssignmentsList = renderAllAssignmentsList;
+  window.renderUpcomingTasksWidget = renderUpcomingTasksWidget;
+  window.toggleAssignmentTask = toggleAssignmentTask;
+  window.deleteAssignmentTask = deleteAssignmentTask;
+
+  window.openCourseGroupsModal = openCourseGroupsModal;
+  window.closeCourseGroupsModal = closeCourseGroupsModal;
+  window.selectCourseGroupsTab = selectCourseGroupsTab;
+  window.renderCourseGroups = renderCourseGroups;
+  window.copyGroupMembers = copyGroupMembers;
+  window.jumpToCourseGroupsFromTaskModal = jumpToCourseGroupsFromTaskModal;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

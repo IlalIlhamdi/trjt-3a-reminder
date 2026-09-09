@@ -569,6 +569,62 @@
         </div>
       </div>
 
+      <!-- Section: Manajemen Tugas Kuliah (Firestore) -->
+      <div class="admin-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <h2 style="font-size: 1.125rem; font-weight: 700; color: var(--color-primary-text); display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="clipboard-check" style="width: 20px; height: 20px; color: var(--color-primary-blue);"></i>
+              Manajemen Tugas Kuliah TRJT 3A (Firestore)
+            </h2>
+            <p style="font-size: 13px; color: var(--color-secondary-text); margin-top: 2px;">
+              Input dan kelola seluruh tugas perkuliahan TRJT 3A beserta batas pengumpulan (deadline).
+            </p>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span id="admin-task-total-count" class="soft-badge-info">0 Tugas Aktif</span>
+            <button type="button" id="btn-admin-add-task" class="btn-primary" style="font-size: 13px; padding: 7px 14px;" onclick="openAdminAddTaskModal()">
+              <i data-lucide="plus" style="width: 14px; height: 14px;"></i> Tambah Tugas
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter bar -->
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; background-color: var(--color-panel-bg); padding: 12px 16px; border-radius: var(--radius-inner); border: 1px solid var(--color-border-subtle);">
+          <div style="display: flex; align-items: center; gap: 8px; min-width: 240px;">
+            <label style="font-size: 12px; font-weight: 600; color: var(--color-secondary-text); white-space: nowrap;">Filter MK:</label>
+            <select id="admin-task-filter-course" class="form-select" style="font-size: 12px; padding: 6px 10px;" onchange="renderAdminAssignmentsTable()">
+              <option value="">Semua Mata Kuliah</option>
+            </select>
+          </div>
+          <div style="font-size: 12px; color: var(--color-secondary-text);">
+            Data otomatis tersimpan di Cloud Firestore & tersinkron ke mahasiswa
+          </div>
+        </div>
+
+        <!-- Assignments Table -->
+        <div style="overflow-x: auto; border: 1px solid var(--color-border-card); border-radius: var(--radius-inner);">
+          <table class="admin-table" style="font-size: 12px;">
+            <thead>
+              <tr>
+                <th style="width: 40px;">No</th>
+                <th>Judul Tugas</th>
+                <th>Mata Kuliah</th>
+                <th>Batas Pengumpulan</th>
+                <th>Tipe</th>
+                <th>Tempat Kumpul</th>
+                <th style="width: 80px; text-align: center;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="admin-assignments-table-body">
+              <tr>
+                <td colspan="7" style="text-align: center; color: var(--color-secondary-text); padding: 20px;">Memuat data tugas...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- Section: Override Jadwal / Batalkan Kelas -->
       <div class="admin-card">
         <div>
@@ -711,6 +767,99 @@
     </div>
   </div>
 
+  <!-- Modal Tambah Tugas Kuliah (Admin) -->
+  <div id="modal-admin-add-task" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-sheet" style="max-width: 540px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div class="brand-logo-box" style="width: 38px; height: 38px; background: #EFF6FF; border-color: #BFDBFE;">
+            <i data-lucide="file-plus" style="width: 20px; height: 20px; color: var(--color-primary-blue);"></i>
+          </div>
+          <div>
+            <h3 style="font-size: 15px; font-weight: 700; color: var(--color-primary-text);">Tambah Tugas Kuliah Baru</h3>
+            <p style="font-size: 12px; color: var(--color-secondary-text);">Input tugas perkuliahan untuk kelas TRJT 3A</p>
+          </div>
+        </div>
+        <button type="button" id="btn-close-admin-task-modal" class="btn-close-modal" onclick="closeAdminAddTaskModal()" aria-label="Tutup">
+          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+        </button>
+      </div>
+
+      <form id="form-admin-add-task" class="modal-body" onsubmit="handleAdminSaveAssignment(event)">
+        <div class="form-group">
+          <label style="font-size: 12px; font-weight: 600; color: var(--color-primary-text);">Pilih Mata Kuliah <span style="color: #DC2626;">*</span></label>
+          <select id="admin-task-course-select" class="form-select" required style="font-size: 13px;">
+            <option value="">Pilih Mata Kuliah...</option>
+            <option value="Praktikum Antena dan Propagasi">Praktikum Antena dan Propagasi</option>
+            <option value="Jaringan Komputer Lanjut">Jaringan Komputer Lanjut</option>
+            <option value="Praktikum Jaringan Komputer Lanjut">Praktikum Jaringan Komputer Lanjut</option>
+            <option value="Praktikum Sistem Komunikasi Satelit dan Radar">Praktikum Sistem Komunikasi Satelit dan Radar</option>
+            <option value="Teknik Instalasi Fiber Optik">Teknik Instalasi Fiber Optik</option>
+            <option value="Praktikum Teknik Instalasi Fiber Optik">Praktikum Teknik Instalasi Fiber Optik</option>
+            <option value="Antena dan Propagasi">Antena dan Propagasi</option>
+            <option value="Praktikum Sistem Komunikasi Seluler">Praktikum Sistem Komunikasi Seluler</option>
+            <option value="Sistem Komunikasi Satelit dan Radar">Sistem Komunikasi Satelit dan Radar</option>
+            <option value="Sistem Komunikasi Seluler">Sistem Komunikasi Seluler</option>
+            <option value="Metodologi Penelitian">Metodologi Penelitian</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 12px; font-weight: 600; color: var(--color-primary-text);">Judul / Nama Tugas <span style="color: #DC2626;">*</span></label>
+          <input type="text" id="admin-task-title" class="form-input" placeholder="Contoh: Laporan Praktikum Antena Bab 2" required>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="form-group">
+            <label style="font-size: 12px; font-weight: 600; color: var(--color-primary-text);">Batas Tanggal <span style="color: #DC2626;">*</span></label>
+            <input type="date" id="admin-task-due-date" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label style="font-size: 12px; font-weight: 600; color: var(--color-primary-text);">Jam Kumpul</label>
+            <input type="time" id="admin-task-due-time" class="form-input" value="23:59">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="form-group">
+            <label style="font-size: 12px; font-weight: 600; color: var(--color-primary-text);">Tipe Tugas</label>
+            <select id="admin-task-type" class="form-select">
+              <option value="individu">Individu</option>
+              <option value="kelompok">Kelompok</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label style="font-size: 12px; font-weight: 600; color: var(--color-primary-text);">Media Kumpul</label>
+            <select id="admin-task-method" class="form-select">
+              <option value="lab">Kumpul Fisik di Lab / Ruangan</option>
+              <option value="classroom">Google Classroom</option>
+              <option value="email">Email Dosen</option>
+              <option value="drive">Google Drive</option>
+              <option value="lainnya">Lainnya</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 12px; font-weight: 600; color: var(--color-primary-text);">Detail Lokasi / Link Kumpul (Opsional)</label>
+          <input type="text" id="admin-task-place" class="form-input" placeholder="Contoh: Meja Dosen Lab HF atau link Classroom">
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 12px; font-weight: 600; color: var(--color-primary-text);">Instruksi & Catatan Tambahan (Opsional)</label>
+          <textarea id="admin-task-desc" class="form-input" rows="3" placeholder="Ketentuan format, jumlah halaman, materi..."></textarea>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+          <button type="button" class="btn-secondary" onclick="closeAdminAddTaskModal()" style="padding: 9px 16px; font-size: 13px;">Batal</button>
+          <button type="submit" class="btn-primary" style="padding: 9px 20px; font-size: 13px;">
+            <i data-lucide="check" style="width: 15px; height: 15px;"></i> Simpan Tugas
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Firebase Scripts -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -723,6 +872,7 @@
   <script src="../js/data.js?v=3.5"></script>
   <script src="../js/drive-service.js?v=3.5"></script>
   <script src="../js/material-service.js?v=3.5"></script>
+  <script src="../js/assignment-service.js?v=5.5"></script>
 
   <script>
     (function () {
@@ -763,6 +913,8 @@
         renderAdminRegisteredDevices();
         renderAdminDriveIntegration();
         renderAdminMaterialsTable();
+        populateAdminTaskCourseFilter();
+        renderAdminAssignmentsTable();
         if (window.lucide) window.lucide.createIcons();
       }
 
@@ -1850,6 +2002,170 @@
           if (window.lucide) window.lucide.createIcons();
         }
       }
+
+      // --- Admin Course Assignments Management ---
+      function populateAdminTaskCourseFilter() {
+        const select = document.getElementById('admin-task-filter-course');
+        if (!select || !window.TRJT_SCHEDULE) return;
+        const currentVal = select.value;
+        const courses = Array.from(new Set(window.TRJT_SCHEDULE.classes.map(c => c.courseName))).sort();
+        select.innerHTML = '<option value="">Semua Mata Kuliah</option>' + 
+          courses.map(c => `<option value="${c}">${c}</option>`).join('');
+        if (currentVal) select.value = currentVal;
+      }
+
+      function openAdminAddTaskModal(defaultCourse) {
+        const modal = document.getElementById('modal-admin-add-task');
+        const form = document.getElementById('form-admin-add-task');
+        if (form) form.reset();
+
+        const courseSelect = document.getElementById('admin-task-course-select');
+        if (courseSelect && defaultCourse) {
+          courseSelect.value = defaultCourse;
+        }
+
+        const d = new Date();
+        d.setDate(d.getDate() + 3);
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const dateInput = document.getElementById('admin-task-due-date');
+        if (dateInput) dateInput.value = `${yyyy}-${mm}-${dd}`;
+
+        const timeInput = document.getElementById('admin-task-due-time');
+        if (timeInput) timeInput.value = '23:59';
+
+        if (modal) modal.classList.add('is-open');
+        if (window.lucide) window.lucide.createIcons();
+      }
+
+      function closeAdminAddTaskModal() {
+        const modal = document.getElementById('modal-admin-add-task');
+        if (modal) modal.classList.remove('is-open');
+      }
+
+      async function handleAdminSaveAssignment(e) {
+        if (e && e.preventDefault) e.preventDefault();
+
+        const course = document.getElementById('admin-task-course-select')?.value;
+        const title = document.getElementById('admin-task-title')?.value;
+        const dueDate = document.getElementById('admin-task-due-date')?.value;
+        const dueTime = document.getElementById('admin-task-due-time')?.value || '23:59';
+        const type = document.getElementById('admin-task-type')?.value || 'individu';
+        const submissionMethod = document.getElementById('admin-task-method')?.value || 'lab';
+        const submissionPlace = document.getElementById('admin-task-place')?.value || '';
+        const description = document.getElementById('admin-task-desc')?.value || '';
+
+        if (!course || !title || !dueDate) {
+          alert('Mohon lengkapi mata kuliah, judul tugas, dan batas tanggal.');
+          return;
+        }
+
+        try {
+          if (window.TRJT_ASSIGNMENTS) {
+            await window.TRJT_ASSIGNMENTS.createAssignment({
+              courseName: course,
+              title: title,
+              dueDate: dueDate,
+              dueTime: dueTime,
+              type: type,
+              submissionMethod: submissionMethod,
+              submissionPlace: submissionPlace,
+              description: description,
+              createdBy: 'Admin / Komti'
+            });
+          }
+          closeAdminAddTaskModal();
+          renderAdminAssignmentsTable();
+          alert('✅ Tugas berhasil ditambahkan ke database Firestore!');
+        } catch (err) {
+          alert('Gagal menyimpan tugas: ' + err.message);
+        }
+      }
+
+      async function handleAdminDeleteAssignment(id) {
+        if (!confirm('Apakah Anda yakin ingin menghapus tugas ini secara permanen?')) return;
+        if (window.TRJT_ASSIGNMENTS) {
+          await window.TRJT_ASSIGNMENTS.deleteAssignment(id);
+          renderAdminAssignmentsTable();
+        }
+      }
+
+      function renderAdminAssignmentsTable() {
+        const tbody = document.getElementById('admin-assignments-table-body');
+        const countBadge = document.getElementById('admin-task-total-count');
+        const filterCourse = document.getElementById('admin-task-filter-course')?.value || '';
+
+        if (!tbody || !window.TRJT_ASSIGNMENTS) return;
+
+        let list = window.TRJT_ASSIGNMENTS.getAllAssignments();
+        if (countBadge) countBadge.innerText = `${list.length} Tugas Tersimpan`;
+
+        if (filterCourse) {
+          list = list.filter(t => (t.courseName || '').toLowerCase().includes(filterCourse.toLowerCase()));
+        }
+
+        if (list.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="7" style="text-align: center; color: var(--color-secondary-text); padding: 24px;">
+                Belum ada data tugas untuk filter ini. Klik tombol "+ Tambah Tugas" di atas untuk membuat tugas baru.
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        tbody.innerHTML = list.map((task, idx) => {
+          const deadline = window.TRJT_ASSIGNMENTS.formatDeadlineCountdown(task.dueDate, task.dueTime);
+          const typeLabel = task.type === 'kelompok' ? 'Kelompok' : 'Individu';
+          const placeLabel = task.submissionPlace || task.submissionMethod;
+
+          return `
+            <tr>
+              <td style="font-weight: 600; color: var(--color-secondary-text);">${idx + 1}</td>
+              <td style="font-weight: 700; color: var(--color-primary-text);">
+                ${task.title}
+                ${task.description ? `<div style="font-size: 11px; font-weight: 400; color: var(--color-secondary-text); margin-top: 2px;">${task.description}</div>` : ''}
+              </td>
+              <td style="color: var(--color-primary-blue); font-weight: 600;">${task.courseName}</td>
+              <td>
+                <span class="badge-deadline ${deadline.badgeClass}">
+                  ${deadline.text}
+                </span>
+                <div style="font-size: 10.5px; color: var(--color-secondary-text); margin-top: 2px;">${deadline.fullText || ''}</div>
+              </td>
+              <td><span class="soft-badge-neutral">${typeLabel}</span></td>
+              <td style="color: var(--color-secondary-text);">${placeLabel}</td>
+              <td style="text-align: center;">
+                <button type="button" class="btn-secondary" style="padding: 4px 8px; font-size: 11px; color: #DC2626; border-color: #FECACA;" onclick="handleAdminDeleteAssignment('${task.id}')" title="Hapus Tugas">
+                  <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i> Hapus
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        if (window.lucide) window.lucide.createIcons();
+      }
+
+      window.openAdminAddTaskModal = openAdminAddTaskModal;
+      window.closeAdminAddTaskModal = closeAdminAddTaskModal;
+      window.handleAdminSaveAssignment = handleAdminSaveAssignment;
+      window.handleAdminDeleteAssignment = handleAdminDeleteAssignment;
+      window.renderAdminAssignmentsTable = renderAdminAssignmentsTable;
+
+      // Close modal on backdrop
+      const modalAdminTask = document.getElementById('modal-admin-add-task');
+      if (modalAdminTask) {
+        modalAdminTask.addEventListener('click', (e) => {
+          if (e.target === modalAdminTask) closeAdminAddTaskModal();
+        });
+      }
+
+      window.addEventListener('trjt:assignments-updated', () => {
+        renderAdminAssignmentsTable();
+      });
 
       // Bind Diagnostics Buttons
       const btnManualCheck = document.getElementById('btn-trigger-reminder-check');
