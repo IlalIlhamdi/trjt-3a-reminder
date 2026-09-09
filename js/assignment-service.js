@@ -10,60 +10,7 @@
   const STORAGE_KEY_ASSIGNMENTS = 'trjt_assignments_cache_v1';
   const STORAGE_KEY_COMPLETED = 'trjt_completed_assignments_v1';
 
-  // Seed sample assignments for TRJT 3A Semester 5 so students have immediate data
-  const DEFAULT_INITIAL_ASSIGNMENTS = [
-    {
-      id: 'task-antena-lap1',
-      courseId: 'senin-praktikum-antena-dan-propagasi',
-      courseName: 'Praktikum Antena dan Propagasi',
-      title: 'Laporan Praktikum Bab 1: Pengukuran Pola Radiasi Antena Dipole',
-      description: 'Format laporan resmi TRJT, lampirkan grafik pola radiasi hasil ukur di Lab HF dan analisa perhitungan gain.',
-      dueDate: getRelativeDateStr(2), // 2 days from now
-      dueTime: '23:59',
-      type: 'individu', // individu | kelompok
-      submissionMethod: 'lab', // lab | classroom | email | drive | lainnya
-      submissionPlace: 'Kumpul fisik hardcopy di Lab. HF (L10)',
-      createdBy: 'Komti TRJT 3A',
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: 'task-jarkom-subnet',
-      courseId: 'senin-jaringan-komputer-lanjut',
-      courseName: 'Jaringan Komputer Lanjut',
-      title: 'Tugas Mandiri: Analisis Routing Dinamis OSPF Multi-Area',
-      description: 'Selesaikan simulasi topologi Cisco Packet Tracer dan buat ringkasan tabel routing dalam file PDF.',
-      dueDate: getRelativeDateStr(4), // 4 days from now
-      dueTime: '12:00',
-      type: 'individu',
-      submissionMethod: 'classroom',
-      submissionPlace: 'Google Classroom Jarkom Lanjut',
-      createdBy: 'Dosen Pengampu',
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: 'task-satelit-link',
-      courseId: 'selasa-praktikum-sistem-komunikasi-satelit-dan-radar',
-      courseName: 'Praktikum Sistem Komunikasi Satelit dan Radar',
-      title: 'Laporan Awal: Perhitungan Link Budget Uplink/Downlink C-Band',
-      description: 'Kerjakan per kelompok praktikum, cantumkan spesifikasi transponder satelit Telkom 4.',
-      dueDate: getRelativeDateStr(6), // 6 days from now
-      dueTime: '10:00',
-      type: 'kelompok',
-      submissionMethod: 'drive',
-      submissionPlace: 'Folder Google Drive Praktikum Satelit',
-      createdBy: 'Asisten Lab',
-      createdAt: new Date().toISOString()
-    }
-  ];
-
-  function getRelativeDateStr(offsetDays) {
-    const d = new Date();
-    d.setDate(d.getDate() + offsetDays);
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd}`;
-  }
+  const DUMMY_TASK_IDS = new Set(['task-antena-lap1', 'task-jarkom-subnet', 'task-satelit-link']);
 
   let assignmentsCache = loadCachedAssignments();
   let completedSet = loadCompletedIds();
@@ -72,23 +19,28 @@
   function loadCachedAssignments() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY_ASSIGNMENTS);
-      if (raw) {
+      if (raw !== null) {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+        if (Array.isArray(parsed)) {
+          // Filter out legacy dummy sample tasks so they never persist or reappear
+          const cleaned = parsed.filter((t) => t && !DUMMY_TASK_IDS.has(t.id));
+          if (cleaned.length !== parsed.length) {
+            saveAssignmentsToCache(cleaned);
+          }
+          return cleaned;
         }
       }
     } catch (e) {
       console.warn('Load assignments cache error:', e);
     }
-    // Default fallback
-    saveAssignmentsToCache(DEFAULT_INITIAL_ASSIGNMENTS);
-    return [...DEFAULT_INITIAL_ASSIGNMENTS];
+    // Clean initial state: start empty without fake dummy assignments
+    saveAssignmentsToCache([]);
+    return [];
   }
 
   function saveAssignmentsToCache(list) {
     try {
-      localStorage.setItem(STORAGE_KEY_ASSIGNMENTS, JSON.stringify(list));
+      localStorage.setItem(STORAGE_KEY_ASSIGNMENTS, JSON.stringify(list || []));
     } catch (e) {
       console.warn('Save assignments cache error:', e);
     }
@@ -127,15 +79,18 @@
             snapshot.forEach((doc) => {
               list.push({ id: doc.id, ...doc.data() });
             });
-            assignmentsCache = list;
-            saveAssignmentsToCache(list);
+            const cleanedList = list.filter((t) => t && !DUMMY_TASK_IDS.has(t.id));
+            assignmentsCache = cleanedList;
+            saveAssignmentsToCache(cleanedList);
             isFirestoreConnected = true;
-            window.dispatchEvent(new CustomEvent('trjt:assignments-updated', { detail: list }));
+            window.dispatchEvent(new CustomEvent('trjt:assignments-updated', { detail: cleanedList }));
           } else if (snapshot && snapshot.empty) {
-            // If remote collection empty, keep or seed
-            if (assignmentsCache.length > 0) {
-              window.dispatchEvent(new CustomEvent('trjt:assignments-updated', { detail: assignmentsCache }));
-            }
+            // Remote collection is empty: preserve only real local tasks (excluding dummy sample tasks)
+            const realTasks = assignmentsCache.filter((t) => t && !DUMMY_TASK_IDS.has(t.id));
+            assignmentsCache = realTasks;
+            saveAssignmentsToCache(realTasks);
+            isFirestoreConnected = true;
+            window.dispatchEvent(new CustomEvent('trjt:assignments-updated', { detail: realTasks }));
           }
         }, (error) => {
           console.warn('Firestore assignments listener notice:', error.message);

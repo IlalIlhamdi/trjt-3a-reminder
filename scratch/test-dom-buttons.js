@@ -22,11 +22,11 @@ const viewPengaturanEnd = indexHtml.indexOf('</section>') !== -1
 const toastPos = indexHtml.indexOf('id="toast-container"');
 assert.ok(viewPengaturanEnd !== -1 && toastPos > viewPengaturanEnd, 'toast-container is placed AFTER view-pengaturan');
 
-// 4. Check versions are bumped to 5.9
-assert.ok(indexHtml.includes('design-system.css?v=5.9'), 'design-system.css uses v=5.9');
-assert.ok(indexHtml.includes('app.js?v=5.9'), 'app.js uses v=5.9');
-assert.ok(indexHtml.includes('assignment-service.js?v=5.9'), 'assignment-service.js uses v=5.9');
-assert.ok(!indexHtml.includes('?v=5.4') && !indexHtml.includes('?v=5.5') && !indexHtml.includes('?v=5.6') && !indexHtml.includes('?v=5.7') && !indexHtml.includes('?v=5.8'), 'No old versions remaining in index.html');
+// 4. Check versions are bumped to 6.0
+assert.ok(indexHtml.includes('design-system.css?v=6.0'), 'design-system.css uses v=6.0');
+assert.ok(indexHtml.includes('app.js?v=6.0'), 'app.js uses v=6.0');
+assert.ok(indexHtml.includes('assignment-service.js?v=6.0'), 'assignment-service.js uses v=6.0');
+assert.ok(!indexHtml.includes('?v=5.4') && !indexHtml.includes('?v=5.5') && !indexHtml.includes('?v=5.6') && !indexHtml.includes('?v=5.7') && !indexHtml.includes('?v=5.8') && !indexHtml.includes('?v=5.9'), 'No old versions remaining in index.html');
 
 // 5. Check app.js declarations
 assert.ok(appJs.includes('window.activeCourseTaskCourse = null;'), 'window.activeCourseTaskCourse initialized in app.js');

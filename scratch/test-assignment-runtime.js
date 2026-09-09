@@ -32,16 +32,10 @@ eval(serviceCode);
 const service = globalThis.window.TRJT_ASSIGNMENTS;
 assert.ok(service, 'TRJT_ASSIGNMENTS must be initialized on window');
 
-// Test 1: Initial default assignments loaded
+// Test 1: Clean initial state (no dummy tasks)
 const initialList = service.getAllAssignments();
 console.log(`📦 Loaded ${initialList.length} initial assignments.`);
-assert.ok(initialList.length >= 3, 'Should have at least 3 initial seeded assignments');
-
-// Test 2: Filter by course
-const antenaTasks = service.getAssignmentsForCourse('Praktikum Antena dan Propagasi');
-console.log(`📡 Found ${antenaTasks.length} task(s) for Praktikum Antena dan Propagasi.`);
-assert.ok(antenaTasks.length >= 1, 'Should find Antena task');
-assert.strictEqual(antenaTasks[0].courseName, 'Praktikum Antena dan Propagasi');
+assert.strictEqual(initialList.length, 0, 'Clean initial state should have 0 assignments');
 
 // Test 3: Create a new assignment
 console.log('➕ Creating a new assignment for Teknik Instalasi Fiber Optik...');
