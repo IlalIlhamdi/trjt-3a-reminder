@@ -2528,7 +2528,7 @@
     const deadlineInfo = window.TRJT_ASSIGNMENTS.formatDeadlineCountdown(task.dueDate, task.dueTime);
 
     const checkClass = isDone ? 'checked' : '';
-    const checkIcon = isDone ? '<i data-lucide="check" style="width: 14px; height: 14px;"></i>' : '';
+    const checkIcon = isDone ? '<i data-lucide="check" style="width: 13px; height: 13px;"></i>' : '';
     const cardDoneClass = isDone ? 'completed' : '';
 
     const typeIcon = task.type === 'kelompok' ? 'users' : 'user';
@@ -2548,53 +2548,55 @@
     }
 
     const coursePillHtml = showCoursePill ? `
-      <div class="assignment-course-pill">
-        <i data-lucide="book-open" style="width: 12px; height: 12px;"></i>
-        <span>${task.courseName}</span>
+      <div class="assignment-course-pill" title="${escapeHtml(task.courseName)}">
+        <i data-lucide="book-open" style="width: 12px; height: 12px; flex-shrink: 0;"></i>
+        <span>${escapeHtml(task.courseName)}</span>
       </div>
     ` : '';
 
     const descHtml = task.description ? `
-      <p class="assignment-card-desc" title="${task.description}">${task.description}</p>
+      <p class="assignment-card-desc" title="${escapeHtml(task.description)}">${escapeHtml(task.description)}</p>
     ` : '';
 
     return `
       <div class="assignment-card ${cardDoneClass}" id="task-card-${task.id}">
-        <div class="assignment-card-header">
-          <div class="assignment-card-left">
-            <button type="button" class="task-check-btn ${checkClass}" onclick="toggleAssignmentTask('${task.id}')" title="${isDone ? 'Tandai belum selesai' : 'Tandai selesai'}">
-              ${checkIcon}
-            </button>
-            <div class="assignment-card-body">
-              ${coursePillHtml}
-              <h4 class="assignment-card-title">${task.title}</h4>
-              ${descHtml}
-            </div>
-          </div>
-          <div class="badge-deadline ${deadlineInfo.badgeClass}" title="${deadlineInfo.fullText || ''}">
-            <i data-lucide="clock"></i>
+        <div class="assignment-card-topbar" style="${showCoursePill ? '' : 'justify-content: flex-end;'}">
+          ${coursePillHtml}
+          <div class="badge-deadline ${deadlineInfo.badgeClass}" title="Batas: ${deadlineInfo.fullText || ''}">
+            <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
             <span>${deadlineInfo.text}</span>
           </div>
         </div>
 
+        <div class="assignment-card-main">
+          <button type="button" class="task-check-btn ${checkClass}" onclick="toggleAssignmentTask('${task.id}')" title="${isDone ? 'Tandai belum selesai' : 'Tandai selesai'}">
+            ${checkIcon}
+          </button>
+          <div class="assignment-card-content">
+            <h4 class="assignment-card-title">${escapeHtml(task.title)}</h4>
+            ${descHtml}
+          </div>
+        </div>
+
         <div class="assignment-meta-footer">
-          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+          <div class="assignment-meta-badges">
             <span class="assignment-type-badge">
               <i data-lucide="${typeIcon}" style="width: 11px; height: 11px;"></i>
-              ${typeLabel}
+              <span>${typeLabel}</span>
             </span>
-            <span class="assignment-type-badge" title="${methodLabel}">
+            <span class="assignment-type-badge" title="${escapeHtml(methodLabel)}">
               <i data-lucide="${methodIcon}" style="width: 11px; height: 11px;"></i>
-              <span style="max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${methodLabel}</span>
+              <span class="assignment-badge-truncate">${escapeHtml(methodLabel)}</span>
             </span>
           </div>
 
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 11px; color: var(--color-text-muted);" title="Batas waktu: ${deadlineInfo.fullText || ''}">
-              ${deadlineInfo.fullText || ''}
+          <div class="assignment-meta-actions">
+            <span class="assignment-due-date-text" title="Batas pengumpulan">
+              <i data-lucide="calendar" style="width: 11px; height: 11px;"></i>
+              <span>${deadlineInfo.fullText || ''}</span>
             </span>
-            <button type="button" class="btn-task-delete" onclick="deleteAssignmentTask('${task.id}')" title="Hapus tugas ini">
-              <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+            <button type="button" class="btn-task-delete" onclick="deleteAssignmentTask('${task.id}')" title="Hapus tugas">
+              <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i>
             </button>
           </div>
         </div>
