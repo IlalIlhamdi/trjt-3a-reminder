@@ -25,7 +25,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <!-- Design System Stylesheet & Critical Inlined Styles -->
-  <link rel="stylesheet" href="./css/design-system.css?v=6.1">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.6">
   <style>
     /* Critical Glassmorphism Inlined Styles for Instant Guaranteed Rendering */
     :root {
@@ -209,6 +209,21 @@
     .form-label { font-size: 12.5px; font-weight: 600; color: var(--color-primary-navy); }
     .form-input { background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(191, 219, 254, 0.8); border-radius: 12px; padding: 10px 14px; font-family: inherit; font-size: 13.5px; color: var(--color-primary-navy); outline: none; }
     .btn-submit-upload { width: 100%; min-height: 48px; background: var(--color-primary-blue); color: #FFFFFF; border: none; border-radius: 14px; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(47, 128, 237, 0.35); }
+    .btn-submit-upload.is-loading { background: var(--color-primary-blue) !important; opacity: 0.92; cursor: wait; pointer-events: none; }
+    .spinner-loader-wrap { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; margin-right: 6px; flex-shrink: 0; }
+    .spinner { position: absolute; width: 9px; height: 9px; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.48); }
+    .spinner div { position: absolute; width: 50%; height: 150%; background: #FFFFFF; transform: rotate(calc(var(--rotation) * 1deg)) translate(0, calc(var(--translation) * 1%)); animation: spinner-fzua35 1s calc(var(--delay) * 1s) infinite ease; border-radius: 1px; }
+    .spinner div:nth-child(1) { --delay: 0.1; --rotation: 36; --translation: 150; }
+    .spinner div:nth-child(2) { --delay: 0.2; --rotation: 72; --translation: 150; }
+    .spinner div:nth-child(3) { --delay: 0.3; --rotation: 108; --translation: 150; }
+    .spinner div:nth-child(4) { --delay: 0.4; --rotation: 144; --translation: 150; }
+    .spinner div:nth-child(5) { --delay: 0.5; --rotation: 180; --translation: 150; }
+    .spinner div:nth-child(6) { --delay: 0.6; --rotation: 216; --translation: 150; }
+    .spinner div:nth-child(7) { --delay: 0.7; --rotation: 252; --translation: 150; }
+    .spinner div:nth-child(8) { --delay: 0.8; --rotation: 288; --translation: 150; }
+    .spinner div:nth-child(9) { --delay: 0.9; --rotation: 324; --translation: 150; }
+    .spinner div:nth-child(10) { --delay: 1; --rotation: 360; --translation: 150; }
+    @keyframes spinner-fzua35 { 0%, 10%, 20%, 30%, 50%, 60%, 70%, 80%, 90%, 100% { transform: rotate(calc(var(--rotation) * 1deg)) translate(0, calc(var(--translation) * 1%)); } 50% { transform: rotate(calc(var(--rotation) * 1deg)) translate(0, calc(var(--translation) * 1.5%)); } }
     .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); width: calc(100% - 40px); max-width: 440px; z-index: 200; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
     .toast-item { background: rgba(15, 41, 66, 0.92); backdrop-filter: blur(16px); color: #FFFFFF; border-radius: 14px; padding: 12px 16px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 24px rgba(15, 61, 145, 0.2); pointer-events: auto; }
     .btn-piket-action { width: 100%; background: linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 248, 255, 0.92) 100%); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.95); border-radius: var(--radius-card); padding: 14px 18px; box-shadow: 0 10px 28px -6px rgba(15, 61, 145, 0.08), 0 2px 8px rgba(15, 61, 145, 0.03); display: flex; align-items: center; justify-content: space-between; gap: 14px; cursor: pointer; font-family: inherit; text-align: left; position: relative; overflow: hidden; }
@@ -288,6 +303,7 @@
             </div>
           </div>
 
+
           <!-- Hero Next Class / Status Card Container -->
           <div id="hero-card-container">
             <!-- Dynamically populated by evaluateScheduleState() -->
@@ -305,15 +321,16 @@
 
             <!-- Section: Tugas & Deadline Mendatang (Beranda) -->
             <div id="section-tugas-home" class="tugas-home-section" style="margin-top: 16px;">
-              <div class="section-header-row">
-                <div style="display: flex; align-items: center; gap: 8px;">
+              <div class="tugas-header-row">
+                <div class="tugas-header-left">
                   <h2 class="section-main-title">Tugas & Deadline</h2>
                   <span id="badge-home-tasks-count" class="tugas-header-badge">0 Tugas</span>
                 </div>
-                <div style="display: flex; align-items: center; gap: 6px;">
-                  <button type="button" class="btn-mark-read-link" onclick="openAllAssignmentsModal()" style="font-size: 12px; font-weight: 700;">Lihat Semua</button>
-                  <button type="button" class="btn-schedule-tugas" onclick="openAddAssignmentModal()" style="padding: 4px 10px; font-size: 11.5px;">
-                    <i data-lucide="plus" style="width: 12px; height: 12px;"></i> Tambah
+                <div class="tugas-header-actions">
+                  <button type="button" class="btn-tugas-view-all" onclick="openAllAssignmentsModal()">Lihat Semua</button>
+                  <button type="button" class="btn-tugas-add-header" onclick="openAddAssignmentModal()">
+                    <i data-lucide="plus"></i>
+                    <span>Tambah</span>
                   </button>
                 </div>
               </div>
@@ -374,7 +391,12 @@
           <!-- Title & Semester Badge -->
           <div class="view-title-row">
             <h2 class="view-page-title">Jadwal mingguan</h2>
-            <span class="badge-semester">Semester 5</span>
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+              <span class="badge-semester">Semester 5</span>
+              <span class="badge-semester" style="background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.3); color: #047857; font-weight: 700;">
+                <i data-lucide="book-open" style="width: 11px; height: 11px; vertical-align: middle; margin-right: 3px;"></i>Pertemuan 3/16
+              </span>
+            </div>
           </div>
 
           <!-- Segmented Day Selector Capsule (Sen 24, Sel 25, Rab 26, Kam 27, Jum 28) -->
@@ -982,7 +1004,7 @@
         <!-- Mata Kuliah Selector -->
         <div class="form-group">
           <label for="task-input-course" class="form-label">Mata Kuliah <span style="color: #DC2626;">*</span></label>
-          <select id="task-input-course" class="form-input" required style="font-size: 13px; padding: 10px 12px;">
+          <select id="task-input-course" class="form-input" required style="font-size: 13px; padding: 10px 12px; border-radius: 12px;">
             <option value="">Pilih Mata Kuliah...</option>
             <option value="Praktikum Antena dan Propagasi">Praktikum Antena dan Propagasi</option>
             <option value="Jaringan Komputer Lanjut">Jaringan Komputer Lanjut</option>
@@ -1000,19 +1022,23 @@
 
         <!-- Judul Tugas -->
         <div class="form-group">
-          <label for="task-input-title" class="form-label">Judul / Nama Tugas <span style="color: #DC2626;">*</span></label>
-          <input type="text" id="task-input-title" class="form-input" placeholder="Contoh: Laporan Bab 1 Karakteristik Antena" required>
+          <label for="task-input-title" class="form-label">Nama / Judul Tugas <span style="color: #DC2626;">*</span></label>
+          <input type="text" id="task-input-title" class="form-input" placeholder="Contoh: Laporan Bab 1 Karakteristik Antena" required style="border-radius: 12px;">
         </div>
 
-        <!-- Tanggal & Jam Pengumpulan (Deadline) -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-          <div class="form-group">
-            <label for="task-input-due-date" class="form-label">Batas Tanggal <span style="color: #DC2626;">*</span></label>
-            <input type="date" id="task-input-due-date" class="form-input" required>
+        <!-- Batas Tanggal (Tanpa Jam, Lebih Sederhana) -->
+        <div class="form-group">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+            <label for="task-input-due-date" class="form-label" style="margin: 0;">Batas Tanggal (Deadline) <span style="color: #DC2626;">*</span></label>
+            <span style="font-size: 11px; color: var(--color-text-muted);">Pilih cepat:</span>
           </div>
-          <div class="form-group">
-            <label for="task-input-due-time" class="form-label">Jam Kumpul</label>
-            <input type="time" id="task-input-due-time" class="form-input" value="23:59">
+          <input type="date" id="task-input-due-date" class="form-input" required style="border-radius: 12px; font-size: 13.5px; padding: 9px 12px; width: 100%; box-sizing: border-box;">
+          
+          <!-- Tombol Pilihan Tanggal Cepat -->
+          <div class="quick-date-chips">
+            <button type="button" class="quick-date-btn" data-days="1" onclick="setQuickDueDate(1)">Besok</button>
+            <button type="button" class="quick-date-btn active" data-days="3" onclick="setQuickDueDate(3)">3 Hari lagi</button>
+            <button type="button" class="quick-date-btn" data-days="7" onclick="setQuickDueDate(7)">1 Minggu</button>
           </div>
         </div>
 
@@ -1030,37 +1056,19 @@
           <input type="hidden" id="task-input-type" value="individu">
         </div>
 
-        <!-- Tempat / Media Pengumpulan -->
+        <!-- Tempat / Media Kumpul -->
         <div class="form-group">
-          <label for="task-input-method" class="form-label">Media / Tempat Pengumpulan</label>
-          <select id="task-input-method" class="form-input" style="font-size: 13px; padding: 10px 12px;">
-            <option value="lab">Kumpul Fisik di Lab / Ruang Kuliah</option>
-            <option value="classroom">Google Classroom</option>
-            <option value="email">Email Dosen Pengampu</option>
-            <option value="drive">Folder Google Drive</option>
-            <option value="lainnya">Lainnya / Sesuai Instruksi</option>
-          </select>
+          <label for="task-input-place" class="form-label">Tempat / Media Kumpul <span style="font-size: 11px; font-weight: 500; color: var(--color-text-muted);">(Opsional)</span></label>
+          <input type="text" id="task-input-place" class="form-input" placeholder="Contoh: Lab HF Lt. 2 / Google Classroom" style="border-radius: 12px;">
         </div>
 
-        <!-- Keterangan Tambahan Tempat Kumpul / Catatan Ruangan -->
+        <!-- Catatan Tambahan (Opsional) -->
         <div class="form-group">
-          <label for="task-input-place" class="form-label">Keterangan Tempat / Link Kumpul (Opsional)</label>
-          <input type="text" id="task-input-place" class="form-input" placeholder="Contoh: Meja Dosen Lab HF Lt. 2 atau link Classroom">
+          <label for="task-input-desc" class="form-label">Catatan Tambahan <span style="font-size: 11px; font-weight: 500; color: var(--color-text-muted);">(Opsional)</span></label>
+          <textarea id="task-input-desc" class="form-input" rows="2" placeholder="Ketentuan tugas, bab laporan..." style="border-radius: 12px; resize: vertical; min-height: 50px;"></textarea>
         </div>
 
-        <!-- Instruksi / Deskripsi Tugas -->
-        <div class="form-group">
-          <label for="task-input-desc" class="form-label">Instruksi & Catatan Tugas (Opsional)</label>
-          <textarea id="task-input-desc" class="form-input" rows="3" placeholder="Tuliskan format file, ketentuan pengerjaan, bab laporan..." style="resize: vertical; min-height: 65px;"></textarea>
-        </div>
-
-        <!-- Nama Penginput (Opsional) -->
-        <div class="form-group">
-          <label for="task-input-author" class="form-label">Penginput Tugas (Opsional)</label>
-          <input type="text" id="task-input-author" class="form-input" placeholder="Contoh: Komti TRJT 3A / Nama Mahasiswa">
-        </div>
-
-        <button type="submit" id="btn-submit-task" class="btn-submit-upload" style="margin-top: 4px;">
+        <button type="submit" id="btn-submit-task" class="btn-submit-upload" style="margin-top: 4px; border-radius: 12px;">
           <i data-lucide="check-circle" style="width: 18px; height: 18px;"></i>
           <span>Simpan Tugas Kuliah</span>
         </button>
@@ -1257,14 +1265,14 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
-  <script src="./js/firebase-config.js?v=6.1"></script>
+  <script src="./js/firebase-config.js?v=6.6"></script>
 
   <!-- Application Scripts -->
-  <script src="./js/time-provider.js?v=6.1"></script>
-  <script src="./js/data.js?v=6.1"></script>
-  <script src="./js/drive-service.js?v=6.1"></script>
-  <script src="./js/material-service.js?v=6.1"></script>
-  <script src="./js/assignment-service.js?v=6.1"></script>
-  <script src="./js/app.js?v=6.1"></script>
+  <script src="./js/time-provider.js?v=6.6"></script>
+  <script src="./js/data.js?v=6.6"></script>
+  <script src="./js/drive-service.js?v=6.6"></script>
+  <script src="./js/material-service.js?v=6.6"></script>
+  <script src="./js/assignment-service.js?v=6.6"></script>
+  <script src="./js/app.js?v=6.6"></script>
 </body>
 </html>

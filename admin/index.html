@@ -809,15 +809,12 @@
           <input type="text" id="admin-task-title" class="form-input" placeholder="Contoh: Laporan Praktikum Antena Bab 2" required>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-          <div class="form-group">
-            <label style="font-size: 12px; font-weight: 600; color: var(--color-primary-text);">Batas Tanggal <span style="color: #DC2626;">*</span></label>
-            <input type="date" id="admin-task-due-date" class="form-input" required>
-          </div>
-          <div class="form-group">
-            <label style="font-size: 12px; font-weight: 600; color: var(--color-primary-text);">Jam Kumpul</label>
-            <input type="time" id="admin-task-due-time" class="form-input" value="23:59">
-          </div>
+        <div class="form-group">
+          <label style="font-size: 12px; font-weight: 600; color: var(--color-primary-text); display: flex; justify-content: space-between; align-items: center;">
+            <span>Batas Tanggal (Deadline) <span style="color: #DC2626;">*</span></span>
+            <span style="font-size: 11px; font-weight: 400; color: var(--color-secondary-text);">Batas akhir: 23:59 WIB</span>
+          </label>
+          <input type="date" id="admin-task-due-date" class="form-input" required>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -866,13 +863,13 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
-  <script src="../js/firebase-config.js"></script>
+  <script src="../js/firebase-config.js?v=6.6"></script>
 
   <!-- App Data & Services -->
-  <script src="../js/data.js?v=3.5"></script>
-  <script src="../js/drive-service.js?v=3.5"></script>
-  <script src="../js/material-service.js?v=3.5"></script>
-  <script src="../js/assignment-service.js?v=5.5"></script>
+  <script src="../js/data.js?v=6.6"></script>
+  <script src="../js/drive-service.js?v=6.6"></script>
+  <script src="../js/material-service.js?v=6.6"></script>
+  <script src="../js/assignment-service.js?v=6.6"></script>
 
   <script>
     (function () {
@@ -2061,9 +2058,26 @@
           return;
         }
 
+        const form = document.getElementById('form-admin-add-task');
+        const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
+        let origBtnHtml = '';
+        if (submitBtn) {
+          origBtnHtml = submitBtn.innerHTML;
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = `
+            <div class="spinner-loader-wrap" style="width: 18px; height: 18px; margin-right: 6px;">
+              <div class="spinner">
+                <div></div><div></div><div></div><div></div><div></div>
+                <div></div><div></div><div></div><div></div><div></div>
+              </div>
+            </div>
+            <span>Menyimpan...</span>
+          `;
+        }
+
         try {
           if (window.TRJT_ASSIGNMENTS) {
-            await window.TRJT_ASSIGNMENTS.createAssignment({
+            const savePromise = window.TRJT_ASSIGNMENTS.createAssignment({
               courseName: course,
               title: title,
               dueDate: dueDate,
@@ -2074,12 +2088,23 @@
               description: description,
               createdBy: 'Admin / Komti'
             });
+
+            await Promise.all([
+              savePromise,
+              new Promise((resolve) => setTimeout(resolve, 450))
+            ]);
           }
           closeAdminAddTaskModal();
           renderAdminAssignmentsTable();
           alert('✅ Tugas berhasil ditambahkan ke database Firestore!');
         } catch (err) {
           alert('Gagal menyimpan tugas: ' + err.message);
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = origBtnHtml;
+            if (window.lucide) window.lucide.createIcons();
+          }
         }
       }
 

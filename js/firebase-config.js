@@ -127,6 +127,7 @@
 
         isFirebaseReady = true;
         console.log("🔥 Firebase Connected: TRJT 3A Database Ready");
+        window.dispatchEvent(new CustomEvent('trjt:firebase-ready', { detail: { db, auth } }));
         setupFirestoreListeners();
 
         // Auto register client device in Firestore

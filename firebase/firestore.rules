@@ -44,5 +44,10 @@ service cloud.firestore {
     match /systemConfig/{configId} {
       allow read, write: if true;
     }
+
+    // 8. Course Assignments (Tugas Kuliah)
+    match /courseAssignments/{assignmentId} {
+      allow read, write: if true;
+    }
   }
 }

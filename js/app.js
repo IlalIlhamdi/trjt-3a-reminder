@@ -478,7 +478,10 @@
                 <i data-lucide="${iconName}" style="width: 16px; height: 16px;"></i>
               </div>
               <div class="today-card-info">
-                <span class="today-card-time">${item.startTime.replace(':', '.')} – ${item.endTime.replace(':', '.')}</span>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span class="today-card-time">${item.startTime.replace(':', '.')} – ${item.endTime.replace(':', '.')}</span>
+                  <span class="schedule-meeting-chip">P3/16</span>
+                </div>
                 <span class="today-card-title">${item.courseName} ${taskBadgeTodayHtml}</span>
               </div>
             </div>
@@ -570,6 +573,10 @@
               <div class="schedule-room-badge">
                 <i data-lucide="map-pin"></i>
                 <span>${roomDisplay}</span>
+              </div>
+              <div class="schedule-meeting-badge" title="Minggu ke-3 (Pertemuan 3 dari 16 · Ujian di P16)">
+                <i data-lucide="book-open"></i>
+                <span>P3/16</span>
               </div>
             </div>
             
@@ -1978,7 +1985,7 @@
     const searchInput = document.getElementById('mat-search-input');
 
     if (titleEl) titleEl.innerText = courseName;
-    if (metaEl) metaEl.innerText = `${lecturer || 'Dosen Pengampu'} · Ruang ${room || '-'}`;
+    if (metaEl) metaEl.innerText = `${lecturer || 'Dosen Pengampu'} · Ruang ${room || '-'} · Pertemuan 3/16`;
     if (searchInput) searchInput.value = '';
 
     const btnDriveFolder = document.getElementById('btn-open-course-drive-folder');
@@ -2208,18 +2215,8 @@
       }
     }
 
-    // Default due date to 3 days ahead
-    const d = new Date();
-    d.setDate(d.getDate() + 3);
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    const dateInput = document.getElementById('task-input-due-date');
-    if (dateInput) dateInput.value = `${yyyy}-${mm}-${dd}`;
-
-    const timeInput = document.getElementById('task-input-due-time');
-    if (timeInput) timeInput.value = '23:59';
-
+    // Default due date to 3 days ahead via quick setter
+    setQuickDueDate(3);
     selectTaskType('individu');
 
     if (modal) modal.classList.add('is-open');
@@ -2248,6 +2245,39 @@
       }
     }
   }
+
+  function setQuickDueDate(daysAhead) {
+    const d = new Date();
+    d.setDate(d.getDate() + (daysAhead || 1));
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const dateInput = document.getElementById('task-input-due-date');
+    if (dateInput) dateInput.value = `${yyyy}-${mm}-${dd}`;
+
+    document.querySelectorAll('.quick-date-btn').forEach((btn) => {
+      const days = parseInt(btn.getAttribute('data-days'), 10);
+      if (days === daysAhead) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+  }
+  window.setQuickDueDate = setQuickDueDate;
+
+  // Uiverse Multi-blade Spinner Generator
+  function getUiverseSpinnerHtml(extraClass = '') {
+    return `
+      <div class="spinner-loader-wrap ${extraClass}">
+        <div class="spinner">
+          <div></div><div></div><div></div><div></div><div></div>
+          <div></div><div></div><div></div><div></div><div></div>
+        </div>
+      </div>
+    `;
+  }
+  window.getUiverseSpinnerHtml = getUiverseSpinnerHtml;
 
   let isSavingAssignment = false;
   async function handleSaveAssignment(e) {
@@ -2279,13 +2309,13 @@
     if (submitBtn) {
       origBtnHtml = submitBtn.innerHTML;
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i data-lucide="loader-2" style="width: 18px; height: 18px;"></i><span>Menyimpan Tugas...</span>';
-      if (window.lucide) window.lucide.createIcons();
+      submitBtn.classList.add('is-loading');
+      submitBtn.innerHTML = `${getUiverseSpinnerHtml()}<span>Menyimpan Tugas...</span>`;
     }
 
     try {
       isSavingAssignment = true;
-      await window.TRJT_ASSIGNMENTS.createAssignment({
+      const savePromise = window.TRJT_ASSIGNMENTS.createAssignment({
         courseName: course,
         title: title,
         dueDate: dueDate,
@@ -2296,6 +2326,12 @@
         description: description,
         createdBy: createdBy
       });
+
+      // Provide natural visual feedback of at least 450ms for spinner animation
+      await Promise.all([
+        savePromise,
+        new Promise((resolve) => setTimeout(resolve, 450))
+      ]);
 
       showToast('✅ Tugas berhasil ditambahkan!', 'success');
       closeAddAssignmentModal();
@@ -2313,6 +2349,7 @@
       isSavingAssignment = false;
       if (submitBtn) {
         submitBtn.disabled = false;
+        submitBtn.classList.remove('is-loading');
         submitBtn.innerHTML = origBtnHtml;
         if (window.lucide) window.lucide.createIcons();
       }
@@ -2329,7 +2366,7 @@
     const metaEl = document.getElementById('course-task-modal-meta');
 
     if (nameEl) nameEl.innerText = courseName;
-    if (metaEl) metaEl.innerText = `${lecturer || 'Dosen Pengampu'} · Ruang ${room || '-'}`;
+    if (metaEl) metaEl.innerText = `${lecturer || 'Dosen Pengampu'} · Ruang ${room || '-'} · Pertemuan 3/16`;
 
     const btnJumpGroups = document.getElementById('btn-course-jump-groups');
     if (btnJumpGroups) {

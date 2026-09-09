@@ -33,7 +33,24 @@ const TRJT_SCHEDULE = {
     institusi: 'Politeknik Negeri Lhokseumawe',
     kelas: 'TRJT 3A',
     semester: 5,
-    tahunAkademik: '2026/2027'
+    tahunAkademik: '2026/2027',
+    currentWeek: 3,
+    currentMeeting: 3,
+    totalMeetings: 16,
+    examMeeting: 16,
+    midtermMeeting: 8
+  },
+
+  academicProgress: {
+    semester: 5,
+    tahunAkademik: '2026/2027',
+    currentWeek: 3,
+    currentMeeting: 3,
+    totalMeetings: 16,
+    examMeeting: 16,
+    midtermMeeting: 8,
+    statusLabel: 'Pertemuan 3 dari 16',
+    examNote: 'Pertemuan 16: Ujian (UAS)'
   },
 
   days: [
@@ -624,6 +641,24 @@ function getStudentPracticalGroups(studentName) {
   return results;
 }
 
+function getAcademicMeetingInfo() {
+  const current = 3;
+  const total = 16;
+  const percent = Math.round((current / total) * 100);
+  return {
+    currentMeeting: current,
+    totalMeetings: total,
+    examMeeting: 16,
+    midtermMeeting: 8,
+    percent: percent, // 19%
+    meetingLabel: `Pertemuan ${current}/${total}`,
+    meetingFullLabel: `Pertemuan ${current} dari ${total}`,
+    weekLabel: `Minggu ke-${current}`,
+    examLabel: 'Pertemuan 16: Ujian (UAS)',
+    remainingMeetings: total - current
+  };
+}
+
 const TRJT_PIKET = TRJT_SCHEDULE.piket;
 const TRJT_DOSEN = TRJT_SCHEDULE.dosen;
 const TRJT_PRACTICAL_GROUPS = TRJT_SCHEDULE.practicalGroups;
@@ -637,6 +672,7 @@ if (typeof window !== 'undefined') {
   window.TRJT_PRACTICAL_GROUPS = TRJT_PRACTICAL_GROUPS;
   window.getCoursePracticalGroups = getCoursePracticalGroups;
   window.getStudentPracticalGroups = getStudentPracticalGroups;
+  window.getAcademicMeetingInfo = getAcademicMeetingInfo;
 }
 
 if (typeof module !== 'undefined' && module.exports) {
@@ -646,7 +682,8 @@ if (typeof module !== 'undefined' && module.exports) {
     TRJT_DOSEN,
     TRJT_PRACTICAL_GROUPS,
     getCoursePracticalGroups,
-    getStudentPracticalGroups
+    getStudentPracticalGroups,
+    getAcademicMeetingInfo
   };
 }
 

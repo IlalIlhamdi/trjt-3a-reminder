@@ -20,11 +20,51 @@
 
   let allMaterialsCache = [];
   let uploadSettingsCache = { allowStudentUpload: true };
+  let isMaterialsListening = false;
+
+  function getFirestoreDb() {
+    try {
+      if (window.TRJT_FIREBASE && typeof window.TRJT_FIREBASE.getDb === 'function') {
+        const d = window.TRJT_FIREBASE.getDb();
+        if (d) return d;
+      }
+      if (window.firebase && window.firebase.apps && window.firebase.apps.length > 0) {
+        return window.firebase.firestore();
+      }
+    } catch (e) {}
+    return null;
+  }
 
   // Initialize Firestore realtime listener for course materials
   function initMaterialsListener() {
-    const db = window.firebase ? window.firebase.firestore() : null;
-    if (!db) return;
+    if (isMaterialsListening) return;
+
+    const db = getFirestoreDb();
+    if (!db) {
+      const onFirebaseReady = () => {
+        window.removeEventListener('trjt:firebase-ready', onFirebaseReady);
+        initMaterialsListener();
+      };
+      window.addEventListener('trjt:firebase-ready', onFirebaseReady);
+
+      let retries = 0;
+      const poll = setInterval(() => {
+        retries++;
+        if (isMaterialsListening) {
+          clearInterval(poll);
+          return;
+        }
+        if (getFirestoreDb()) {
+          clearInterval(poll);
+          initMaterialsListener();
+        } else if (retries >= 20) {
+          clearInterval(poll);
+        }
+      }, 500);
+      return;
+    }
+
+    isMaterialsListening = true;
 
     // Listen to all materials
     db.collection('courseMaterials')

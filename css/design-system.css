@@ -1853,6 +1853,127 @@ select,
   box-shadow: none;
 }
 
+.btn-submit-upload.is-loading {
+  background: var(--color-primary-blue) !important;
+  opacity: 0.92;
+  cursor: wait;
+  box-shadow: 0 4px 14px rgba(47, 128, 237, 0.35);
+}
+
+/* ==========================================================================
+   From Uiverse.io by PriyanshuGupta28 - Radial Multi-blade Spinner
+   ========================================================================== */
+.spinner-loader-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.spinner {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+}
+
+.spinner-loader-wrap .spinner {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.48);
+  transform-origin: center center;
+}
+
+.spinner div {
+  position: absolute;
+  width: 50%;
+  height: 150%;
+  background: #000000;
+  transform: rotate(calc(var(--rotation) * 1deg)) translate(0, calc(var(--translation) * 1%));
+  animation: spinner-fzua35 1s calc(var(--delay) * 1s) infinite ease;
+  border-radius: 1px;
+}
+
+/* High contrast adaptation for buttons & dark surfaces */
+.btn-submit-upload .spinner div,
+.btn-primary .spinner div,
+.spinner-white div {
+  background: #ffffff;
+}
+
+.spinner div:nth-child(1) {
+  --delay: 0.1;
+  --rotation: 36;
+  --translation: 150;
+}
+
+.spinner div:nth-child(2) {
+  --delay: 0.2;
+  --rotation: 72;
+  --translation: 150;
+}
+
+.spinner div:nth-child(3) {
+  --delay: 0.3;
+  --rotation: 108;
+  --translation: 150;
+}
+
+.spinner div:nth-child(4) {
+  --delay: 0.4;
+  --rotation: 144;
+  --translation: 150;
+}
+
+.spinner div:nth-child(5) {
+  --delay: 0.5;
+  --rotation: 180;
+  --translation: 150;
+}
+
+.spinner div:nth-child(6) {
+  --delay: 0.6;
+  --rotation: 216;
+  --translation: 150;
+}
+
+.spinner div:nth-child(7) {
+  --delay: 0.7;
+  --rotation: 252;
+  --translation: 150;
+}
+
+.spinner div:nth-child(8) {
+  --delay: 0.8;
+  --rotation: 288;
+  --translation: 150;
+}
+
+.spinner div:nth-child(9) {
+  --delay: 0.9;
+  --rotation: 324;
+  --translation: 150;
+}
+
+.spinner div:nth-child(10) {
+  --delay: 1;
+  --rotation: 360;
+  --translation: 150;
+}
+
+@keyframes spinner-fzua35 {
+  0%, 10%, 20%, 30%, 50%, 60%, 70%, 80%, 90%, 100% {
+    transform: rotate(calc(var(--rotation) * 1deg)) translate(0, calc(var(--translation) * 1%));
+  }
+
+  50% {
+    transform: rotate(calc(var(--rotation) * 1deg)) translate(0, calc(var(--translation) * 1.5%));
+  }
+}
+
 /* Toast Container */
 .toast-container {
   position: fixed;
@@ -2866,17 +2987,142 @@ select,
   margin-top: 4px;
 }
 
+.tugas-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tugas-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.tugas-header-left .section-main-title {
+  font-size: 1.05rem; /* ~16.5px */
+  font-weight: 700;
+  color: var(--color-primary-navy);
+  letter-spacing: -0.01em;
+  white-space: nowrap !important;
+  margin: 0;
+  line-height: 1.2;
+}
+
 .tugas-header-badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 3px 9px;
+  justify-content: center;
+  padding: 2.5px 8.5px;
   border-radius: 9999px;
   font-size: 11px;
   font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap !important;
+  flex-shrink: 0;
   background: rgba(254, 243, 199, 0.9);
   border: 1px solid rgba(251, 191, 36, 0.8);
   color: #B45309;
+  box-sizing: border-box;
+}
+
+.tugas-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.btn-tugas-view-all {
+  background: transparent;
+  border: none;
+  color: var(--color-primary-blue);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  white-space: nowrap !important;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  font-family: inherit;
+  line-height: 1;
+}
+
+.btn-tugas-view-all:hover {
+  background: rgba(47, 128, 237, 0.08);
+  color: #1D4ED8;
+}
+
+.btn-tugas-add-header {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4.5px;
+  padding: 0 10px;
+  height: 30px;
+  box-sizing: border-box;
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-primary-blue);
+  background: rgba(235, 244, 254, 0.95);
+  border: 1px solid rgba(191, 219, 254, 0.9);
+  border-radius: 9px;
+  cursor: pointer;
+  white-space: nowrap !important;
+  flex-shrink: 0;
+  text-decoration: none;
+  font-family: inherit;
+  transition: all var(--transition-fast);
+  box-shadow: 0 2px 5px rgba(47, 128, 237, 0.08);
+}
+
+.btn-tugas-add-header:hover {
+  background: #FFFFFF;
+  border-color: var(--color-primary-blue);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(47, 128, 237, 0.16);
+}
+
+.btn-tugas-add-header i,
+.btn-tugas-add-header svg {
+  width: 13px !important;
+  height: 13px !important;
+  stroke-width: 2.2 !important;
+  flex-shrink: 0;
+  display: block;
+}
+
+@media (max-width: 480px) {
+  .tugas-header-left {
+    gap: 6px;
+  }
+  .tugas-header-left .section-main-title {
+    font-size: 15px;
+  }
+  .tugas-header-badge {
+    padding: 2px 7px;
+    font-size: 10.5px;
+  }
+  .tugas-header-actions {
+    gap: 6px;
+  }
+  .btn-tugas-view-all {
+    font-size: 11.5px;
+    padding: 3px 5px;
+  }
+  .btn-tugas-add-header {
+    height: 28px;
+    padding: 0 8px;
+    font-size: 11px;
+    border-radius: 8px;
+  }
 }
 
 /* Segmented Type Selector in Add Assignment Form */
@@ -2914,7 +3160,285 @@ select,
   font-weight: 700;
 }
 
+/* Quick Date Chips in Add Assignment Form */
+.quick-date-chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.quick-date-btn {
+  flex: 1;
+  padding: 6px 10px;
+  border-radius: 9px;
+  font-size: 11.5px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  background: rgba(244, 248, 254, 0.9);
+  border: 1px solid rgba(220, 235, 252, 0.9);
+  color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+  text-align: center;
+}
+
+.quick-date-btn:hover {
+  background: #FFFFFF;
+  border-color: var(--color-primary-blue);
+  color: var(--color-primary-blue);
+}
+
+.quick-date-btn.active {
+  background: var(--color-primary-blue);
+  border-color: var(--color-primary-blue);
+  color: #FFFFFF;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(47, 128, 237, 0.25);
+}
+
+/* Meeting Badges on Schedule Cards */
+.schedule-meeting-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1;
+  background: rgba(236, 253, 245, 0.95);
+  border: 1px solid rgba(167, 243, 208, 0.9);
+  color: #047857;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.schedule-meeting-badge i,
+.schedule-meeting-badge svg {
+  width: 12px;
+  height: 12px;
+  stroke-width: 2.2;
+}
+
+.schedule-meeting-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(236, 253, 245, 0.95);
+  border: 1px solid rgba(167, 243, 208, 0.9);
+  color: #047857;
+  white-space: nowrap;
+}
+
+/* Card Progress Perkuliahan Semester (Pertemuan 3 dari 16) */
+.semester-progress-card {
+  background: var(--color-surface-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--color-border-glass);
+  border-radius: var(--radius-card);
+  padding: 14px 16px;
+  margin-top: 8px;
+  margin-bottom: 6px;
+  box-shadow: 0 8px 24px rgba(15, 61, 145, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all var(--transition-fast);
+}
+
+.semester-progress-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.semester-progress-left-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(236, 253, 245, 0.95);
+  border: 1px solid rgba(167, 243, 208, 0.9);
+  padding: 3px 9px;
+  border-radius: 9999px;
+}
+
+.pulse-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10B981;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  animation: pulseGreen 2s infinite;
+}
+
+@keyframes pulseGreen {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.semester-live-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #047857;
+  white-space: nowrap;
+}
+
+.semester-exam-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #B45309;
+  background: rgba(254, 243, 199, 0.9);
+  border: 1px solid rgba(251, 191, 36, 0.8);
+  padding: 3px 9px;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+.semester-progress-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.semester-progress-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-primary-navy);
+  margin: 0;
+  line-height: 1.25;
+}
+
+.semester-progress-sub {
+  font-size: 11.5px;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+
+.semester-pct-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.semester-pct-number {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--color-primary-blue);
+  line-height: 1;
+}
+
+.semester-pct-label {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.semester-progress-bar-track {
+  width: 100%;
+  height: 7px;
+  background: rgba(220, 235, 252, 0.7);
+  border-radius: 9999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.semester-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10B981 0%, #2F80ED 100%);
+  border-radius: 9999px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.semester-progress-milestones {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.milestone-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 4px;
+  border-radius: 7px;
+  background: rgba(244, 248, 254, 0.8);
+  border: 1px solid rgba(220, 235, 252, 0.8);
+  color: var(--color-text-secondary);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.milestone-chip.passed {
+  background: rgba(236, 253, 245, 0.7);
+  border-color: rgba(167, 243, 208, 0.7);
+  color: #059669;
+}
+
+.milestone-chip.current {
+  background: rgba(239, 246, 255, 0.95);
+  border-color: rgba(147, 197, 253, 0.9);
+  color: #1D4ED8;
+  font-weight: 700;
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.12);
+}
+
+.milestone-chip.target {
+  background: rgba(254, 243, 199, 0.5);
+  border-color: rgba(253, 230, 138, 0.6);
+  color: #B45309;
+}
+
+.milestone-chip.exam {
+  background: rgba(254, 226, 226, 0.6);
+  border-color: rgba(254, 202, 202, 0.8);
+  color: #DC2626;
+  font-weight: 700;
+}
+
 /* Dark Theme Overrides */
+[data-theme="dark"] .tugas-header-left .section-main-title {
+  color: #FFFFFF;
+}
+
+[data-theme="dark"] .btn-tugas-view-all {
+  color: #60A5FA;
+}
+
+[data-theme="dark"] .btn-tugas-view-all:hover {
+  background: rgba(96, 165, 250, 0.12);
+  color: #93C5FD;
+}
+
+[data-theme="dark"] .btn-tugas-add-header {
+  background: rgba(30, 58, 138, 0.35);
+  border-color: rgba(59, 130, 246, 0.4);
+  color: #93C5FD;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .btn-tugas-add-header:hover {
+  background: rgba(37, 99, 235, 0.45);
+  border-color: #60A5FA;
+  color: #FFFFFF;
+}
+
 [data-theme="dark"] .btn-schedule-tugas {
   background: rgba(30, 58, 138, 0.35);
   border-color: rgba(59, 130, 246, 0.4);
@@ -2954,6 +3478,78 @@ select,
 [data-theme="dark"] .task-type-btn.active {
   background: rgba(30, 41, 59, 0.95);
   color: #F8FAFC;
+}
+
+[data-theme="dark"] .quick-date-btn {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #94A3B8;
+}
+
+[data-theme="dark"] .quick-date-btn:hover {
+  background: rgba(30, 58, 138, 0.5);
+  color: #FFFFFF;
+}
+
+[data-theme="dark"] .quick-date-btn.active {
+  background: #2563EB;
+  border-color: #3B82F6;
+  color: #FFFFFF;
+}
+
+[data-theme="dark"] .semester-progress-card {
+  background: rgba(18, 28, 48, 0.78);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .semester-progress-title {
+  color: #FFFFFF;
+}
+
+[data-theme="dark"] .semester-progress-sub {
+  color: #94A3B8;
+}
+
+[data-theme="dark"] .semester-progress-bar-track {
+  background: rgba(30, 41, 59, 0.9);
+}
+
+[data-theme="dark"] .milestone-chip {
+  background: rgba(30, 41, 59, 0.7);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #94A3B8;
+}
+
+[data-theme="dark"] .milestone-chip.passed {
+  background: rgba(6, 78, 59, 0.3);
+  border-color: rgba(5, 150, 105, 0.4);
+  color: #34D399;
+}
+
+[data-theme="dark"] .milestone-chip.current {
+  background: rgba(30, 58, 138, 0.45);
+  border-color: rgba(59, 130, 246, 0.5);
+  color: #93C5FD;
+}
+
+[data-theme="dark"] .milestone-chip.target {
+  background: rgba(120, 53, 15, 0.3);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #FCD34D;
+}
+
+[data-theme="dark"] .milestone-chip.exam {
+  background: rgba(127, 29, 29, 0.3);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #F87171;
+}
+
+[data-theme="dark"] .schedule-meeting-badge,
+[data-theme="dark"] .schedule-meeting-chip {
+  background: rgba(6, 78, 59, 0.35);
+  border-color: rgba(5, 150, 105, 0.4);
+  color: #34D399;
 }
 
 /* Stack input modals on top of list/course modals */

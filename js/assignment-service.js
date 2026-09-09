@@ -63,40 +63,112 @@
     } catch (e) {}
   }
 
+  function getFirestoreDb() {
+    try {
+      if (window.TRJT_FIREBASE && typeof window.TRJT_FIREBASE.getDb === 'function') {
+        const d = window.TRJT_FIREBASE.getDb();
+        if (d) return d;
+      }
+      if (window.firebase && window.firebase.apps && window.firebase.apps.length > 0) {
+        return window.firebase.firestore();
+      }
+    } catch (e) {
+      console.warn('Get Firestore db fallback:', e.message);
+    }
+    return null;
+  }
+
+  let isFirestoreListening = false;
+  let unsubscribeAssignments = null;
+
   // Initialize Firestore realtime listener
   function initAssignmentsListener() {
-    const db = window.firebase ? window.firebase.firestore() : null;
+    if (isFirestoreListening) return;
+
+    const db = getFirestoreDb();
     if (!db) {
-      console.log('ℹ️ Local offline mode for assignments active.');
+      // Waiting for Firebase to complete initialization
+      const onFirebaseReady = () => {
+        window.removeEventListener('trjt:firebase-ready', onFirebaseReady);
+        initAssignmentsListener();
+      };
+      window.addEventListener('trjt:firebase-ready', onFirebaseReady);
+
+      // Polling fallback in case event was already dispatched or missed
+      let retries = 0;
+      const pollInterval = setInterval(() => {
+        retries++;
+        if (isFirestoreListening) {
+          clearInterval(pollInterval);
+          return;
+        }
+        const retryDb = getFirestoreDb();
+        if (retryDb) {
+          clearInterval(pollInterval);
+          initAssignmentsListener();
+        } else if (retries >= 20) {
+          clearInterval(pollInterval);
+          console.log('ℹ️ Local offline mode for assignments active.');
+        }
+      }, 500);
       return;
     }
 
     try {
-      db.collection('courseAssignments')
+      isFirestoreListening = true;
+      if (typeof unsubscribeAssignments === 'function') {
+        try { unsubscribeAssignments(); } catch (_) {}
+      }
+
+      unsubscribeAssignments = db.collection('courseAssignments')
         .onSnapshot((snapshot) => {
           if (snapshot && !snapshot.empty) {
             const list = [];
+            const remoteIds = new Set();
             snapshot.forEach((doc) => {
-              list.push({ id: doc.id, ...doc.data() });
+              const item = { id: doc.id, ...doc.data() };
+              list.push(item);
+              remoteIds.add(doc.id);
             });
             const cleanedList = list.filter((t) => t && !DUMMY_TASK_IDS.has(t.id));
+
+            // Auto-sync any local real tasks that were created locally but not yet in Firestore
+            const localUnsynced = assignmentsCache.filter((t) => t && !DUMMY_TASK_IDS.has(t.id) && !remoteIds.has(t.id));
+            if (localUnsynced.length > 0) {
+              localUnsynced.forEach((task) => {
+                cleanedList.push(task);
+                db.collection('courseAssignments').doc(task.id).set(task).catch((e) => {
+                  console.warn('Sync local assignment to cloud error:', e);
+                });
+              });
+            }
+
             assignmentsCache = cleanedList;
             saveAssignmentsToCache(cleanedList);
             isFirestoreConnected = true;
             window.dispatchEvent(new CustomEvent('trjt:assignments-updated', { detail: cleanedList }));
           } else if (snapshot && snapshot.empty) {
-            // Remote collection is empty: preserve only real local tasks (excluding dummy sample tasks)
+            // Remote collection is empty: preserve real local tasks and sync them up to Firestore
             const realTasks = assignmentsCache.filter((t) => t && !DUMMY_TASK_IDS.has(t.id));
             assignmentsCache = realTasks;
             saveAssignmentsToCache(realTasks);
+            if (realTasks.length > 0) {
+              realTasks.forEach((task) => {
+                db.collection('courseAssignments').doc(task.id).set(task).catch((e) => {
+                  console.warn('Upload cached assignment to empty Firestore error:', e);
+                });
+              });
+            }
             isFirestoreConnected = true;
             window.dispatchEvent(new CustomEvent('trjt:assignments-updated', { detail: realTasks }));
           }
         }, (error) => {
           console.warn('Firestore assignments listener notice:', error.message);
+          isFirestoreListening = false;
         });
     } catch (err) {
       console.warn('Assignments init error:', err);
+      isFirestoreListening = false;
     }
   }
 
@@ -130,7 +202,7 @@
     const dayName = dayNames[dueDateTime.getDay()] || '';
     const dateNum = dueDateTime.getDate();
     const monthName = monthNames[dueDateTime.getMonth()] || '';
-    const formattedFull = `${dayName}, ${dateNum} ${monthName} • ${timeStr} WIB`;
+    const formattedFull = `${dayName}, ${dateNum} ${monthName} ${dueDateTime.getFullYear()}`;
 
     if (isPast) {
       const pastHours = Math.abs(diffHours);
@@ -155,7 +227,7 @@
     const isToday = dueDateTime.toDateString() === now.toDateString();
     if (isToday) {
       return {
-        text: `Hari ini, ${timeStr}`,
+        text: 'Hari ini',
         fullText: formattedFull,
         urgency: 'critical',
         badgeClass: 'badge-deadline-critical',
@@ -170,7 +242,7 @@
     const isTomorrow = dueDateTime.toDateString() === tomorrow.toDateString();
     if (isTomorrow) {
       return {
-        text: `Besok, ${timeStr}`,
+        text: 'Besok',
         fullText: formattedFull,
         urgency: 'urgent',
         badgeClass: 'badge-deadline-urgent',
@@ -295,13 +367,14 @@
     saveAssignmentsToCache(assignmentsCache);
 
     // Save to Firestore if available
-    const db = window.firebase ? window.firebase.firestore() : null;
+    const db = getFirestoreDb();
     if (db) {
       try {
         await db.collection('courseAssignments').doc(newId).set(assignment);
         console.log('✅ Assignment successfully saved to Firestore:', newId);
       } catch (err) {
-        console.warn('⚠️ Firestore save assignment fallback to local:', err.message);
+        console.error('⚠️ Firestore save assignment error:', err);
+        throw new Error('Gagal menyimpan ke database cloud: ' + (err.message || err));
       }
     }
 
@@ -318,7 +391,7 @@
     saveAssignmentsToCache(assignmentsCache);
     saveCompletedIds();
 
-    const db = window.firebase ? window.firebase.firestore() : null;
+    const db = getFirestoreDb();
     if (db) {
       try {
         await db.collection('courseAssignments').doc(assignmentId).delete();
