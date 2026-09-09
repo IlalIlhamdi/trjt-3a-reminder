@@ -9,12 +9,31 @@
 
   const STORAGE_KEY_ASSIGNMENTS = 'trjt_assignments_cache_v1';
   const STORAGE_KEY_COMPLETED = 'trjt_completed_assignments_v1';
+  const STORAGE_KEY_DELETED = 'trjt_deleted_assignment_ids_v1';
 
   const DUMMY_TASK_IDS = new Set(['task-antena-lap1', 'task-jarkom-subnet', 'task-satelit-link']);
 
+  let deletedSet = loadDeletedIds();
   let assignmentsCache = loadCachedAssignments();
   let completedSet = loadCompletedIds();
   let isFirestoreConnected = false;
+
+  function loadDeletedIds() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_DELETED);
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) return new Set(arr);
+      }
+    } catch (e) {}
+    return new Set();
+  }
+
+  function saveDeletedIds() {
+    try {
+      localStorage.setItem(STORAGE_KEY_DELETED, JSON.stringify(Array.from(deletedSet)));
+    } catch (e) {}
+  }
 
   function loadCachedAssignments() {
     try {
@@ -22,8 +41,8 @@
       if (raw !== null) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
-          // Filter out legacy dummy sample tasks so they never persist or reappear
-          const cleaned = parsed.filter((t) => t && !DUMMY_TASK_IDS.has(t.id));
+          // Filter out legacy dummy sample tasks & permanently deleted tasks
+          const cleaned = parsed.filter((t) => t && !DUMMY_TASK_IDS.has(t.id) && !deletedSet.has(t.id));
           if (cleaned.length !== parsed.length) {
             saveAssignmentsToCache(cleaned);
           }
@@ -122,45 +141,20 @@
 
       unsubscribeAssignments = db.collection('courseAssignments')
         .onSnapshot((snapshot) => {
-          if (snapshot && !snapshot.empty) {
+          if (snapshot) {
             const list = [];
-            const remoteIds = new Set();
             snapshot.forEach((doc) => {
               const item = { id: doc.id, ...doc.data() };
-              list.push(item);
-              remoteIds.add(doc.id);
+              // Discard any dummy tasks or tasks explicitly deleted by the user
+              if (item && !DUMMY_TASK_IDS.has(item.id) && !deletedSet.has(item.id)) {
+                list.push(item);
+              }
             });
-            const cleanedList = list.filter((t) => t && !DUMMY_TASK_IDS.has(t.id));
 
-            // Auto-sync any local real tasks that were created locally but not yet in Firestore
-            const localUnsynced = assignmentsCache.filter((t) => t && !DUMMY_TASK_IDS.has(t.id) && !remoteIds.has(t.id));
-            if (localUnsynced.length > 0) {
-              localUnsynced.forEach((task) => {
-                cleanedList.push(task);
-                db.collection('courseAssignments').doc(task.id).set(task).catch((e) => {
-                  console.warn('Sync local assignment to cloud error:', e);
-                });
-              });
-            }
-
-            assignmentsCache = cleanedList;
-            saveAssignmentsToCache(cleanedList);
+            assignmentsCache = list;
+            saveAssignmentsToCache(list);
             isFirestoreConnected = true;
-            window.dispatchEvent(new CustomEvent('trjt:assignments-updated', { detail: cleanedList }));
-          } else if (snapshot && snapshot.empty) {
-            // Remote collection is empty: preserve real local tasks and sync them up to Firestore
-            const realTasks = assignmentsCache.filter((t) => t && !DUMMY_TASK_IDS.has(t.id));
-            assignmentsCache = realTasks;
-            saveAssignmentsToCache(realTasks);
-            if (realTasks.length > 0) {
-              realTasks.forEach((task) => {
-                db.collection('courseAssignments').doc(task.id).set(task).catch((e) => {
-                  console.warn('Upload cached assignment to empty Firestore error:', e);
-                });
-              });
-            }
-            isFirestoreConnected = true;
-            window.dispatchEvent(new CustomEvent('trjt:assignments-updated', { detail: realTasks }));
+            window.dispatchEvent(new CustomEvent('trjt:assignments-updated', { detail: list }));
           }
         }, (error) => {
           console.warn('Firestore assignments listener notice:', error.message);
@@ -362,6 +356,10 @@
       createdAt: new Date().toISOString()
     };
 
+    // Ensure ID is not marked as deleted
+    deletedSet.delete(newId);
+    saveDeletedIds();
+
     // Save locally
     assignmentsCache.unshift(assignment);
     saveAssignmentsToCache(assignmentsCache);
@@ -386,21 +384,30 @@
   async function deleteAssignment(assignmentId) {
     if (!assignmentId) return false;
 
+    // 1. Permanently record tombstone
+    deletedSet.add(assignmentId);
+    saveDeletedIds();
+
+    // 2. Remove immediately from active cache & completed tracking
     assignmentsCache = assignmentsCache.filter((a) => a.id !== assignmentId);
     completedSet.delete(assignmentId);
     saveAssignmentsToCache(assignmentsCache);
     saveCompletedIds();
 
+    // 3. Immediately dispatch reactive update event
+    window.dispatchEvent(new CustomEvent('trjt:assignments-updated', { detail: assignmentsCache }));
+
+    // 4. Delete from Firestore
     const db = getFirestoreDb();
     if (db) {
       try {
         await db.collection('courseAssignments').doc(assignmentId).delete();
+        console.log('🗑️ Successfully deleted assignment from Firestore:', assignmentId);
       } catch (err) {
         console.warn('Firestore delete assignment notice:', err.message);
       }
     }
 
-    window.dispatchEvent(new CustomEvent('trjt:assignments-updated', { detail: assignmentsCache }));
     return true;
   }
 

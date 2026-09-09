@@ -2661,11 +2661,23 @@
     }
   }
 
-  function deleteAssignmentTask(taskId) {
+  async function deleteAssignmentTask(taskId) {
     if (!window.TRJT_ASSIGNMENTS) return;
     if (confirm('Apakah Anda yakin ingin menghapus tugas ini?')) {
-      window.TRJT_ASSIGNMENTS.deleteAssignment(taskId);
+      // Optimistic instant animation and DOM removal
+      const cardEl = document.getElementById(`task-card-${taskId}`);
+      if (cardEl) {
+        cardEl.style.transition = 'all 0.22s ease-out';
+        cardEl.style.opacity = '0';
+        cardEl.style.transform = 'scale(0.96) translateY(-4px)';
+        setTimeout(() => {
+          if (cardEl && cardEl.parentNode) cardEl.remove();
+        }, 220);
+      }
+
       showToast('🗑️ Tugas berhasil dihapus.', 'info');
+      await window.TRJT_ASSIGNMENTS.deleteAssignment(taskId);
+
       renderUpcomingTasksWidget();
       renderWeeklySchedule();
       if (activeCourseTaskCourse) renderCourseAssignmentsList();
