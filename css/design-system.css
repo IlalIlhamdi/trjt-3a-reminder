@@ -905,6 +905,13 @@ body {
   border-radius: var(--radius-full);
 }
 
+.badge-pertemuan {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #047857;
+  font-weight: 700;
+}
+
 /* Day Selector Capsule */
 .day-selector-capsule {
   background: var(--color-surface-glass);
@@ -3625,10 +3632,11 @@ select,
 }
 
 [data-theme="dark"] .schedule-meeting-badge,
-[data-theme="dark"] .schedule-meeting-chip {
-  background: rgba(6, 78, 59, 0.35);
-  border-color: rgba(5, 150, 105, 0.4);
-  color: #34D399;
+[data-theme="dark"] .schedule-meeting-chip,
+[data-theme="dark"] .badge-pertemuan {
+  background: rgba(6, 78, 59, 0.35) !important;
+  border-color: rgba(5, 150, 105, 0.4) !important;
+  color: #34D399 !important;
 }
 
 /* Stack input modals on top of list/course modals */

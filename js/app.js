@@ -478,10 +478,7 @@
                 <i data-lucide="${iconName}" style="width: 16px; height: 16px;"></i>
               </div>
               <div class="today-card-info">
-                <div style="display: flex; align-items: center; gap: 6px;">
-                  <span class="today-card-time">${item.startTime.replace(':', '.')} – ${item.endTime.replace(':', '.')}</span>
-                  <span class="schedule-meeting-chip">P3/16</span>
-                </div>
+                <span class="today-card-time">${item.startTime.replace(':', '.')} – ${item.endTime.replace(':', '.')}</span>
                 <span class="today-card-title">${item.courseName} ${taskBadgeTodayHtml}</span>
               </div>
             </div>
@@ -573,10 +570,6 @@
               <div class="schedule-room-badge">
                 <i data-lucide="map-pin"></i>
                 <span>${roomDisplay}</span>
-              </div>
-              <div class="schedule-meeting-badge" title="Minggu ke-3 (Pertemuan 3 dari 16 · Ujian di P16)">
-                <i data-lucide="book-open"></i>
-                <span>P3/16</span>
               </div>
             </div>
             
@@ -1985,7 +1978,7 @@
     const searchInput = document.getElementById('mat-search-input');
 
     if (titleEl) titleEl.innerText = courseName;
-    if (metaEl) metaEl.innerText = `${lecturer || 'Dosen Pengampu'} · Ruang ${room || '-'} · Pertemuan 3/16`;
+    if (metaEl) metaEl.innerText = `${lecturer || 'Dosen Pengampu'} · Ruang ${room || '-'}`;
     if (searchInput) searchInput.value = '';
 
     const btnDriveFolder = document.getElementById('btn-open-course-drive-folder');
@@ -2366,7 +2359,7 @@
     const metaEl = document.getElementById('course-task-modal-meta');
 
     if (nameEl) nameEl.innerText = courseName;
-    if (metaEl) metaEl.innerText = `${lecturer || 'Dosen Pengampu'} · Ruang ${room || '-'} · Pertemuan 3/16`;
+    if (metaEl) metaEl.innerText = `${lecturer || 'Dosen Pengampu'} · Ruang ${room || '-'}`;
 
     const btnJumpGroups = document.getElementById('btn-course-jump-groups');
     if (btnJumpGroups) {

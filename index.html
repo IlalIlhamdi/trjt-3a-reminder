@@ -25,7 +25,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <!-- Design System Stylesheet & Critical Inlined Styles -->
-  <link rel="stylesheet" href="./css/design-system.css?v=6.8">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.9">
   <style>
     /* Critical Glassmorphism Inlined Styles for Instant Guaranteed Rendering */
     :root {
@@ -389,14 +389,14 @@
         <section id="view-jadwal" class="view-section">
           
           <!-- Title & Semester Badge -->
-          <div class="view-title-row">
-            <h2 class="view-page-title">Jadwal mingguan</h2>
-            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-              <span class="badge-semester">Semester 5</span>
-              <span class="badge-semester" style="background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.3); color: #047857; font-weight: 700;">
-                <i data-lucide="book-open" style="width: 11px; height: 11px; vertical-align: middle; margin-right: 3px;"></i>Pertemuan 3/16
-              </span>
+          <div class="view-title-row" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;">
+            <div>
+              <h2 class="view-page-title" style="white-space: nowrap; margin: 0;">Jadwal Mingguan</h2>
+              <p class="notif-subtitle-text" style="margin-top: 2px;">Semester 5 · TRJT 3A</p>
             </div>
+            <span class="badge-semester badge-pertemuan" style="background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.3); color: #047857; font-weight: 700; white-space: nowrap; margin-top: 2px; display: inline-flex; align-items: center;">
+              <i data-lucide="book-open" style="width: 12px; height: 12px; vertical-align: middle; margin-right: 4px;"></i>Pertemuan 3/16
+            </span>
           </div>
 
           <!-- Segmented Day Selector Capsule (Sen 24, Sel 25, Rab 26, Kam 27, Jum 28) -->
@@ -1265,14 +1265,14 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
-  <script src="./js/firebase-config.js?v=6.8"></script>
+  <script src="./js/firebase-config.js?v=6.9"></script>
 
   <!-- Application Scripts -->
-  <script src="./js/time-provider.js?v=6.8"></script>
-  <script src="./js/data.js?v=6.8"></script>
-  <script src="./js/drive-service.js?v=6.8"></script>
-  <script src="./js/material-service.js?v=6.8"></script>
-  <script src="./js/assignment-service.js?v=6.8"></script>
-  <script src="./js/app.js?v=6.8"></script>
+  <script src="./js/time-provider.js?v=6.9"></script>
+  <script src="./js/data.js?v=6.9"></script>
+  <script src="./js/drive-service.js?v=6.9"></script>
+  <script src="./js/material-service.js?v=6.9"></script>
+  <script src="./js/assignment-service.js?v=6.9"></script>
+  <script src="./js/app.js?v=6.9"></script>
 </body>
 </html>
