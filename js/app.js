@@ -2171,17 +2171,38 @@
     const courseSelect = document.getElementById('task-input-course');
     if (courseSelect) {
       if (courseTarget) {
-        let matched = false;
-        for (let i = 0; i < courseSelect.options.length; i++) {
-          const val = courseSelect.options[i].value.toLowerCase();
-          const target = courseTarget.toLowerCase();
-          if (val.includes(target) || target.includes(val)) {
-            courseSelect.selectedIndex = i;
-            matched = true;
+        const normTarget = courseTarget.toLowerCase().replace(/[^a-z0-9]/g, '');
+        let matchedIndex = -1;
+
+        // Pass 1: Exact normalized match (skipping empty placeholder at index 0)
+        for (let i = 1; i < courseSelect.options.length; i++) {
+          const optVal = courseSelect.options[i].value;
+          if (!optVal) continue;
+          if (optVal.toLowerCase().replace(/[^a-z0-9]/g, '') === normTarget) {
+            matchedIndex = i;
             break;
           }
         }
-        if (!matched) courseSelect.selectedIndex = 0;
+
+        // Pass 2: Substring normalized match fallback
+        if (matchedIndex === -1) {
+          for (let i = 1; i < courseSelect.options.length; i++) {
+            const optVal = courseSelect.options[i].value;
+            if (!optVal) continue;
+            const normVal = optVal.toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (normVal.includes(normTarget) || normTarget.includes(normVal)) {
+              matchedIndex = i;
+              break;
+            }
+          }
+        }
+
+        if (matchedIndex !== -1) {
+          courseSelect.selectedIndex = matchedIndex;
+          courseSelect.value = courseSelect.options[matchedIndex].value;
+        } else {
+          courseSelect.selectedIndex = 0;
+        }
       } else {
         courseSelect.selectedIndex = 0;
       }
