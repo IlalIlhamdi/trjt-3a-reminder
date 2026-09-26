@@ -15,6 +15,15 @@ export default async function handler(req, res) {
     return res.status(204).end();
   }
 
+  
+  const expectedSecret = process.env.CRON_SECRET || process.env.ADMIN_SECRET || null;
+  const authHeader = req.headers.authorization || '';
+  const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : '';
+  const providedSecret = req.query.secret || req.headers['x-cron-secret'] || req.headers['x-admin-secret'] || bearerToken;
+  if (expectedSecret && providedSecret !== expectedSecret) {
+    return res.status(401).json({ success: false, error: 'Unauthorized: Access secret required.' });
+  }
+
   const data = req.body || req.query || {};
   const courseName = data.courseName || 'Jaringan Komputer Lanjut';
   const lecturer = data.lecturer || 'Muhammad Syahroni, S.T., M.T.';

@@ -305,6 +305,9 @@
 
 
           <!-- Hero Next Class / Status Card Container -->
+          
+          
+
           <div id="hero-card-container">
             <!-- Dynamically populated by evaluateScheduleState() -->
           </div>
@@ -823,9 +826,12 @@
           <span>Simpan ke Google Drive</span>
         </button>
 
-        <div id="upload-status-text" style="display: none; text-align: center; font-size: 13px; font-weight: 600; color: var(--color-primary-blue);">
-          <i data-lucide="loader-2" class="spin-animate" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 4px;"></i> Mengunggah ke Google Drive…
+        <div id="upload-status-text" class="upload-loader-wrap" style="display: none; margin: 16px auto 6px auto; text-align: center;">
+          <div class="loader"></div>
         </div>
+        <p style="font-size: 12px; color: var(--color-text-muted); text-align: center; margin: 12px 0 0 0;">
+            Tugas yang disimpan akan terlihat oleh seluruh kelas TRJT 3A.
+          </p>
       </form>
     </div>
   </div>
@@ -992,7 +998,7 @@
           </div>
           <div>
             <h2 id="modal-add-task-title" style="font-size: 15px; font-weight: 700; color: var(--color-primary-navy); line-height: 1.25;">Tambah Tugas Kuliah</h2>
-            <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 2px;">Tersinkron otomatis ke seluruh kelas TRJT 3A</p>
+            <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 2px;">Tugas yang disimpan akan dapat dilihat oleh seluruh kelas TRJT 3A</p>
           </div>
         </div>
         <button id="btn-close-add-task-modal" class="btn-close-modal" onclick="closeAddAssignmentModal()" aria-label="Tutup">
@@ -1000,11 +1006,19 @@
         </button>
       </div>
 
-      <form id="form-add-assignment" class="modal-body">
+      <form id="form-add-assignment" class="modal-body" novalidate>
+        <div id="task-input-error-msg" class="task-form-error-alert" style="display: none;" role="alert">
+          <i data-lucide="alert-circle" style="width: 18px; height: 18px; flex-shrink: 0;"></i>
+          <span id="task-input-error-text">Mohon lengkapi kolom yang wajib diisi.</span>
+        </div>
+
         <!-- Mata Kuliah Selector -->
-        <div class="form-group">
-          <label for="task-input-course" class="form-label">Mata Kuliah <span style="color: #DC2626;">*</span></label>
-          <select id="task-input-course" class="form-input" required style="font-size: 13px; padding: 10px 12px; border-radius: 12px;">
+        <div class="form-group" id="group-course">
+          <label for="task-input-course" class="form-label">
+            <span>Mata Kuliah</span>
+            <span class="form-badge-req">Wajib</span>
+          </label>
+          <select id="task-input-course" class="form-input" required>
             <option value="">Pilih Mata Kuliah...</option>
             <option value="Praktikum Antena dan Propagasi">Praktikum Antena dan Propagasi</option>
             <option value="Jaringan Komputer Lanjut">Jaringan Komputer Lanjut</option>
@@ -1021,36 +1035,51 @@
         </div>
 
         <!-- Judul Tugas -->
-        <div class="form-group">
-          <label for="task-input-title" class="form-label">Nama / Judul Tugas <span style="color: #DC2626;">*</span></label>
-          <input type="text" id="task-input-title" class="form-input" placeholder="Contoh: Laporan Bab 1 Karakteristik Antena" required style="border-radius: 12px;">
+        <div class="form-group" id="group-title">
+          <label for="task-input-title" class="form-label">
+            <span>Nama / Judul Tugas</span>
+            <span class="form-badge-req">Wajib</span>
+          </label>
+          <input type="text" id="task-input-title" class="form-input" placeholder="Contoh: Laporan Bab 1 Karakteristik Antena" required autocomplete="off">
         </div>
 
-        <!-- Batas Tanggal (Tanpa Jam, Lebih Sederhana) -->
-        <div class="form-group">
+        <!-- Tanggal Pengumpulan & Pilihan Cepat -->
+        <div class="form-group" id="group-due-date">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-            <label for="task-input-due-date" class="form-label" style="margin: 0;">Batas Tanggal (Deadline) <span style="color: #DC2626;">*</span></label>
-            <span style="font-size: 11px; color: var(--color-text-muted);">Pilih cepat:</span>
+            <label for="task-input-due-date" class="form-label" style="margin: 0;">
+              <span>Tanggal pengumpulan</span>
+              <span class="form-badge-req">Wajib</span>
+            </label>
+            <span class="quick-date-label">Pilihan cepat:</span>
           </div>
-          <input type="date" id="task-input-due-date" class="form-input" required style="border-radius: 12px; font-size: 13.5px; padding: 9px 12px; width: 100%; box-sizing: border-box;">
+          <input type="date" id="task-input-due-date" class="form-input" required>
           
           <!-- Tombol Pilihan Tanggal Cepat -->
-          <div class="quick-date-chips">
+          <div class="quick-date-chips" style="margin-top: 8px;">
             <button type="button" class="quick-date-btn" data-days="1" onclick="setQuickDueDate(1)">Besok</button>
             <button type="button" class="quick-date-btn active" data-days="3" onclick="setQuickDueDate(3)">3 Hari lagi</button>
             <button type="button" class="quick-date-btn" data-days="7" onclick="setQuickDueDate(7)">1 Minggu</button>
+          </div>
+
+          <!-- Preview Tanggal Format Indonesia -->
+          <div id="task-due-date-preview" class="task-date-preview" style="margin-top: 8px;">
+            <i data-lucide="calendar" style="width: 14px; height: 14px; flex-shrink: 0;"></i>
+            <span id="task-due-date-preview-text">Batas: Terpilih</span>
           </div>
         </div>
 
         <!-- Tipe Tugas (Individu / Kelompok) -->
         <div class="form-group">
-          <label class="form-label">Tipe Pengerjaan</label>
+          <label class="form-label">
+            <span>Tipe Pengerjaan</span>
+            <span class="form-badge-opt">Opsional</span>
+          </label>
           <div class="task-type-selector">
             <button type="button" id="btn-type-individu" class="task-type-btn active" data-type="individu" onclick="selectTaskType('individu')">
-              <i data-lucide="user" style="width: 15px; height: 15px;"></i> Individu
+              <i data-lucide="user" style="width: 16px; height: 16px;"></i> Individu
             </button>
             <button type="button" id="btn-type-kelompok" class="task-type-btn" data-type="kelompok" onclick="selectTaskType('kelompok')">
-              <i data-lucide="users" style="width: 15px; height: 15px;"></i> Kelompok
+              <i data-lucide="users" style="width: 16px; height: 16px;"></i> Kelompok
             </button>
           </div>
           <input type="hidden" id="task-input-type" value="individu">
@@ -1058,17 +1087,29 @@
 
         <!-- Tempat / Media Kumpul -->
         <div class="form-group">
-          <label for="task-input-place" class="form-label">Tempat / Media Kumpul <span style="font-size: 11px; font-weight: 500; color: var(--color-text-muted);">(Opsional)</span></label>
-          <input type="text" id="task-input-place" class="form-input" placeholder="Contoh: Lab HF Lt. 2 / Google Classroom" style="border-radius: 12px;">
+          <label for="task-input-place" class="form-label">
+            <span>Tempat atau tautan pengumpulan</span>
+            <span class="form-badge-opt">Opsional</span>
+          </label>
+          <input type="text" id="task-input-place" class="form-input" placeholder="Contoh: Lab HF Lt. 2 / Google Classroom">
         </div>
 
         <!-- Catatan Tambahan (Opsional) -->
         <div class="form-group">
-          <label for="task-input-desc" class="form-label">Catatan Tambahan <span style="font-size: 11px; font-weight: 500; color: var(--color-text-muted);">(Opsional)</span></label>
-          <textarea id="task-input-desc" class="form-input" rows="2" placeholder="Ketentuan tugas, bab laporan..." style="border-radius: 12px; resize: vertical; min-height: 50px;"></textarea>
+          <label for="task-input-desc" class="form-label">
+            <span>Catatan Tambahan</span>
+            <span class="form-badge-opt">Opsional</span>
+          </label>
+          <textarea id="task-input-desc" class="form-input" rows="2" placeholder="Ketentuan tugas, bab laporan..."></textarea>
         </div>
 
-        <button type="submit" id="btn-submit-task" class="btn-submit-upload" style="margin-top: 4px; border-radius: 12px;">
+        <!-- Catatan Transparansi Seluruh Kelas -->
+        <div class="form-sync-note">
+          <i data-lucide="users" style="width: 16px; height: 16px; flex-shrink: 0;"></i>
+          <span>Tugas yang disimpan akan disinkronkan otomatis dan dapat dilihat oleh seluruh mahasiswa TRJT 3A.</span>
+        </div>
+
+        <button type="submit" id="btn-submit-task" class="btn-submit-upload" style="margin-top: 14px;">
           <i data-lucide="check-circle" style="width: 18px; height: 18px;"></i>
           <span>Simpan Tugas Kuliah</span>
         </button>

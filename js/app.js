@@ -1,3 +1,115 @@
+
+// ==========================================================================
+// SKELETON LOADING & ERROR FALLBACK GENERATORS
+// ==========================================================================
+function getSkeletonHeroCardHtml() {
+  return `
+    <div class="skeleton-hero-card" aria-busy="true" role="status">
+      <span class="sr-only">Memuat data kelas berikutnya...</span>
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="skeleton-box" style="width: 140px; height: 24px;" aria-hidden="true"></div>
+        <div class="skeleton-box" style="width: 90px; height: 24px; border-radius: 999px;" aria-hidden="true"></div>
+      </div>
+      <div class="skeleton-box" style="width: 75%; height: 28px; margin-top: 6px;" aria-hidden="true"></div>
+      <div class="skeleton-box" style="width: 55%; height: 18px;" aria-hidden="true"></div>
+      <div class="skeleton-box" style="width: 40%; height: 18px;" aria-hidden="true"></div>
+    </div>
+  `;
+}
+
+function getSkeletonScheduleCardHtml(count = 2) {
+  let html = `<div aria-busy="true" role="status" style="display: flex; flex-direction: column; gap: 12px;">
+    <span class="sr-only">Memuat data jadwal kuliah...</span>`;
+  for (let i = 0; i < count; i++) {
+    html += `
+      <div class="skeleton-schedule-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="skeleton-box" style="width: 60%; height: 22px;" aria-hidden="true"></div>
+          <div class="skeleton-box" style="width: 75px; height: 20px; border-radius: 999px;" aria-hidden="true"></div>
+        </div>
+        <div class="skeleton-box" style="width: 45%; height: 16px;" aria-hidden="true"></div>
+        <div class="skeleton-box" style="width: 35%; height: 16px;" aria-hidden="true"></div>
+        <div style="display: flex; gap: 8px; margin-top: 4px;">
+          <div class="skeleton-box" style="width: 75px; height: 32px; border-radius: 10px;" aria-hidden="true"></div>
+          <div class="skeleton-box" style="width: 75px; height: 32px; border-radius: 10px;" aria-hidden="true"></div>
+          <div class="skeleton-box" style="width: 85px; height: 32px; border-radius: 10px;" aria-hidden="true"></div>
+        </div>
+      </div>
+    `;
+  }
+  html += `</div>`;
+  return html;
+}
+
+function getSkeletonTaskCardHtml(count = 2) {
+  let html = `<div aria-busy="true" role="status" style="display: flex; flex-direction: column; gap: 10px;">
+    <span class="sr-only">Memuat data tugas...</span>`;
+  for (let i = 0; i < count; i++) {
+    html += `
+      <div class="skeleton-task-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="skeleton-box" style="width: 55%; height: 18px;" aria-hidden="true"></div>
+          <div class="skeleton-box" style="width: 80px; height: 18px; border-radius: 999px;" aria-hidden="true"></div>
+        </div>
+        <div class="skeleton-box" style="width: 40%; height: 14px;" aria-hidden="true"></div>
+      </div>
+    `;
+  }
+  html += `</div>`;
+  return html;
+}
+
+function getSkeletonDosenCardHtml(count = 4) {
+  let html = `<div aria-busy="true" role="status" style="display: flex; flex-direction: column; gap: 12px;">
+    <span class="sr-only">Memuat data daftar dosen...</span>`;
+  for (let i = 0; i < count; i++) {
+    html += `
+      <div class="skeleton-dosen-card">
+        <div class="skeleton-box" style="width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0;" aria-hidden="true"></div>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
+          <div class="skeleton-box" style="width: 60%; height: 20px;" aria-hidden="true"></div>
+          <div class="skeleton-box" style="width: 40%; height: 14px;" aria-hidden="true"></div>
+          <div class="skeleton-box" style="width: 50%; height: 14px;" aria-hidden="true"></div>
+        </div>
+      </div>
+    `;
+  }
+  html += `</div>`;
+  return html;
+}
+
+function getSkeletonMaterialCardHtml(count = 3) {
+  let html = `<div aria-busy="true" role="status" style="display: flex; flex-direction: column; gap: 10px;">
+    <span class="sr-only">Memuat data materi...</span>`;
+  for (let i = 0; i < count; i++) {
+    html += `
+      <div class="skeleton-schedule-card" style="min-height: 70px; flex-direction: row; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+          <div class="skeleton-box" style="width: 38px; height: 38px; border-radius: 10px;" aria-hidden="true"></div>
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
+            <div class="skeleton-box" style="width: 65%; height: 16px;" aria-hidden="true"></div>
+            <div class="skeleton-box" style="width: 45%; height: 13px;" aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  html += `</div>`;
+  return html;
+}
+
+function getErrorFallbackHtml(message, retryFuncStr) {
+  return `
+    <div style="text-align: center; padding: 24px 16px; background: rgba(254, 242, 242, 0.85); border: 1px solid rgba(254, 202, 202, 0.9); border-radius: var(--radius-card, 18px); color: #DC2626;" role="alert">
+      <div style="font-weight: 650; font-size: 14px; margin-bottom: 4px;">Gagal Memuat Data</div>
+      <p style="font-size: 12px; margin: 0 0 14px; opacity: 0.85;">${escapeHtml(message)}</p>
+      <button type="button" onclick="${retryFuncStr}" style="background: #DC2626; color: #fff; border: none; padding: 8px 16px; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer;">
+        Coba Lagi
+      </button>
+    </div>
+  `;
+}
+
 /**
  * TRJT 3A REMINDER — Core Application Controller v4.0
  * Production Mode: Clean Asia/Jakarta Time Provider & Official Schedule Engine
@@ -887,27 +999,64 @@
     const container = document.getElementById('toast-container');
     if (!container) return;
 
+    // Clean leading emoji symbols from message string to avoid duplicate icons
+    let cleanMessage = (message || '').toString();
+    cleanMessage = cleanMessage.replace(/^[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}\u{1F900}-\u{1F9FF}\s]+/u, '').trim();
+    if (!cleanMessage) cleanMessage = message;
+
     const toast = document.createElement('div');
     toast.className = `toast-item ${type}`;
 
-    let iconHtml = '<i data-lucide="info" style="width: 18px; height: 18px; flex-shrink: 0;"></i>';
+    let iconName = 'info';
+    let iconBg = 'rgba(47, 128, 237, 0.12)';
+    let iconColor = '#2F80ED';
+    let titleText = 'Informasi';
+
     if (type === 'success') {
-      iconHtml = '<i data-lucide="check-circle" style="width: 18px; height: 18px; flex-shrink: 0; color: #4ADE80;"></i>';
+      iconName = 'check-circle';
+      iconBg = 'rgba(16, 185, 129, 0.12)';
+      iconColor = '#10B981';
+      titleText = 'Berhasil';
     } else if (type === 'error') {
-      iconHtml = '<i data-lucide="alert-circle" style="width: 18px; height: 18px; flex-shrink: 0; color: #F87171;"></i>';
+      iconName = 'alert-circle';
+      iconBg = 'rgba(239, 68, 68, 0.12)';
+      iconColor = '#EF4444';
+      titleText = 'Gagal';
+    } else if (type === 'warning') {
+      iconName = 'alert-triangle';
+      iconBg = 'rgba(245, 158, 11, 0.12)';
+      iconColor = '#F59E0B';
+      titleText = 'Peringatan';
     }
 
-    toast.innerHTML = `${iconHtml}<span>${message}</span>`;
+    toast.innerHTML = `
+      <div class="toast-accent-bar"></div>
+      <div class="toast-icon-badge" style="background: ${iconBg}; color: ${iconColor};">
+        <i data-lucide="${iconName}" style="width: 18px; height: 18px;"></i>
+      </div>
+      <div class="toast-content">
+        <span class="toast-message">${cleanMessage}</span>
+      </div>
+      <button type="button" class="toast-close-btn" onclick="this.parentElement.remove()" aria-label="Tutup notifikasi">
+        <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+      </button>
+    `;
+
     container.appendChild(toast);
 
     if (window.lucide) window.lucide.createIcons();
 
+    // Auto remove toast after 3.8s with smooth animation
     setTimeout(() => {
-      toast.style.transition = 'opacity 300ms ease, transform 300ms ease';
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateY(12px)';
-      setTimeout(() => toast.remove(), 320);
-    }, 4000);
+      if (toast && toast.parentElement) {
+        toast.style.transition = 'opacity 250ms ease, transform 250ms ease';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-10px) scale(0.96)';
+        setTimeout(() => {
+          if (toast && toast.parentElement) toast.remove();
+        }, 260);
+      }
+    }, 3800);
   }
 
   // --- Dynamic Honest Settings & Diagnostics Renderer ---
@@ -1375,6 +1524,13 @@
 
     // Form Add Assignment Submit Listener
     const formAddAssignment = document.getElementById('form-add-assignment');
+    
+    const dateInputEl = document.getElementById('task-input-due-date');
+    if (dateInputEl) {
+      dateInputEl.addEventListener('input', (e) => updateDueDatePreview(e.target.value));
+      dateInputEl.addEventListener('change', (e) => updateDueDatePreview(e.target.value));
+    }
+  
     if (formAddAssignment) {
       formAddAssignment.addEventListener('submit', (e) => {
         handleSaveAssignment(e);
@@ -1742,7 +1898,7 @@
   }
 
   function setupScrollHideBottomNav() {
-    let lastScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    let lastScrollY = (typeof window !== 'undefined' && window.scrollY) || (typeof document !== 'undefined' && document.documentElement && document.documentElement.scrollTop) || 0;
     let ticking = false;
 
     window.addEventListener('scroll', () => {
@@ -2246,7 +2402,10 @@
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
     const dateInput = document.getElementById('task-input-due-date');
-    if (dateInput) dateInput.value = `${yyyy}-${mm}-${dd}`;
+    if (dateInput) {
+      dateInput.value = `${yyyy}-${mm}-${dd}`;
+      updateDueDatePreview(`${yyyy}-${mm}-${dd}`);
+    }
 
     document.querySelectorAll('.quick-date-btn').forEach((btn) => {
       const days = parseInt(btn.getAttribute('data-days'), 10);
@@ -2257,6 +2416,27 @@
       }
     });
   }
+
+  function updateDueDatePreview(dateStr) {
+    const previewEl = document.getElementById('task-due-date-preview-text');
+    if (!previewEl || !dateStr) return;
+    try {
+      const [y, m, d] = dateStr.split('-');
+      const dateObj = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+      if (!isNaN(dateObj.getTime())) {
+        const formatted = dateObj.toLocaleDateString('id-ID', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        });
+        previewEl.innerText = `Batas: ${formatted}`;
+        return;
+      }
+    } catch (e) {}
+    previewEl.innerText = `Batas: ${dateStr}`;
+  }
+  window.updateDueDatePreview = updateDueDatePreview;
   window.setQuickDueDate = setQuickDueDate;
 
   // Uiverse Multi-blade Spinner Generator
@@ -2277,23 +2457,59 @@
     if (e && e.preventDefault) e.preventDefault();
     if (isSavingAssignment) return;
 
-    const course = document.getElementById('task-input-course')?.value;
-    const title = document.getElementById('task-input-title')?.value;
-    const dueDate = document.getElementById('task-input-due-date')?.value;
+    const courseSelect = document.getElementById('task-input-course');
+    const titleInput = document.getElementById('task-input-title');
+    const dateInput = document.getElementById('task-input-due-date');
+    const errorBox = document.getElementById('task-input-error-msg');
+    const errorText = document.getElementById('task-input-error-text');
+
+    // Reset error states
+    if (errorBox) errorBox.style.display = 'none';
+    if (courseSelect) courseSelect.classList.remove('form-input-error');
+    if (titleInput) titleInput.classList.remove('form-input-error');
+    if (dateInput) dateInput.classList.remove('form-input-error');
+
+    const course = courseSelect?.value?.trim();
+    const title = titleInput?.value?.trim();
+    const dueDate = dateInput?.value?.trim();
     const dueTime = document.getElementById('task-input-due-time')?.value || '23:59';
     const type = document.getElementById('task-input-type')?.value || 'individu';
     const submissionMethod = document.getElementById('task-input-method')?.value || 'lab';
-    const submissionPlace = document.getElementById('task-input-place')?.value || '';
-    const description = document.getElementById('task-input-desc')?.value || '';
+    const submissionPlace = document.getElementById('task-input-place')?.value?.trim() || '';
+    const description = document.getElementById('task-input-desc')?.value?.trim() || '';
     const createdBy = document.getElementById('task-input-author')?.value || 'Mahasiswa TRJT 3A';
 
-    if (!course || !title || !dueDate) {
-      showToast('⚠️ Mohon lengkapi mata kuliah, judul, dan tanggal batas pengumpulan.', 'warning');
+    // Validation
+    const missingFields = [];
+    if (!course) {
+      missingFields.push('Mata Kuliah');
+      if (courseSelect) courseSelect.classList.add('form-input-error');
+    }
+    if (!title) {
+      missingFields.push('Judul Tugas');
+      if (titleInput) titleInput.classList.add('form-input-error');
+    }
+    if (!dueDate) {
+      missingFields.push('Tanggal Pengumpulan');
+      if (dateInput) dateInput.classList.add('form-input-error');
+    }
+
+    if (missingFields.length > 0) {
+      const msg = `Mohon lengkapi kolom wajib: ${missingFields.join(', ')}.`;
+      if (errorBox && errorText) {
+        errorText.innerText = msg;
+        errorBox.style.display = 'flex';
+        errorBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      showToast(msg, 'warning');
+      if (!course && courseSelect) courseSelect.focus();
+      else if (!title && titleInput) titleInput.focus();
+      else if (!dueDate && dateInput) dateInput.focus();
       return;
     }
 
     if (!window.TRJT_ASSIGNMENTS) {
-      showToast('❌ Sistem tugas belum siap. Mohon muat ulang halaman.', 'error');
+      showToast('Sistem tugas belum siap. Mohon muat ulang halaman.', 'error');
       return;
     }
 
@@ -2320,14 +2536,19 @@
         createdBy: createdBy
       });
 
-      // Provide natural visual feedback of at least 450ms for spinner animation
+      // Provide natural visual feedback of at least 400ms for spinner animation
       await Promise.all([
         savePromise,
-        new Promise((resolve) => setTimeout(resolve, 450))
+        new Promise((resolve) => setTimeout(resolve, 400))
       ]);
 
-      showToast('✅ Tugas berhasil ditambahkan!', 'success');
+      showToast('Tugas berhasil disimpan dan disinkronkan ke seluruh kelas!', 'success');
       closeAddAssignmentModal();
+
+      // Reset form fields only on confirmed success
+      if (titleInput) titleInput.value = '';
+      if (document.getElementById('task-input-place')) document.getElementById('task-input-place').value = '';
+      if (document.getElementById('task-input-desc')) document.getElementById('task-input-desc').value = '';
 
       renderUpcomingTasksWidget();
       renderWeeklySchedule();
@@ -2337,7 +2558,13 @@
       }
     } catch (err) {
       console.error('Error saving assignment:', err);
-      showToast('❌ Gagal menyimpan tugas: ' + (err.message || err), 'error');
+      const errMsg = 'Gagal menyimpan tugas: ' + (err.message || err);
+      if (errorBox && errorText) {
+        errorText.innerText = errMsg;
+        errorBox.style.display = 'flex';
+      }
+      showToast(errMsg, 'error');
+      // Notice: user inputs are NOT cleared, user can retry immediately!
     } finally {
       isSavingAssignment = false;
       if (submitBtn) {
@@ -2515,13 +2742,13 @@
     if (window.lucide) window.lucide.createIcons();
   }
 
-  function buildAssignmentCardHtml(task, showCoursePill = false) {
+  function buildAssignmentCardHtml(task, showCoursePill = true) {
     if (!window.TRJT_ASSIGNMENTS) return '';
     const isDone = window.TRJT_ASSIGNMENTS.isPersonalCompleted(task.id);
     const deadlineInfo = window.TRJT_ASSIGNMENTS.formatDeadlineCountdown(task.dueDate, task.dueTime);
 
     const checkClass = isDone ? 'checked' : '';
-    const checkIcon = isDone ? '<i data-lucide="check" style="width: 13px; height: 13px;"></i>' : '';
+    const checkIcon = isDone ? '<i data-lucide="check" style="width: 18px; height: 18px;" aria-hidden="true"></i>' : '';
     const cardDoneClass = isDone ? 'completed' : '';
 
     const typeIcon = task.type === 'kelompok' ? 'users' : 'user';
@@ -2540,57 +2767,88 @@
       if (!task.submissionPlace) methodLabel = 'Google Drive';
     }
 
-    const coursePillHtml = showCoursePill ? `
-      <div class="assignment-course-pill" title="${escapeHtml(task.courseName)}">
-        <i data-lucide="book-open" style="width: 12px; height: 12px; flex-shrink: 0;"></i>
-        <span>${escapeHtml(task.courseName)}</span>
-      </div>
-    ` : '';
+    // Format Indonesian Full Date
+    let formattedDueDateStr = deadlineInfo.fullText || task.dueDate || '';
+    if (task.dueDate && task.dueDate.includes('-')) {
+      try {
+        const [y, m, d] = task.dueDate.split('-');
+        const dateObj = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+        if (!isNaN(dateObj.getTime())) {
+          formattedDueDateStr = dateObj.toLocaleDateString('id-ID', {
+            weekday: 'short',
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+          });
+        }
+      } catch (e) {}
+    }
 
     const descHtml = task.description ? `
       <p class="assignment-card-desc" title="${escapeHtml(task.description)}">${escapeHtml(task.description)}</p>
     ` : '';
 
+    // Deadline badge text: Ensure exact "Terlambat X hari" phrasing
+    let statusText = deadlineInfo.text || '';
+    if (statusText.toLowerCase().includes('lewat')) {
+      statusText = statusText.replace(/lewat\s*/i, 'Terlambat ').replace(/lalu/i, '').trim();
+    }
+    if (isDone) {
+      statusText = 'Selesai';
+    }
+
+    const badgeClass = isDone ? 'soft-badge-success deadline-completed' : (deadlineInfo.badgeClass || 'soft-badge-neutral');
+
     return `
       <div class="assignment-card ${cardDoneClass}" id="task-card-${task.id}">
-        <div class="assignment-card-topbar" style="${showCoursePill ? '' : 'justify-content: flex-end;'}">
-          ${coursePillHtml}
-          <div class="badge-deadline ${deadlineInfo.badgeClass}" title="Batas: ${deadlineInfo.fullText || ''}">
-            <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
-            <span>${deadlineInfo.text}</span>
-          </div>
-        </div>
-
-        <div class="assignment-card-main">
-          <button type="button" class="task-check-btn ${checkClass}" onclick="toggleAssignmentTask('${task.id}')" title="${isDone ? 'Tandai belum selesai' : 'Tandai selesai'}">
+        <!-- Top Row: Checkbox, Judul Tugas, and Delete Action -->
+        <div class="assignment-card-header">
+          <button type="button" class="task-check-btn ${checkClass}" onclick="toggleAssignmentTask('${task.id}')" aria-label="${isDone ? 'Tandai tugas belum selesai' : 'Tandai tugas selesai'}" title="${isDone ? 'Tandai tugas belum selesai' : 'Tandai tugas selesai'}">
             ${checkIcon}
           </button>
-          <div class="assignment-card-content">
-            <h4 class="assignment-card-title">${escapeHtml(task.title)}</h4>
-            ${descHtml}
+          
+          <div class="assignment-title-wrap">
+            <h3 class="assignment-card-title">${escapeHtml(task.title)}</h3>
+            ${task.courseName ? `
+              <div class="assignment-course-name">
+                <i data-lucide="book-open" style="width: 14px; height: 14px; flex-shrink: 0;" aria-hidden="true"></i>
+                <span>${escapeHtml(task.courseName)}</span>
+              </div>
+            ` : ''}
+          </div>
+
+          <button type="button" class="btn-task-delete" onclick="deleteAssignmentTask('${task.id}')" aria-label="Hapus tugas ${escapeHtml(task.title)}" title="Hapus tugas">
+            <i data-lucide="trash-2" style="width: 18px; height: 18px;" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        ${descHtml}
+
+        <!-- Middle Row: Status Deadline & Tanggal Pengumpulan -->
+        <div class="assignment-deadline-row">
+          <span class="badge-deadline ${badgeClass}" title="Status batas pengumpulan">
+            <i data-lucide="${isDone ? 'check-circle' : 'clock'}" style="width: 13px; height: 13px; flex-shrink: 0;" aria-hidden="true"></i>
+            <span>${escapeHtml(statusText)}</span>
+          </span>
+
+          <div class="assignment-due-date-text">
+            <i data-lucide="calendar" style="width: 14px; height: 14px; flex-shrink: 0;" aria-hidden="true"></i>
+            <span>Batas: ${escapeHtml(formattedDueDateStr)}</span>
           </div>
         </div>
 
+        <!-- Bottom Row: Tipe Pengerjaan & Media Pengumpulan -->
         <div class="assignment-meta-footer">
-          <div class="assignment-meta-badges">
-            <span class="assignment-type-badge">
-              <i data-lucide="${typeIcon}" style="width: 11px; height: 11px;"></i>
+          <div class="assignment-meta-details">
+            <span class="assignment-meta-item">
+              <i data-lucide="${typeIcon}" style="width: 13px; height: 13px; flex-shrink: 0;" aria-hidden="true"></i>
               <span>${typeLabel}</span>
             </span>
-            <span class="assignment-type-badge" title="${escapeHtml(methodLabel)}">
-              <i data-lucide="${methodIcon}" style="width: 11px; height: 11px;"></i>
+            <span class="assignment-meta-divider" aria-hidden="true">•</span>
+            <span class="assignment-meta-item" title="${escapeHtml(methodLabel)}">
+              <i data-lucide="${methodIcon}" style="width: 13px; height: 13px; flex-shrink: 0;" aria-hidden="true"></i>
               <span class="assignment-badge-truncate">${escapeHtml(methodLabel)}</span>
             </span>
-          </div>
-
-          <div class="assignment-meta-actions">
-            <span class="assignment-due-date-text" title="Batas pengumpulan">
-              <i data-lucide="calendar" style="width: 11px; height: 11px;"></i>
-              <span>${deadlineInfo.fullText || ''}</span>
-            </span>
-            <button type="button" class="btn-task-delete" onclick="deleteAssignmentTask('${task.id}')" title="Hapus tugas">
-              <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i>
-            </button>
           </div>
         </div>
       </div>

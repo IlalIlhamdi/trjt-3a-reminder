@@ -3,7 +3,7 @@
  * Path: /api/reminder-check
  */
 
-import { runH10ReminderCheck } from './lib/reminder-engine.js';
+import { runH10ReminderCheck } from '../lib/reminder-engine.js';
 
 export default async function handler(req, res) {
   // CORS configuration

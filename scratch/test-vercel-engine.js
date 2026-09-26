@@ -1,4 +1,4 @@
-import { runH10ReminderCheck } from '../api/lib/reminder-engine.js';
+import { runH10ReminderCheck } from '../lib/reminder-engine.js';
 
 async function main() {
   console.log('Testing Vercel Reminder Engine with Service Account credentials...');

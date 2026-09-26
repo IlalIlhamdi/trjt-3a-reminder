@@ -16,14 +16,14 @@ export default async function handler(req, res) {
     return res.status(204).end();
   }
 
-  const expectedSecret = process.env.CRON_SECRET || 'trjt3a-cron-secure-key-2026';
+  const expectedSecret = process.env.CRON_SECRET || null;
   const authHeader = req.headers.authorization || '';
   const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : '';
   const providedSecret = req.query.secret || req.headers['x-cron-secret'] || bearerToken;
   const isVercelCron = req.headers['x-vercel-cron'] === '1';
 
   // Verify authorization
-  const isAuthorized = isVercelCron || providedSecret === expectedSecret;
+  const isAuthorized = isVercelCron || (expectedSecret && providedSecret === expectedSecret);
   if (!isAuthorized) {
     return res.status(401).json({
       success: false,
