@@ -362,27 +362,43 @@ function getErrorFallbackHtml(message, retryFuncStr) {
     };
   }
 
-  // --- Production UI Renderers (Glassmorphism White-Blue UI) ---
+  // --- Dashboard UI Renderers ---
   function renderHeader(data) {
     if (!data) return;
     const greetingEl = document.getElementById('header-greeting');
     const dateEl = document.getElementById('header-date');
-    const chipContainer = document.getElementById('beranda-status-chip-container');
+    const summaryContainer = document.getElementById('dashboard-summary');
 
     if (greetingEl) greetingEl.innerText = getGreeting(data.now.getHours());
     if (dateEl) dateEl.innerText = formatFormattedDate(data.now);
 
-    if (chipContainer) {
-      if (data.inProgressClass) {
-        chipContainer.innerHTML = `<span class="status-pill-chip in-progress"><i data-lucide="play" style="width: 12px; height: 12px;"></i> Sedang berlangsung</span>`;
-      } else if (data.isH10) {
-        chipContainer.innerHTML = `<span class="status-pill-chip starting-soon"><i data-lucide="bell" style="width: 12px; height: 12px;"></i> 10 menit lagi</span>`;
-      } else if (data.totalCount > 0 && data.completedCount === data.totalCount) {
-        chipContainer.innerHTML = `<span class="status-pill-chip"><i data-lucide="check" style="width: 12px; height: 12px;"></i> Semua kelas hari ini selesai</span>`;
-      } else if (data.nextUpcomingClass) {
-        chipContainer.innerHTML = `<span class="status-pill-chip in-progress"><i data-lucide="clock" style="width: 12px; height: 12px;"></i> Belum dimulai</span>`;
-      } else {
-        chipContainer.innerHTML = `<span class="status-pill-chip neutral"><i data-lucide="calendar" style="width: 12px; height: 12px;"></i> Libur / Tidak ada kelas</span>`;
+    if (summaryContainer) {
+      const remaining = Math.max(0, data.totalCount - data.completedCount);
+      const isZeroRemaining = remaining === 0;
+      const currentSig = `${data.totalCount}-${data.completedCount}-${remaining}`;
+
+      if (!summaryContainer.dataset) summaryContainer.dataset = {};
+      if (summaryContainer.dataset.sig !== currentSig) {
+        summaryContainer.dataset.sig = currentSig;
+        summaryContainer.innerHTML = `
+          <div class="summary-item summary-item-total">
+            <span class="summary-value">${data.totalCount}</span>
+            <span class="summary-label">Kelas hari ini</span>
+          </div>
+          <div class="summary-item summary-item-completed">
+            <span class="summary-value">${data.completedCount}</span>
+            <span class="summary-label">Kelas selesai</span>
+          </div>
+          <div class="summary-item summary-item-remaining">
+            <span class="summary-value">
+              ${remaining}${isZeroRemaining ? '<i data-lucide="check" class="summary-check-icon" aria-hidden="true"></i>' : ''}
+            </span>
+            <span class="summary-label">Kelas tersisa</span>
+          </div>
+        `;
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+          window.lucide.createIcons();
+        }
       }
     }
   }
@@ -390,6 +406,28 @@ function getErrorFallbackHtml(message, retryFuncStr) {
   function renderHeroCard(data) {
     const heroContainer = document.getElementById('hero-card-container');
     if (!heroContainer || !data) return;
+
+    const phase = data.inProgressClass ? 'in-progress' :
+      data.nextUpcomingClass ? 'upcoming' :
+      data.nextDayUpcomingClass ? 'next-day' : 'empty';
+    const visibleClass = data.inProgressClass || data.nextUpcomingClass || data.nextDayUpcomingClass;
+    const signature = JSON.stringify([
+      phase, data.dayIndex, visibleClass?.id, visibleClass?.courseName, visibleClass?.startTime,
+      visibleClass?.endTime, visibleClass?.roomCode, visibleClass?.roomName,
+      visibleClass?.lecturerName, visibleClass?.lecturerCode,
+      data.nextDayName, data.isH10
+    ]);
+    if (!heroContainer.dataset) heroContainer.dataset = {};
+    if (heroContainer.dataset.signature === signature) {
+      const countdown = heroContainer.querySelector('.hero-countdown-digits');
+      if (countdown) countdown.textContent = formatCountdown(data.countdownMs);
+      const progress = heroContainer.querySelector('.hero-progress-bar');
+      if (progress) progress.style.width = `${data.progressPercent}%`;
+      const reminder = heroContainer.querySelector('.hero-reminder-badge span');
+      if (reminder && data.isH10) reminder.textContent = `Mulai dalam ${formatCountdown(data.countdownMs)}`;
+      return;
+    }
+    heroContainer.dataset.signature = signature;
 
     // Case 1: In Progress
     if (data.inProgressClass) {
@@ -490,7 +528,7 @@ function getErrorFallbackHtml(message, retryFuncStr) {
     if (data.nextDayUpcomingClass) {
       const item = data.nextDayUpcomingClass;
       heroContainer.innerHTML = `
-        <div class="hero-glass-card" onclick="document.querySelector('[data-tab=jadwal]').click()" style="cursor: pointer;">
+        <div class="hero-glass-card">
           <div class="hero-tag-pill">
             <i data-lucide="calendar"></i>
             <span>KELAS BERIKUTNYA</span>
@@ -566,16 +604,8 @@ function getErrorFallbackHtml(message, retryFuncStr) {
         const isActive = currentMinutes >= startMin && currentMinutes < endMin;
         const isPast = currentMinutes >= endMin;
 
-        let circleClass = '';
-        let iconName = 'clock';
-
-        if (isActive) {
-          circleClass = 'ongoing';
-          iconName = 'play';
-        } else if (isPast) {
-          circleClass = 'finished';
-          iconName = 'check';
-        }
+        const cardStateClass = isActive ? 'is-active' : (isPast ? 'is-past' : '');
+        const stateLabel = isActive ? 'Berlangsung' : (isPast ? 'Selesai' : 'Akan datang');
 
         const courseTasks = window.TRJT_ASSIGNMENTS ? window.TRJT_ASSIGNMENTS.getAssignmentsForCourse(item.courseName) : [];
         const pendingTasks = courseTasks.filter((t) => window.TRJT_ASSIGNMENTS && !window.TRJT_ASSIGNMENTS.isPersonalCompleted(t.id));
@@ -584,18 +614,20 @@ function getErrorFallbackHtml(message, retryFuncStr) {
           : '';
 
         return `
-          <div class="today-class-card" onclick="window.openCourseAssignmentsModal('${item.courseName.replace(/'/g, "\\'")}', '${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName).replace(/'/g, "\\'")}', '${item.roomCode}')">
-            <div class="today-card-left">
-              <div class="today-status-circle ${circleClass}">
-                <i data-lucide="${iconName}" style="width: 16px; height: 16px;"></i>
-              </div>
-              <div class="today-card-info">
-                <span class="today-card-time">${item.startTime.replace(':', '.')} – ${item.endTime.replace(':', '.')}</span>
+          <button type="button" class="today-class-card ${cardStateClass}" onclick="window.openCourseAssignmentsModal('${item.courseName.replace(/'/g, "\\'")}', '${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName).replace(/'/g, "\\'")}', '${item.roomCode}')">
+            <span class="today-card-left">
+              <span class="today-time-rail">
+                <span class="today-time-start">${item.startTime.replace(':', '.')}</span>
+                <span class="today-time-end">${item.endTime.replace(':', '.')}</span>
+              </span>
+              <span class="today-card-info">
+                <span class="today-state-label">${stateLabel}</span>
                 <span class="today-card-title">${item.courseName} ${taskBadgeTodayHtml}</span>
-              </div>
-            </div>
+                <span class="today-card-room"><i data-lucide="map-pin"></i>${getRoomDisplay(item.roomCode, item.roomName)}</span>
+              </span>
+            </span>
             <i data-lucide="chevron-right" class="today-card-chevron"></i>
-          </div>
+          </button>
         `;
       })
       .join('');
@@ -651,8 +683,15 @@ function getErrorFallbackHtml(message, retryFuncStr) {
           <p style="font-size: 13px; color: var(--color-text-secondary);">Hari ini libur / tidak ada agenda perkuliahan.</p>
         </div>
       `;
+      if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        window.lucide.createIcons();
+      }
       return;
     }
+
+    const now = timeProvider.now();
+    const currentDay = now.getDay();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
     listContainer.innerHTML = dayClasses
       .map((item) => {
@@ -666,56 +705,81 @@ function getErrorFallbackHtml(message, retryFuncStr) {
 
         const roomDisplay = item.roomCode ? `${item.roomCode} · ${cleanRoomName}` : cleanRoomName;
 
+        const startMin = parseTimeToMinutes(item.startTime);
+        const endMin = parseTimeToMinutes(item.endTime);
+        const durationMin = Math.max(0, endMin - startMin);
+
+        let statusText = '• AKAN DATANG';
+        let statusClass = 'upcoming';
+        let cardActiveClass = '';
+        let progressPercent = 0;
+
+        if (state.selectedWeeklyDayId < currentDay) {
+          statusText = '• SELESAI';
+          statusClass = 'finished';
+        } else if (state.selectedWeeklyDayId > currentDay) {
+          statusText = '• AKAN DATANG';
+          statusClass = 'upcoming';
+        } else {
+          // Selected day is today
+          if (currentMinutes >= startMin && currentMinutes < endMin) {
+            statusText = '• BERLANGSUNG';
+            statusClass = 'in-progress';
+            cardActiveClass = 'is-active';
+            const totalSecs = (endMin - startMin) * 60;
+            const elapsedSecs = (currentMinutes - startMin) * 60 + now.getSeconds();
+            progressPercent = Math.min(100, Math.max(0, (elapsedSecs / totalSecs) * 100));
+          } else if (currentMinutes >= endMin) {
+            statusText = '• SELESAI';
+            statusClass = 'finished';
+          } else {
+            statusText = '• AKAN DATANG';
+            statusClass = 'upcoming';
+          }
+        }
+
         const courseTasks = window.TRJT_ASSIGNMENTS ? window.TRJT_ASSIGNMENTS.getAssignmentsForCourse(item.courseName) : [];
         const pendingTasks = courseTasks.filter((t) => window.TRJT_ASSIGNMENTS && !window.TRJT_ASSIGNMENTS.isPersonalCompleted(t.id));
         const hasTasks = pendingTasks.length > 0;
-        const taskBadgeClass = hasTasks ? 'has-tasks' : '';
-        const taskBadgeHtml = hasTasks ? `<span class="badge-task-counter">${pendingTasks.length}</span>` : '';
+        const taskBadgeHtml = hasTasks 
+          ? `<span class="badge-deadline badge-deadline-warning" style="margin-left: 6px; padding: 1px 6px; font-size: 10px; vertical-align: middle; display: inline-flex; align-items: center; gap: 3px;"><i data-lucide="clipboard-check" style="width: 10px; height: 10px;"></i> ${pendingTasks.length} Tugas</span>` 
+          : '';
 
         return `
-          <div class="schedule-glass-card">
-            <div class="schedule-top-meta-row">
-              <div class="schedule-time-badge">
-                <i data-lucide="clock"></i>
-                <span>${item.startTime.replace(':', '.')} – ${item.endTime.replace(':', '.')}</span>
+          <div class="schedule-glass-card ${cardActiveClass} status-${statusClass}" data-schedule-id="${item.id}" onclick="window.openCourseAssignmentsModal('${item.courseName.replace(/'/g, "\\'")}', '${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName).replace(/'/g, "\\'")}', '${item.roomCode}')" role="button" tabindex="0" title="Klik untuk lihat tugas & detail mata kuliah" style="cursor: pointer;">
+            <div class="schedule-card-body-row">
+              <div class="schedule-time-col">
+                <span class="schedule-time-start">${item.startTime.replace(':', '.')}</span>
+                <span class="schedule-time-end">${item.endTime.replace(':', '.')}</span>
+                <span class="schedule-time-duration">${durationMin} mnt</span>
               </div>
-              <div class="schedule-room-badge">
-                <i data-lucide="map-pin"></i>
-                <span>${roomDisplay}</span>
-              </div>
-            </div>
-            
-            <h3 class="schedule-subject-heading">${item.courseName}</h3>
-            
-            <div class="schedule-lecturer-row">
-              <div class="schedule-lecturer-info">
-                <span class="schedule-lecturer-avatar">
-                  <i data-lucide="user"></i>
-                </span>
-                <span class="schedule-lecturer-name">${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}</span>
-              </div>
-              <div class="btn-schedule-actions-row">
-                <button class="btn-schedule-tugas ${taskBadgeClass}" onclick="window.openCourseAssignmentsModal('${item.courseName.replace(/'/g, "\\'")}', '${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName).replace(/'/g, "\\'")}', '${item.roomCode}')" title="Lihat Tugas Kuliah">
-                  <i data-lucide="clipboard-check"></i>
-                  <span>Tugas</span>
-                  ${taskBadgeHtml}
-                </button>
-                <button class="btn-schedule-mat" onclick="window.openCourseMaterialsModal('${item.id}', '${item.courseName.replace(/'/g, "\\'")}', '${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName).replace(/'/g, "\\'")}', '${item.roomCode}')" title="Lihat Materi Perkuliahan">
-                  <i data-lucide="folder"></i>
-                  <span>Materi</span>
-                </button>
-                ${(window.getCoursePracticalGroups && window.getCoursePracticalGroups(item.courseName)) ? `
-                  <button class="btn-schedule-group" onclick="window.openCourseGroupsModal('${item.courseName.replace(/'/g, "\\'")}')" title="Lihat Kelompok Praktikum">
-                    <i data-lucide="users"></i>
-                    <span>Kelompok</span>
-                  </button>
-                ` : ''}
+              <div class="schedule-card-main-col">
+                <h3 class="schedule-subject-heading">${item.courseName} ${taskBadgeHtml}</h3>
+                
+                <div class="schedule-room-badge" title="${roomDisplay}">
+                  <i data-lucide="map-pin"></i>
+                  <span>${roomDisplay}</span>
+                </div>
+                
+                <div class="schedule-lecturer-row">
+                  <i data-lucide="user" class="schedule-lecturer-icon"></i>
+                  <span class="schedule-lecturer-name">${getLecturerDisplay(item.lecturerName, item.lecturerCode, item.courseName)}</span>
+                </div>
               </div>
             </div>
+            ${statusClass === 'in-progress' ? `
+              <div class="schedule-card-progress-track" aria-hidden="true" title="Waktu berjalan: ${Math.round(progressPercent)}%">
+                <div class="schedule-card-progress-fill" data-progress-class-id="${item.id}" style="width: ${progressPercent}%;"></div>
+              </div>
+            ` : ''}
           </div>
         `;
       })
       .join('');
+
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons();
+    }
   }
 
   function renderNotifications() {
@@ -1046,17 +1110,17 @@ function getErrorFallbackHtml(message, retryFuncStr) {
 
     if (window.lucide) window.lucide.createIcons();
 
-    // Auto remove toast after 3.8s with smooth animation
+    // Auto remove toast after 3s with smooth animation
     setTimeout(() => {
       if (toast && toast.parentElement) {
         toast.style.transition = 'opacity 250ms ease, transform 250ms ease';
         toast.style.opacity = '0';
-        toast.style.transform = 'translateY(-10px) scale(0.96)';
+        toast.style.transform = 'translateY(10px) scale(0.96)';
         setTimeout(() => {
           if (toast && toast.parentElement) toast.remove();
         }, 260);
       }
-    }, 3800);
+    }, 3000);
   }
 
   // --- Dynamic Honest Settings & Diagnostics Renderer ---
@@ -1109,6 +1173,7 @@ function getErrorFallbackHtml(message, retryFuncStr) {
 
   function switchTab(tabId) {
     state.currentTab = tabId;
+    document.body.classList.toggle('home-active', tabId === 'beranda');
 
     document.querySelectorAll('.nav-item').forEach((btn) => {
       const isCurrent = btn.getAttribute('data-tab') === tabId;
@@ -1128,10 +1193,10 @@ function getErrorFallbackHtml(message, retryFuncStr) {
       }
     });
 
-    // Auto-hide bell button on Notifikasi view to avoid redundancy
+    // Hide header bell button if present
     const headerBell = document.getElementById('btn-header-bell');
     if (headerBell) {
-      headerBell.style.display = (tabId === 'notifikasi') ? 'none' : 'inline-flex';
+      headerBell.style.display = 'none';
     }
 
     if (tabId === 'jadwal') {
@@ -1167,6 +1232,16 @@ function getErrorFallbackHtml(message, retryFuncStr) {
         if (window.lucide) window.lucide.createIcons();
       });
     });
+
+    const weeklyCards = document.getElementById('weekly-cards-container');
+    if (weeklyCards) {
+      weeklyCards.addEventListener('keydown', (event) => {
+        if ((event.key === 'Enter' || event.key === ' ') && event.target?.classList?.contains('schedule-glass-card')) {
+          event.preventDefault();
+          event.target.click();
+        }
+      });
+    }
 
     // Notification Filter Pills
     const filterAllBtn = document.getElementById('filter-notif-all');
@@ -1328,6 +1403,28 @@ function getErrorFallbackHtml(message, retryFuncStr) {
       });
     }
 
+    // Material Course Switcher Dropdown
+    const courseSelectMat = document.getElementById('mat-course-select');
+    if (courseSelectMat) {
+      courseSelectMat.addEventListener('change', (e) => {
+        const selectedCourseName = e.target.value;
+        if (!selectedCourseName) return;
+
+        let matchedClass = null;
+        if (window.TRJT_SCHEDULE && window.TRJT_SCHEDULE.classes) {
+          matchedClass = window.TRJT_SCHEDULE.classes.find(
+            (c) => c.courseName.toLowerCase() === selectedCourseName.toLowerCase()
+          );
+        }
+
+        const schedId = matchedClass ? matchedClass.id : ('mat-' + selectedCourseName.toLowerCase().replace(/[^a-z0-9]/g, '-'));
+        const lecturer = matchedClass ? getLecturerDisplay(matchedClass.lecturerName, matchedClass.lecturerCode, matchedClass.courseName) : 'Dosen Pengampu';
+        const room = matchedClass ? matchedClass.roomCode : '-';
+
+        openCourseMaterialsModal(schedId, selectedCourseName, lecturer, room);
+      });
+    }
+
     // Open Upload Modal Trigger
     const btnTriggerUpload = document.getElementById('btn-trigger-upload-modal');
     if (btnTriggerUpload) btnTriggerUpload.addEventListener('click', openUploadModal);
@@ -1419,10 +1516,26 @@ function getErrorFallbackHtml(message, retryFuncStr) {
 
     // Piket Schedule Modal Trigger & Handlers
     // Piket button listeners (both in Beranda & Jadwal)
-    document.querySelectorAll('.btn-piket-action, #btn-open-piket-modal').forEach((btn) => {
+    document.querySelectorAll('.btn-piket-action:not(.btn-group-action):not(.btn-materi-action):not(.btn-tugas-action), #btn-open-piket-modal').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         openPiketModal();
+      });
+    });
+
+    // Tugas Kuliah button listener (Beranda)
+    document.querySelectorAll('.btn-tugas-action').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openAllAssignmentsModal();
+      });
+    });
+
+    // Materi Perkuliahan button listener (Beranda)
+    document.querySelectorAll('.btn-materi-action').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openCourseMaterialsModal();
       });
     });
 
@@ -1522,18 +1635,74 @@ function getErrorFallbackHtml(message, retryFuncStr) {
       });
     }
 
-    // Form Add Assignment Submit Listener
+    // Form Add Assignment Listeners
     const formAddAssignment = document.getElementById('form-add-assignment');
     
     const dateInputEl = document.getElementById('task-input-due-date');
     if (dateInputEl) {
-      dateInputEl.addEventListener('input', (e) => updateDueDatePreview(e.target.value));
-      dateInputEl.addEventListener('change', (e) => updateDueDatePreview(e.target.value));
+      const handleDateChange = (e) => {
+        const val = e.target.value;
+        updateDueDatePreview(val);
+        syncQuickDateButtons(val);
+        if (val) {
+          dateInputEl.classList.remove('form-input-error');
+          const errDate = document.getElementById('error-task-due-date');
+          if (errDate) {
+            errDate.style.display = 'none';
+            errDate.classList.remove('is-visible');
+          }
+          checkAllFieldsValidToDismissAlert();
+        }
+      };
+      dateInputEl.addEventListener('input', handleDateChange);
+      dateInputEl.addEventListener('change', handleDateChange);
+    }
+
+    const courseSelectEl = document.getElementById('task-input-course');
+    if (courseSelectEl) {
+      courseSelectEl.addEventListener('change', (e) => {
+        if (e.target.value) {
+          courseSelectEl.classList.remove('form-input-error');
+          const errCourse = document.getElementById('error-task-course');
+          if (errCourse) {
+            errCourse.style.display = 'none';
+            errCourse.classList.remove('is-visible');
+          }
+          checkAllFieldsValidToDismissAlert();
+        }
+      });
+    }
+
+    const titleInputEl = document.getElementById('task-input-title');
+    if (titleInputEl) {
+      const handleTitleChange = (e) => {
+        if (e.target.value.trim()) {
+          titleInputEl.classList.remove('form-input-error');
+          const errTitle = document.getElementById('error-task-title');
+          if (errTitle) {
+            errTitle.style.display = 'none';
+            errTitle.classList.remove('is-visible');
+          }
+          checkAllFieldsValidToDismissAlert();
+        }
+      };
+      titleInputEl.addEventListener('input', handleTitleChange);
+      titleInputEl.addEventListener('change', handleTitleChange);
     }
   
     if (formAddAssignment) {
       formAddAssignment.addEventListener('submit', (e) => {
         handleSaveAssignment(e);
+      });
+
+      // Auto scroll active field above mobile keyboard and system gestures
+      const formFields = formAddAssignment.querySelectorAll('input, select, textarea');
+      formFields.forEach((field) => {
+        field.addEventListener('focus', () => {
+          setTimeout(() => {
+            field.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 260);
+        });
       });
     }
 
@@ -1956,11 +2125,21 @@ function getErrorFallbackHtml(message, retryFuncStr) {
       themeIcon.setAttribute('data-lucide', effective === 'dark' ? 'moon' : 'sun');
     }
 
-    // Update checkmark in modal
+    // Update checkmark in modal & selected class
     ['light', 'dark', 'system'].forEach((mode) => {
       const checkEl = document.getElementById(`theme-check-${mode}`);
       if (checkEl) {
         checkEl.style.display = (mode === themeName) ? 'block' : 'none';
+      }
+      if (typeof document.querySelector === 'function') {
+        const optBtn = document.querySelector(`.theme-option-item[data-theme-opt="${mode}"]`);
+        if (optBtn) {
+          if (mode === themeName) {
+            optBtn.classList.add('is-selected');
+          } else {
+            optBtn.classList.remove('is-selected');
+          }
+        }
       }
     });
 
@@ -2124,7 +2303,21 @@ function getErrorFallbackHtml(message, retryFuncStr) {
   let selectedUploadFile = null;
 
   async function openCourseMaterialsModal(scheduleId, courseName, lecturer, room) {
-    activeMaterialCourse = { scheduleId, courseName, lecturer, room };
+    // 1. Fallback when called without arguments or empty courseName
+    if (!courseName && window.TRJT_SCHEDULE && window.TRJT_SCHEDULE.classes && window.TRJT_SCHEDULE.classes.length > 0) {
+      const defaultClass = window.TRJT_SCHEDULE.classes[0];
+      scheduleId = scheduleId || defaultClass.id;
+      courseName = defaultClass.courseName;
+      lecturer = lecturer || getLecturerDisplay(defaultClass.lecturerName, defaultClass.lecturerCode, defaultClass.courseName);
+      room = room || defaultClass.roomCode;
+    }
+
+    activeMaterialCourse = {
+      scheduleId: scheduleId || 'mat-default',
+      courseName: courseName || 'Praktikum Antena dan Propagasi',
+      lecturer: lecturer || 'Dosen Pengampu',
+      room: room || '-'
+    };
     activeMaterialFilter = 'all';
     activeMaterialSearch = '';
 
@@ -2132,35 +2325,77 @@ function getErrorFallbackHtml(message, retryFuncStr) {
     const titleEl = document.getElementById('mat-modal-course-name');
     const metaEl = document.getElementById('mat-modal-course-meta');
     const searchInput = document.getElementById('mat-search-input');
+    const courseSelect = document.getElementById('mat-course-select');
+    const container = document.getElementById('mat-list-container');
+    const emptyState = document.getElementById('mat-empty-state');
 
-    if (titleEl) titleEl.innerText = courseName;
-    if (metaEl) metaEl.innerText = `${lecturer || 'Dosen Pengampu'} · Ruang ${room || '-'}`;
+    if (titleEl) titleEl.innerText = activeMaterialCourse.courseName;
+    if (metaEl) metaEl.innerText = `${activeMaterialCourse.lecturer} · Ruang ${activeMaterialCourse.room}`;
     if (searchInput) searchInput.value = '';
+    if (courseSelect) courseSelect.value = activeMaterialCourse.courseName;
 
-    const btnDriveFolder = document.getElementById('btn-open-course-drive-folder');
-    if (btnDriveFolder && window.TRJT_DRIVE) {
-      const folderInfo = await window.TRJT_DRIVE.getFolderForCourse(courseName || scheduleId);
-      if (folderInfo && folderInfo.driveFolderId) {
-        btnDriveFolder.href = `https://drive.google.com/drive/folders/${folderInfo.driveFolderId}?usp=drive_link`;
-      } else {
-        btnDriveFolder.href = `https://drive.google.com/drive/folders/1W7F5rWsNNq-nsLUF1emnOj4eJsYSShzW?usp=drive_link`;
-      }
+    // 2. OPEN MODAL IMMEDIATELY
+    if (modal) {
+      modal.classList.add('is-open');
+      modal.setAttribute('aria-hidden', 'false');
     }
 
+    // 3. Reset Filter Pills
     document.querySelectorAll('#modal-course-materials .filter-glass-pill').forEach((pill) => {
       if (pill.getAttribute('data-filter') === 'all') pill.classList.add('active');
       else pill.classList.remove('active');
     });
 
-    await renderCourseMaterialsList();
+    // 4. Show Skeleton loader immediately while items load
+    if (emptyState) emptyState.style.display = 'none';
+    if (container) {
+      if (typeof getSkeletonMaterialCardHtml === 'function') {
+        container.innerHTML = getSkeletonMaterialCardHtml(3);
+      }
+    }
 
-    if (modal) modal.classList.add('is-open');
+    // 5. Set default Drive folder URL so it's always valid
+    const btnDriveFolder = document.getElementById('btn-open-course-drive-folder');
+    if (btnDriveFolder) {
+      btnDriveFolder.href = 'https://drive.google.com/drive/folders/1W7F5rWsNNq-nsLUF1emnOj4eJsYSShzW?usp=drive_link';
+    }
+
+    if (window.lucide) window.lucide.createIcons();
+
+    // 6. Asynchronously resolve specific Drive folder in background
+    if (btnDriveFolder && window.TRJT_DRIVE && typeof window.TRJT_DRIVE.getFolderForCourse === 'function') {
+      try {
+        const folderInfo = await Promise.race([
+          window.TRJT_DRIVE.getFolderForCourse(activeMaterialCourse.courseName || activeMaterialCourse.scheduleId),
+          new Promise((r) => setTimeout(() => r(null), 800))
+        ]);
+        if (folderInfo && folderInfo.driveFolderId) {
+          btnDriveFolder.href = `https://drive.google.com/drive/folders/${folderInfo.driveFolderId}?usp=drive_link`;
+        }
+      } catch (e) {
+        console.warn('Drive folder lookup note:', e);
+      }
+    }
+
+    // 7. Render course materials list with error boundary
+    try {
+      await renderCourseMaterialsList();
+    } catch (e) {
+      console.error('Error rendering course materials list:', e);
+      if (container) {
+        container.innerHTML = `<div style="text-align: center; padding: 24px; color: var(--color-text-secondary); font-size: 13px;">Gagal memuat materi. Silakan coba lagi.</div>`;
+      }
+    }
+
     if (window.lucide) window.lucide.createIcons();
   }
 
   function closeCourseMaterialsModal() {
     const modal = document.getElementById('modal-course-materials');
-    if (modal) modal.classList.remove('is-open');
+    if (modal) {
+      modal.classList.remove('is-open');
+      modal.setAttribute('aria-hidden', 'true');
+    }
   }
 
   async function renderCourseMaterialsList() {
@@ -2173,9 +2408,18 @@ function getErrorFallbackHtml(message, retryFuncStr) {
     if (!container || !activeMaterialCourse) return;
 
     let items = [];
-    if (window.TRJT_MATERIALS) {
-      items = await window.TRJT_MATERIALS.getMaterialsForCourse(activeMaterialCourse.courseName);
+    if (window.TRJT_MATERIALS && typeof window.TRJT_MATERIALS.getMaterialsForCourse === 'function') {
+      try {
+        items = await Promise.race([
+          window.TRJT_MATERIALS.getMaterialsForCourse(activeMaterialCourse.courseName),
+          new Promise((r) => setTimeout(() => r([]), 1500))
+        ]);
+      } catch (e) {
+        console.warn('Fetch materials error:', e);
+        items = [];
+      }
     }
+    if (!Array.isArray(items)) items = [];
 
     const photoItems = items.filter((m) => m.isImage || ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes(m.fileExtension));
     const docItems = items.filter((m) => !m.isImage && !['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes(m.fileExtension));
@@ -2311,10 +2555,84 @@ function getErrorFallbackHtml(message, retryFuncStr) {
   let activeAllTasksCourse = '';
   let activeAllTasksSearch = '';
 
+  function clearAssignmentFormErrors() {
+    const errorBox = document.getElementById('task-input-error-msg');
+    const courseSelect = document.getElementById('task-input-course');
+    const titleInput = document.getElementById('task-input-title');
+    const dateInput = document.getElementById('task-input-due-date');
+    const errCourse = document.getElementById('error-task-course');
+    const errTitle = document.getElementById('error-task-title');
+    const errDate = document.getElementById('error-task-due-date');
+
+    if (errorBox) {
+      errorBox.style.display = 'none';
+      errorBox.classList.remove('is-visible');
+    }
+    if (courseSelect) courseSelect.classList.remove('form-input-error');
+    if (titleInput) titleInput.classList.remove('form-input-error');
+    if (dateInput) dateInput.classList.remove('form-input-error');
+    if (errCourse) {
+      errCourse.style.display = 'none';
+      errCourse.classList.remove('is-visible');
+    }
+    if (errTitle) {
+      errTitle.style.display = 'none';
+      errTitle.classList.remove('is-visible');
+    }
+    if (errDate) {
+      errDate.style.display = 'none';
+      errDate.classList.remove('is-visible');
+    }
+  }
+  window.clearAssignmentFormErrors = clearAssignmentFormErrors;
+
+  function checkAllFieldsValidToDismissAlert() {
+    const course = document.getElementById('task-input-course')?.value?.trim();
+    const title = document.getElementById('task-input-title')?.value?.trim();
+    const dueDate = document.getElementById('task-input-due-date')?.value?.trim();
+    if (course && title && dueDate) {
+      const errorBox = document.getElementById('task-input-error-msg');
+      if (errorBox) {
+        errorBox.style.display = 'none';
+        errorBox.classList.remove('is-visible');
+      }
+    }
+  }
+  window.checkAllFieldsValidToDismissAlert = checkAllFieldsValidToDismissAlert;
+
+  function syncQuickDateButtons(selectedDateStr) {
+    const chipBtns = document.querySelectorAll('#modal-add-assignment .quick-date-btn');
+    if (!chipBtns.length) return;
+
+    const formatYMD = (daysAhead) => {
+      const d = new Date();
+      d.setDate(d.getDate() + daysAhead);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    };
+
+    const targetDate = selectedDateStr ? selectedDateStr.trim() : '';
+
+    chipBtns.forEach((btn) => {
+      const days = parseInt(btn.getAttribute('data-days'), 10);
+      if (targetDate && formatYMD(days) === targetDate) {
+        btn.classList.add('active');
+        btn.setAttribute('aria-pressed', 'true');
+      } else {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-pressed', 'false');
+      }
+    });
+  }
+  window.syncQuickDateButtons = syncQuickDateButtons;
+
   function openAddAssignmentModal(defaultCourseName) {
     const modal = document.getElementById('modal-add-assignment');
     const form = document.getElementById('form-add-assignment');
     if (form) form.reset();
+    clearAssignmentFormErrors();
 
     // Safely resolve course target (handles undefined, Event object, or string)
     let courseTarget = '';
@@ -2375,6 +2693,7 @@ function getErrorFallbackHtml(message, retryFuncStr) {
   function closeAddAssignmentModal() {
     const modal = document.getElementById('modal-add-assignment');
     if (modal) modal.classList.remove('is-open');
+    clearAssignmentFormErrors();
   }
 
   function selectTaskType(type) {
@@ -2402,36 +2721,43 @@ function getErrorFallbackHtml(message, retryFuncStr) {
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
     const dateInput = document.getElementById('task-input-due-date');
+    const dateVal = `${yyyy}-${mm}-${dd}`;
     if (dateInput) {
-      dateInput.value = `${yyyy}-${mm}-${dd}`;
-      updateDueDatePreview(`${yyyy}-${mm}-${dd}`);
+      dateInput.value = dateVal;
+      dateInput.classList.remove('form-input-error');
+      const errDate = document.getElementById('error-task-due-date');
+      if (errDate) errDate.style.display = 'none';
+      checkAllFieldsValidToDismissAlert();
     }
-
-    document.querySelectorAll('.quick-date-btn').forEach((btn) => {
-      const days = parseInt(btn.getAttribute('data-days'), 10);
-      if (days === daysAhead) {
-        btn.classList.add('active');
-      } else {
-        btn.classList.remove('active');
-      }
-    });
+    updateDueDatePreview(dateVal);
+    syncQuickDateButtons(dateVal);
   }
 
   function updateDueDatePreview(dateStr) {
     const previewEl = document.getElementById('task-due-date-preview-text');
-    if (!previewEl || !dateStr) return;
+    if (!previewEl) return;
+    if (!dateStr) {
+      previewEl.innerText = 'Pilih tanggal pengumpulan';
+      return;
+    }
     try {
-      const [y, m, d] = dateStr.split('-');
-      const dateObj = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
-      if (!isNaN(dateObj.getTime())) {
-        const formatted = dateObj.toLocaleDateString('id-ID', {
-          weekday: 'long',
-          day: 'numeric',
-          month: 'long',
-          year: 'numeric'
-        });
-        previewEl.innerText = `Batas: ${formatted}`;
-        return;
+      const parts = dateStr.split('-');
+      if (parts.length === 3) {
+        const y = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10) - 1;
+        const d = parseInt(parts[2], 10);
+        const dateObj = new Date(y, m, d);
+        if (!isNaN(dateObj.getTime())) {
+          const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+          const months = [
+            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+          ];
+          const dayName = days[dateObj.getDay()];
+          const monthName = months[dateObj.getMonth()];
+          previewEl.innerText = `Batas: ${dayName}, ${d} ${monthName} ${y}`;
+          return;
+        }
       }
     } catch (e) {}
     previewEl.innerText = `Batas: ${dateStr}`;
@@ -2462,12 +2788,30 @@ function getErrorFallbackHtml(message, retryFuncStr) {
     const dateInput = document.getElementById('task-input-due-date');
     const errorBox = document.getElementById('task-input-error-msg');
     const errorText = document.getElementById('task-input-error-text');
+    const errCourse = document.getElementById('error-task-course');
+    const errTitle = document.getElementById('error-task-title');
+    const errDate = document.getElementById('error-task-due-date');
 
-    // Reset error states
-    if (errorBox) errorBox.style.display = 'none';
+    // Reset error states before validation
+    if (errorBox) {
+      errorBox.style.display = 'none';
+      errorBox.classList.remove('is-visible');
+    }
     if (courseSelect) courseSelect.classList.remove('form-input-error');
     if (titleInput) titleInput.classList.remove('form-input-error');
     if (dateInput) dateInput.classList.remove('form-input-error');
+    if (errCourse) {
+      errCourse.style.display = 'none';
+      errCourse.classList.remove('is-visible');
+    }
+    if (errTitle) {
+      errTitle.style.display = 'none';
+      errTitle.classList.remove('is-visible');
+    }
+    if (errDate) {
+      errDate.style.display = 'none';
+      errDate.classList.remove('is-visible');
+    }
 
     const course = courseSelect?.value?.trim();
     const title = titleInput?.value?.trim();
@@ -2479,32 +2823,49 @@ function getErrorFallbackHtml(message, retryFuncStr) {
     const description = document.getElementById('task-input-desc')?.value?.trim() || '';
     const createdBy = document.getElementById('task-input-author')?.value || 'Mahasiswa TRJT 3A';
 
-    // Validation
-    const missingFields = [];
+    // Field-specific validation
+    let hasError = false;
+    let firstErrorElem = null;
+
     if (!course) {
-      missingFields.push('Mata Kuliah');
+      hasError = true;
       if (courseSelect) courseSelect.classList.add('form-input-error');
+      if (errCourse) {
+        errCourse.style.display = 'flex';
+        errCourse.classList.add('is-visible');
+      }
+      if (!firstErrorElem) firstErrorElem = courseSelect;
     }
     if (!title) {
-      missingFields.push('Judul Tugas');
+      hasError = true;
       if (titleInput) titleInput.classList.add('form-input-error');
+      if (errTitle) {
+        errTitle.style.display = 'flex';
+        errTitle.classList.add('is-visible');
+      }
+      if (!firstErrorElem) firstErrorElem = titleInput;
     }
     if (!dueDate) {
-      missingFields.push('Tanggal Pengumpulan');
+      hasError = true;
       if (dateInput) dateInput.classList.add('form-input-error');
+      if (errDate) {
+        errDate.style.display = 'flex';
+        errDate.classList.add('is-visible');
+      }
+      if (!firstErrorElem) firstErrorElem = dateInput;
     }
 
-    if (missingFields.length > 0) {
-      const msg = `Mohon lengkapi kolom wajib: ${missingFields.join(', ')}.`;
+    if (hasError) {
+      const msg = 'Mohon lengkapi kolom yang wajib diisi.';
       if (errorBox && errorText) {
         errorText.innerText = msg;
         errorBox.style.display = 'flex';
+        errorBox.classList.add('is-visible');
         errorBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
       showToast(msg, 'warning');
-      if (!course && courseSelect) courseSelect.focus();
-      else if (!title && titleInput) titleInput.focus();
-      else if (!dueDate && dateInput) dateInput.focus();
+      if (firstErrorElem) firstErrorElem.focus();
+      if (window.lucide) window.lucide.createIcons();
       return;
     }
 
@@ -2549,6 +2910,7 @@ function getErrorFallbackHtml(message, retryFuncStr) {
       if (titleInput) titleInput.value = '';
       if (document.getElementById('task-input-place')) document.getElementById('task-input-place').value = '';
       if (document.getElementById('task-input-desc')) document.getElementById('task-input-desc').value = '';
+      clearAssignmentFormErrors();
 
       renderUpcomingTasksWidget();
       renderWeeklySchedule();
@@ -2874,6 +3236,15 @@ function getErrorFallbackHtml(message, retryFuncStr) {
       }
     }
 
+    const shortcutTasksBadge = document.getElementById('badge-shortcut-tasks-count');
+    if (shortcutTasksBadge) {
+      if (stats.pending > 0) {
+        shortcutTasksBadge.innerText = `${stats.pending} tugas aktif`;
+      } else {
+        shortcutTasksBadge.innerText = 'Semua selesai';
+      }
+    }
+
     const upcoming = window.TRJT_ASSIGNMENTS.getUpcomingAssignments(3);
 
     if (upcoming.length === 0) {
@@ -2938,6 +3309,8 @@ function getErrorFallbackHtml(message, retryFuncStr) {
     }
   }
 
+  let lastScheduleStatusSignature = '';
+
   function tick() {
     const scheduleData = evaluateScheduleState(timeProvider, window.TRJT_SCHEDULE);
     void processH10Reminder(scheduleData).catch(console.error);
@@ -2946,6 +3319,21 @@ function getErrorFallbackHtml(message, retryFuncStr) {
     renderHeroCard(scheduleData);
     renderTodayTimeline(scheduleData);
     renderPiketBadge();
+
+    // Update in-progress schedule card progress bar without full innerHTML re-render
+    if (state.currentTab === 'jadwal') {
+      const activeProgressBar = document.querySelector('.schedule-card-progress-fill');
+      if (activeProgressBar && scheduleData && scheduleData.inProgressClass) {
+        activeProgressBar.style.width = `${scheduleData.progressPercent}%`;
+      }
+
+      // Re-render schedule only when class status changes (e.g. starts or finishes)
+      const currentSignature = `${scheduleData?.inProgressClass?.id || 'none'}-${scheduleData?.completedCount || 0}`;
+      if (lastScheduleStatusSignature && lastScheduleStatusSignature !== currentSignature) {
+        renderWeeklySchedule();
+      }
+      lastScheduleStatusSignature = currentSignature;
+    }
 
     if (window.lucide) {
       window.lucide.createIcons();

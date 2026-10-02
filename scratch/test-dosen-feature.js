@@ -25,12 +25,14 @@ assert.ok(htmlCode.includes('data-tab="dosen"'), 'dosen bottom nav button exists
 assert.ok(htmlCode.includes('id="dosen-search-input"'), 'dosen search input exists in index.html');
 assert.ok(htmlCode.includes('id="dosen-cards-container"'), 'dosen cards container exists in index.html');
 
-// Check bottom nav ordering: notifikasi -> dosen -> pengaturan
+// Check the five-tab dock: Dosen remains accessible and Jadwal is central.
+const berandaIdx = htmlCode.indexOf('data-tab="beranda"');
 const notifIdx = htmlCode.indexOf('data-tab="notifikasi"');
 const dosenIdx = htmlCode.indexOf('data-tab="dosen"');
+const jadwalIdx = htmlCode.indexOf('data-tab="jadwal"');
 const pengIdx = htmlCode.indexOf('data-tab="pengaturan"');
-assert.ok(dosenIdx > notifIdx && dosenIdx < pengIdx, 'Dosen tab is placed directly before Pengaturan');
-console.log('✅ PASS: Dosen view and navigation tab properly positioned before Pengaturan');
+assert.ok(berandaIdx < dosenIdx && dosenIdx < jadwalIdx && jadwalIdx < notifIdx && notifIdx < pengIdx, 'Dosen tab is accessible and Jadwal stays at the center of the five-tab dock');
+console.log('✅ PASS: Dosen view and five-tab navigation dock verified');
 
 // 3. Verify CSS styling
 const cssCode = fs.readFileSync('css/design-system.css', 'utf8');

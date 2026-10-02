@@ -2,8 +2,8 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#F4F8FE">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0F2942">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="description" content="TRJT 3A Reminder - Jadwal Kuliah & Personal Class Assistant Minimalis Modern">
@@ -19,7 +19,7 @@
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -29,23 +29,24 @@
   <style>
     /* Critical Glassmorphism Inlined Styles for Instant Guaranteed Rendering */
     :root {
-      --color-primary-navy: #0F2942;
-      --color-deep-blue: #0F3D91;
-      --color-primary-blue: #2F80ED;
-      --color-blue-hover: #1E6DEB;
-      --color-soft-blue: #DCEEFF;
-      --color-very-light-blue: #EBF4FE;
-      --color-app-bg: #F4F8FE;
+      --color-primary-navy: #173F7A;
+      --color-deep-blue: #123568;
+      --color-primary-blue: #173F7A;
+      --color-blue-hover: #123568;
+      --color-soft-blue: #EEF4FB;
+      --color-very-light-blue: #EEF4FB;
+      --color-app-bg: #F5F8FC;
       --color-surface-glass: rgba(255, 255, 255, 0.78);
       --color-surface-glass-strong: rgba(255, 255, 255, 0.92);
       --color-border-glass: rgba(255, 255, 255, 0.9);
-      --color-border-subtle: rgba(220, 235, 252, 0.8);
-      --color-text-primary: #0F2942;
-      --color-text-secondary: #52667A;
+      --color-border-subtle: #E3EAF2;
+      --color-text-primary: #172B4D;
+      --color-text-secondary: #718096;
       --color-text-muted: #8C9BAE;
-      --color-success-bg: rgba(236, 253, 243, 0.9);
-      --color-success-border: rgba(167, 243, 208, 0.95);
-      --color-success-text: #059669;
+      --color-success: #2FB67C;
+      --color-success-bg: #EEF8F4;
+      --color-success-border: #D1FAE5;
+      --color-success-text: #2FB67C;
       --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       --radius-hero: 22px;
       --radius-card: 18px;
@@ -59,11 +60,7 @@
     html { font-family: var(--font-family); background-color: var(--color-app-bg); color: var(--color-text-primary); font-size: 16px; line-height: 1.5; }
     body { min-height: 100vh; background-color: #F4F8FE; background-image: radial-gradient(at 92% 6%, rgba(200, 228, 255, 0.6) 0px, transparent 50%), radial-gradient(at 8% 94%, rgba(215, 235, 255, 0.55) 0px, transparent 50%), radial-gradient(at 50% 30%, rgba(244, 248, 254, 0.9) 0px, transparent 100%); background-attachment: fixed; color: var(--color-text-primary); overflow-x: hidden; display: flex; flex-direction: column; }
     .app-viewport { width: 100%; min-height: 100vh; display: flex; justify-content: center; }
-    .app-container { width: 100%; max-width: 480px; min-height: 100vh; display: flex; flex-direction: column; position: relative; padding-bottom: calc(var(--nav-height) + var(--safe-area-bottom) + 36px); }
-    @media (min-width: 1024px) {
-      .app-viewport { background-color: #E6EFF8; padding: 24px 0; }
-      .app-container { max-width: 460px; min-height: calc(100vh - 48px); border-radius: 36px; border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 24px 60px -12px rgba(15, 61, 145, 0.12); overflow: hidden; }
-    }
+    .app-container { width: 100%; max-width: 1080px; min-height: 100vh; display: flex; flex-direction: column; position: relative; }
     .app-header { padding: calc(var(--safe-area-top) + 12px) 20px 10px 20px; position: sticky; top: 0; z-index: 40; background: rgba(244, 248, 254, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.7); }
     .header-top { display: flex; align-items: center; justify-content: space-between; }
     .brand-badge { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; }
@@ -125,26 +122,22 @@
     .day-btn-item.active { background: var(--color-primary-blue); color: #FFFFFF; box-shadow: 0 4px 14px rgba(47, 128, 237, 0.35); }
     .day-label-text { font-size: 12px; font-weight: 500; }
     .day-num-text { font-size: 16px; font-weight: 700; }
-    .weekly-cards-list { display: flex; flex-direction: column; gap: 12px; }
-    .schedule-glass-card { background: linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 248, 255, 0.9) 100%); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.95); border-radius: var(--radius-card); padding: 16px 18px; box-shadow: 0 10px 24px -6px rgba(15, 61, 145, 0.08), 0 2px 6px rgba(15, 61, 145, 0.03), inset 0 1px 1px rgba(255, 255, 255, 1); display: flex; flex-direction: column; gap: 10px; }
+    .weekly-cards-list { display: flex; flex-direction: column; gap: 16px; }
+    .schedule-glass-card { background: var(--ui-card, #FFFFFF); border: 1px solid var(--ui-line, #E2E8F0); border-radius: var(--radius-card); padding: 18px 20px; box-shadow: var(--ui-shadow); display: flex; flex-direction: column; gap: 14px; position: relative; overflow: hidden; }
     .schedule-top-meta-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     .schedule-time-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; background: rgba(47, 128, 237, 0.08); border: 1px solid rgba(191, 219, 254, 0.8); border-radius: 8px; font-size: 12px; font-weight: 700; color: var(--color-primary-blue); flex-shrink: 0; }
     .schedule-time-badge i { width: 13px; height: 13px; }
-    .schedule-room-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; background: rgba(244, 248, 254, 0.9); border: 1px solid rgba(220, 235, 252, 0.9); border-radius: 8px; font-size: 11.5px; font-weight: 600; color: #334155; white-space: nowrap; flex-shrink: 0; }
-    .schedule-room-badge i { width: 13px; height: 13px; color: var(--color-primary-blue); flex-shrink: 0; }
-    .schedule-subject-heading { font-size: 1.125rem; font-weight: 800; color: var(--color-primary-navy); line-height: 1.35; letter-spacing: -0.015em; }
-    .schedule-lecturer-row { display: flex; flex-direction: column; align-items: stretch; gap: 8px; margin-top: 6px; padding: 10px 12px; background: linear-gradient(135deg, rgba(239, 246, 255, 0.95) 0%, rgba(224, 242, 254, 0.85) 100%); border: 1px solid rgba(186, 220, 255, 0.9); border-radius: 14px; box-shadow: 0 2px 8px -2px rgba(37, 99, 235, 0.08); }
+    .schedule-room-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px; background: var(--ui-surface, #F9FCFF); border: 1px solid var(--ui-line, #E2E8F0); border-radius: 8px; font-size: 11.5px; font-weight: 600; color: var(--color-text-secondary, #52667A); white-space: nowrap; flex-shrink: 1; max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
+    .schedule-room-badge i { width: 14px; height: 14px; color: var(--color-primary-blue); flex-shrink: 0; }
+    .schedule-subject-heading { font-size: 16px; font-weight: 700; color: var(--color-primary-navy); line-height: 1.3; letter-spacing: -0.2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .schedule-lecturer-row { background: var(--color-very-light-blue); border: 1px solid rgba(219, 234, 254, 0.8); border-radius: 12px; padding: 8px 12px; display: flex; align-items: center; }
     .schedule-lecturer-info { display: flex; align-items: center; gap: 8px; width: 100%; min-width: 0; }
-    .schedule-lecturer-avatar { width: 26px; height: 26px; border-radius: 50%; background: #FFFFFF; border: 1.5px solid rgba(191, 219, 254, 0.95); display: flex; align-items: center; justify-content: center; color: var(--color-primary-blue); box-shadow: 0 2px 6px rgba(37, 99, 235, 0.12); flex-shrink: 0; }
+    .schedule-lecturer-avatar { width: 26px; height: 26px; border-radius: 50%; background: #FFFFFF; border: 1px solid rgba(191, 219, 254, 0.9); display: flex; align-items: center; justify-content: center; color: var(--color-primary-blue); flex-shrink: 0; }
     .schedule-lecturer-avatar i { width: 14px; height: 14px; color: var(--color-primary-blue); }
-    .schedule-lecturer-name { font-size: 13px; color: #1E3A8A; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
-    .btn-schedule-actions-row { display: flex; align-items: center; gap: 6px; width: 100%; box-sizing: border-box; padding-top: 8px; border-top: 1px solid rgba(186, 220, 255, 0.6); }
-    .btn-schedule-actions-row > button { flex: 1 1 0; height: 32px; min-height: 32px; max-height: 32px; box-sizing: border-box; margin: 0; padding: 0 6px; font-size: 11.5px; font-weight: 700; border-radius: 9px; min-width: 0; display: inline-flex; align-items: center; justify-content: center; gap: 5px; line-height: 1; white-space: nowrap; border: 1px solid; cursor: pointer; }
-    .btn-schedule-actions-row > button i, .btn-schedule-actions-row > button svg { width: 14px !important; height: 14px !important; min-width: 14px !important; min-height: 14px !important; stroke-width: 2.2 !important; flex-shrink: 0 !important; display: block !important; }
-    .btn-schedule-actions-row > button span { display: inline-flex; align-items: center; line-height: 1; font-size: 11.5px; font-weight: 700; }
-    .btn-schedule-mat { color: #FFFFFF; background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); border: 1px solid rgba(255, 255, 255, 0.25); box-shadow: 0 2px 6px rgba(37, 99, 235, 0.22); }
-    .btn-schedule-tugas { color: var(--color-primary-blue); background: rgba(235, 244, 254, 0.95); border: 1px solid rgba(191, 219, 254, 0.9); box-shadow: 0 2px 6px rgba(47, 128, 237, 0.08); }
-    .btn-schedule-group { color: #047857; background: rgba(236, 253, 245, 0.95); border: 1px solid rgba(167, 243, 208, 0.9); box-shadow: 0 2px 6px rgba(16, 185, 129, 0.08); }
+    .schedule-lecturer-name { font-size: 12.5px; color: var(--color-text-primary); font-weight: 600; line-height: 1.25; overflow: hidden; white-space: normal !important; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: break-word; flex: 1; min-width: 0; }
+    .btn-schedule-actions-row { display: flex; gap: 8px; width: 100%; box-sizing: border-box; }
+    .btn-schedule-actions-row > button { flex: 1 1 0; min-width: 0; min-height: 44px; height: 44px; font: 700 12px/1 'Inter', sans-serif; white-space: nowrap; padding: 0 10px; border: 1px solid rgba(191, 219, 254, 0.7); border-radius: 14px; background: var(--color-very-light-blue); color: var(--color-primary-blue); display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; }
+    .btn-schedule-actions-row > button i, .btn-schedule-actions-row > button svg { width: 16px !important; height: 16px !important; stroke-width: 2.2 !important; flex-shrink: 0; color: currentColor !important; stroke: currentColor !important; }
     .notif-header-box { display: flex; flex-direction: column; gap: 2px; }
     .notif-top-action-row { display: flex; align-items: center; justify-content: space-between; }
     .notif-subtitle-text { font-size: 13px; color: var(--color-text-secondary); margin-top: 2px; }
@@ -190,12 +183,12 @@
     .nav-item { background: transparent; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 6px 2px; color: #64748B; font-family: inherit; cursor: pointer; border-radius: 18px; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); position: relative; min-height: 48px; }
     .nav-item:hover:not(.active) { background: rgba(235, 244, 254, 0.6); color: var(--color-primary-blue); }
     .nav-item:active { transform: scale(0.93); }
-    .nav-item.active { background: rgba(235, 244, 254, 0.95); color: var(--color-primary-blue); box-shadow: 0 2px 8px rgba(47, 128, 237, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.9); }
+    .nav-item.active { background: var(--color-primary-blue); color: #FFFFFF; box-shadow: 0 4px 12px rgba(47, 128, 237, 0.35); border-radius: var(--radius-full); }
     .nav-icon-wrap { display: flex; align-items: center; justify-content: center; position: relative; }
     .nav-icon-wrap i { width: 20px; height: 20px; transition: stroke-width 0.2s ease; }
     .nav-label { font-size: 10px; font-weight: 600; line-height: 1.1; white-space: nowrap; }
-    .nav-item.active .nav-label { font-weight: 800; color: var(--color-primary-blue); letter-spacing: -0.01em; }
-    .nav-item.active .nav-icon-wrap i { stroke-width: 2.3; }
+    .nav-item.active .nav-label { font-weight: 700; color: #FFFFFF; letter-spacing: -0.01em; }
+    .nav-item.active .nav-icon-wrap i { stroke-width: 2.3; stroke: #FFFFFF; }
     .nav-badge-dot { position: absolute; top: -2px; right: -3px; width: 7px; height: 7px; background-color: var(--color-primary-blue); border-radius: 50%; border: 1.5px solid #FFFFFF; display: none; }
     .modal-backdrop { position: fixed; inset: 0; background: rgba(15, 41, 66, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 100; display: none; align-items: flex-end; justify-content: center; }
     .modal-backdrop.is-open { display: flex; }
@@ -224,8 +217,8 @@
     .spinner div:nth-child(9) { --delay: 0.9; --rotation: 324; --translation: 150; }
     .spinner div:nth-child(10) { --delay: 1; --rotation: 360; --translation: 150; }
     @keyframes spinner-fzua35 { 0%, 10%, 20%, 30%, 50%, 60%, 70%, 80%, 90%, 100% { transform: rotate(calc(var(--rotation) * 1deg)) translate(0, calc(var(--translation) * 1%)); } 50% { transform: rotate(calc(var(--rotation) * 1deg)) translate(0, calc(var(--translation) * 1.5%)); } }
-    .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); width: calc(100% - 40px); max-width: 440px; z-index: 200; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-    .toast-item { background: rgba(15, 41, 66, 0.92); backdrop-filter: blur(16px); color: #FFFFFF; border-radius: 14px; padding: 12px 16px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 24px rgba(15, 61, 145, 0.2); pointer-events: auto; }
+    .toast-container { position: fixed; bottom: calc(96px + var(--safe-area-bottom)); top: auto; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 440px; z-index: 95; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+    .toast-item { background: rgba(15, 41, 66, 0.95); backdrop-filter: blur(16px); color: #FFFFFF; border-radius: 14px; padding: 10px 14px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 24px rgba(15, 61, 145, 0.2); pointer-events: auto; }
     .btn-piket-action { width: 100%; background: linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 248, 255, 0.92) 100%); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.95); border-radius: var(--radius-card); padding: 14px 18px; box-shadow: 0 10px 28px -6px rgba(15, 61, 145, 0.08), 0 2px 8px rgba(15, 61, 145, 0.03); display: flex; align-items: center; justify-content: space-between; gap: 14px; cursor: pointer; font-family: inherit; text-align: left; position: relative; overflow: hidden; }
     .btn-piket-action::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: linear-gradient(180deg, #2F80ED 0%, #10B981 100%); border-top-left-radius: var(--radius-card); border-bottom-left-radius: var(--radius-card); opacity: 0.85; }
     .btn-piket-left { display: flex; align-items: center; gap: 14px; min-width: 0; flex: 1; }
@@ -258,8 +251,9 @@
     .piket-avatar-dot { width: 22px; height: 22px; border-radius: 50%; background: var(--color-very-light-blue); color: var(--color-primary-blue); font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .piket-member-name { font-size: 12.5px; font-weight: 600; color: var(--color-primary-navy); line-height: 1.25; }
   </style>
+  <link rel="stylesheet" href="./css/student-ui.css?v=9.0">
 </head>
-<body>
+<body class="student-app home-active">
 
   <div class="app-viewport">
     <div class="app-container">
@@ -269,18 +263,13 @@
         <div class="header-top">
           <a href="./admin/index.html" class="brand-badge" title="Masuk ke Portal Admin TRJT 3A">
             <div class="brand-logo-box">
-              <i data-lucide="calendar" style="width: 22px; height: 22px;"></i>
+              <i data-lucide="graduation-cap" style="width: 24px; height: 24px;"></i>
             </div>
             <div class="brand-text-wrap">
               <span class="brand-title">TRJT 3A</span>
-              <span class="brand-subtitle">Class Reminder</span>
+              <span class="brand-subtitle">POLITEKNIK NEGERI LHOKSEUMAWE</span>
             </div>
           </a>
-
-          <button id="btn-header-bell" class="btn-header-bell" onclick="document.querySelector('[data-tab=notifikasi]').click()" aria-label="Lihat Notifikasi">
-            <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
-            <span id="header-unread-dot" class="bell-unread-dot" style="display: none;"></span>
-          </button>
         </div>
       </header>
 
@@ -292,96 +281,60 @@
              ========================================== -->
         <section id="view-beranda" class="view-section active">
 
-          <!-- Greeting & Status Row -->
+          <!-- Greeting Row -->
           <div class="beranda-greeting-row">
             <div class="greeting-text-wrap">
               <h1 id="header-greeting" class="greeting-heading">Selamat sore</h1>
               <p id="header-date" class="greeting-date">Rabu, 26 Agustus 2026</p>
             </div>
-            <div id="beranda-status-chip-container">
-              <!-- Dynamically populated status chip -->
-            </div>
           </div>
 
 
-          <!-- Hero Next Class / Status Card Container -->
-          
-          
+          <figure class="campus-cover">
+            <img src="./assets/images/campus-inspired-banner.png" alt="Ilustrasi bangunan kampus dengan ornamen arsitektur Aceh" loading="eager" decoding="async">
+            <figcaption id="hero-card-container">
+              <span class="campus-cover-kicker">Memuat kelas berikutnya…</span>
+            </figcaption>
+          </figure>
 
-          <div id="hero-card-container">
-            <!-- Dynamically populated by evaluateScheduleState() -->
+          <div class="home-shortcuts" aria-label="Menu perkuliahan">
+            <button class="class-shortcut" type="button" onclick="document.querySelector('[data-tab=jadwal]').click()" aria-label="Buka jadwal kuliah"><span class="shortcut-icon"><i data-lucide="calendar-days"></i></span><span class="shortcut-copy"><strong>Jadwal</strong></span></button>
+            <button class="class-shortcut" type="button" onclick="openAllAssignmentsModal()" aria-label="Buka semua tugas"><span class="shortcut-icon"><i data-lucide="notebook-pen"></i></span><span class="shortcut-copy"><strong>Tugas</strong></span></button>
+            <button class="class-shortcut" type="button" onclick="openCourseMaterialsModal()" aria-label="Buka materi kuliah"><span class="shortcut-icon"><i data-lucide="book-open"></i></span><span class="shortcut-copy"><strong>Materi</strong></span></button>
+            <button class="class-shortcut" type="button" onclick="openPiketModal()" aria-label="Lihat daftar piket kelas"><span class="shortcut-icon"><i data-lucide="clipboard-list"></i></span><span class="shortcut-copy"><strong>Piket</strong></span></button>
+            <button class="class-shortcut" type="button" onclick="openCourseGroupsModal()" aria-label="Lihat kelompok praktikum"><span class="shortcut-icon"><i data-lucide="users"></i></span><span class="shortcut-copy"><strong>Kelompok</strong></span></button>
+            <button class="class-shortcut" type="button" onclick="document.querySelector('[data-tab=dosen]').click()" aria-label="Lihat daftar dosen"><span class="shortcut-icon"><i data-lucide="contact-round"></i></span><span class="shortcut-copy"><strong>Dosen</strong></span></button>
+            <button class="class-shortcut" type="button" onclick="document.querySelector('[data-tab=notifikasi]').click()" aria-label="Lihat notifikasi"><span class="shortcut-icon"><i data-lucide="bell"></i></span><span class="shortcut-copy"><strong>Notifikasi</strong></span></button>
+            <button class="class-shortcut" type="button" onclick="document.querySelector('[data-tab=pengaturan]').click()" aria-label="Buka pengaturan"><span class="shortcut-icon"><i data-lucide="settings-2"></i></span><span class="shortcut-copy"><strong>Pengaturan</strong></span></button>
           </div>
 
-          <!-- Section: Jadwal Hari Ini -->
-          <div style="margin-top: 4px;">
-            <div class="section-header-row">
-              <h2 class="section-main-title">Jadwal hari ini</h2>
-            </div>
+          <div class="home-board">
+            <section class="home-agenda" aria-labelledby="today-heading">
+              <div class="section-header-row">
+                <div>
+                  <span class="section-eyebrow">AGENDA KELAS</span>
+                  <h2 id="today-heading" class="section-main-title">Jadwal hari ini</h2>
+                </div>
+                <button type="button" class="section-link" onclick="document.querySelector('[data-tab=jadwal]').click()">Semua jadwal <i data-lucide="arrow-right" aria-hidden="true"></i></button>
+              </div>
+              <div id="today-timeline-container" class="today-cards-list"></div>
+            </section>
 
-            <div id="today-timeline-container" class="today-cards-list">
-              <!-- Dynamically populated by renderTodayTimeline() -->
-            </div>
-
-            <!-- Section: Tugas & Deadline Mendatang (Beranda) -->
-            <div id="section-tugas-home" class="tugas-home-section" style="margin-top: 16px;">
+            <section id="section-tugas-home" class="tugas-home-section" aria-labelledby="tasks-home-heading">
               <div class="tugas-header-row">
                 <div class="tugas-header-left">
-                  <h2 class="section-main-title">Tugas & Deadline</h2>
+                  <h2 id="tasks-home-heading" class="section-main-title">Tugas & deadline</h2>
                   <span id="badge-home-tasks-count" class="tugas-header-badge">0 Tugas</span>
                 </div>
                 <div class="tugas-header-actions">
-                  <button type="button" class="btn-tugas-view-all" onclick="openAllAssignmentsModal()">Lihat Semua</button>
+                  <button type="button" class="btn-tugas-view-all" onclick="openAllAssignmentsModal()">Lihat semua</button>
                   <button type="button" class="btn-tugas-add-header" onclick="openAddAssignmentModal()">
-                    <i data-lucide="plus"></i>
-                    <span>Tambah</span>
+                    <i data-lucide="plus"></i><span>Tambah</span>
                   </button>
                 </div>
               </div>
-
-              <div id="home-upcoming-tasks-container" class="weekly-cards-list" style="gap: 10px; margin-top: 4px;">
-                <!-- Dynamically populated by renderUpcomingTasksWidget() -->
-              </div>
-            </div>
-
-            <!-- Button Daftar Piket Kelas (Beranda) -->
-            <div style="margin-top: 14px;">
-              <button class="btn-piket-action" onclick="openPiketModal()" type="button" aria-label="Lihat Daftar Piket Kelas">
-                <div class="btn-piket-left">
-                  <div class="btn-piket-icon-box">
-                    <i data-lucide="clipboard-list" style="width: 20px; height: 20px;"></i>
-                  </div>
-                  <div class="btn-piket-text-wrap">
-                    <div class="btn-piket-title-row">
-                      <span class="btn-piket-title">Daftar Piket Kelas</span>
-                      <span class="piket-today-pill badge-piket-today-chip">Minggu ini: Kelompok II</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="btn-piket-chevron">
-                  <i data-lucide="chevron-right"></i>
-                </div>
-              </button>
-            </div>
-
-            <!-- Button Kelompok Praktikum MK (Beranda) -->
-            <div style="margin-top: 10px;">
-              <button class="btn-piket-action btn-group-action" onclick="openCourseGroupsModal()" type="button" aria-label="Lihat Kelompok Praktikum Mata Kuliah">
-                <div class="btn-piket-left">
-                  <div class="btn-piket-icon-box" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.28);">
-                    <i data-lucide="users" style="width: 20px; height: 20px;"></i>
-                  </div>
-                  <div class="btn-piket-text-wrap">
-                    <div class="btn-piket-title-row">
-                      <span class="btn-piket-title">Kelompok Praktikum MK</span>
-                      <span class="piket-today-pill" style="background: rgba(236, 253, 245, 0.95); border-color: rgba(110, 231, 183, 0.85); color: #065F46;">4 Mata Kuliah</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="btn-piket-chevron">
-                  <i data-lucide="chevron-right"></i>
-                </div>
-              </button>
-            </div>
+              <div id="home-upcoming-tasks-container" class="weekly-cards-list"></div>
+            </section>
           </div>
 
         </section>
@@ -391,15 +344,12 @@
              ========================================== -->
         <section id="view-jadwal" class="view-section">
           
-          <!-- Title & Semester Badge -->
-          <div class="view-title-row" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;">
+          <!-- Title & Subtitle -->
+          <div class="view-title-row">
             <div>
               <h2 class="view-page-title" style="white-space: nowrap; margin: 0;">Jadwal Mingguan</h2>
               <p class="notif-subtitle-text" style="margin-top: 2px;">Semester 5 · TRJT 3A</p>
             </div>
-            <span class="badge-semester badge-pertemuan" style="background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.3); color: #047857; font-weight: 700; white-space: nowrap; margin-top: 2px; display: inline-flex; align-items: center;">
-              <i data-lucide="book-open" style="width: 12px; height: 12px; vertical-align: middle; margin-right: 4px;"></i>Pertemuan 3/16
-            </span>
           </div>
 
           <!-- Segmented Day Selector Capsule (Sen 24, Sel 25, Rab 26, Kam 27, Jum 28) -->
@@ -661,42 +611,12 @@
       <div id="toast-container" class="toast-container"></div>
 
       <!-- Bottom Navigation (Fixed Glass Bar, 4 Items, Safe Area) -->
-      <nav class="bottom-nav">
-        <button class="nav-item active" data-tab="beranda" aria-label="Beranda" aria-current="page">
-          <div class="nav-icon-wrap">
-            <i data-lucide="home" style="width: 20px; height: 20px;"></i>
-          </div>
-          <span class="nav-label">Beranda</span>
-        </button>
-
-        <button class="nav-item" data-tab="jadwal" aria-label="Jadwal">
-          <div class="nav-icon-wrap">
-            <i data-lucide="calendar" style="width: 20px; height: 20px;"></i>
-          </div>
-          <span class="nav-label">Jadwal</span>
-        </button>
-
-        <button class="nav-item" data-tab="notifikasi" aria-label="Notifikasi">
-          <div class="nav-icon-wrap">
-            <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
-            <span id="nav-notif-dot" class="nav-badge-dot"></span>
-          </div>
-          <span class="nav-label">Notifikasi</span>
-        </button>
-
-        <button class="nav-item" data-tab="dosen" aria-label="Dosen">
-          <div class="nav-icon-wrap">
-            <i data-lucide="graduation-cap" style="width: 20px; height: 20px;"></i>
-          </div>
-          <span class="nav-label">Dosen</span>
-        </button>
-
-        <button class="nav-item" data-tab="pengaturan" aria-label="Pengaturan">
-          <div class="nav-icon-wrap">
-            <i data-lucide="settings" style="width: 20px; height: 20px;"></i>
-          </div>
-          <span class="nav-label">Pengaturan</span>
-        </button>
+      <nav class="bottom-nav" aria-label="Navigasi utama">
+        <button class="nav-item active" data-tab="beranda" aria-label="Beranda" aria-current="page"><span class="nav-icon-wrap"><i data-lucide="house"></i></span><span class="nav-label">Beranda</span></button>
+        <button class="nav-item" data-tab="dosen" aria-label="Dosen"><span class="nav-icon-wrap"><i data-lucide="contact-round"></i></span><span class="nav-label">Dosen</span></button>
+        <button class="nav-item nav-primary" data-tab="jadwal" aria-label="Jadwal"><span class="nav-icon-wrap"><i data-lucide="calendar-days"></i></span><span class="nav-label">Jadwal</span></button>
+        <button class="nav-item" data-tab="notifikasi" aria-label="Notifikasi"><span class="nav-icon-wrap"><i data-lucide="bell"></i><span id="nav-notif-dot" class="nav-badge-dot"></span></span><span class="nav-label">Notifikasi</span></button>
+        <button class="nav-item" data-tab="pengaturan" aria-label="Pengaturan"><span class="nav-icon-wrap"><i data-lucide="settings"></i></span><span class="nav-label">Pengaturan</span></button>
       </nav>
 
     </div>
@@ -731,13 +651,34 @@
 
       <div class="modal-body">
         <div style="display: flex; flex-direction: column; gap: 10px;">
+          <!-- Course Selector Dropdown -->
+          <div style="position: relative;">
+            <label for="mat-course-select" class="form-label" style="font-size: 11px; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; color: var(--color-text-secondary); font-weight: 600;">
+              <i data-lucide="layers" style="width: 12px; height: 12px; color: var(--color-primary-blue);"></i>
+              <span>Pilih Mata Kuliah</span>
+            </label>
+            <select id="mat-course-select" class="form-input" style="font-size: 13px; font-weight: 600; padding: 7px 12px; border-radius: 12px; width: 100%; background: var(--color-surface-glass); color: var(--color-primary-navy);">
+              <option value="Praktikum Antena dan Propagasi">Praktikum Antena dan Propagasi</option>
+              <option value="Jaringan Komputer Lanjut">Jaringan Komputer Lanjut</option>
+              <option value="Praktikum Jaringan Komputer Lanjut">Praktikum Jaringan Komputer Lanjut</option>
+              <option value="Praktikum Sistem Komunikasi Satelit dan Radar">Praktikum Sistem Komunikasi Satelit dan Radar</option>
+              <option value="Teknik Instalasi Fiber Optik">Teknik Instalasi Fiber Optik</option>
+              <option value="Praktikum Teknik Instalasi Fiber Optik">Praktikum Teknik Instalasi Fiber Optik</option>
+              <option value="Antena dan Propagasi">Antena dan Propagasi</option>
+              <option value="Praktikum Sistem Komunikasi Seluler">Praktikum Sistem Komunikasi Seluler</option>
+              <option value="Sistem Komunikasi Satelit dan Radar">Sistem Komunikasi Satelit dan Radar</option>
+              <option value="Sistem Komunikasi Seluler">Sistem Komunikasi Seluler</option>
+              <option value="Metodologi Penelitian">Metodologi Penelitian</option>
+            </select>
+          </div>
+
           <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
             <button id="btn-trigger-upload-modal" class="btn-submit-upload" style="padding: 8px 16px; font-size: 13px; width: auto; min-height: 38px;">
               <i data-lucide="plus-circle" style="width: 16px; height: 16px;"></i> Tambah Materi
             </button>
             <div style="position: relative; flex: 1;">
-              <i data-lucide="search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: var(--color-text-muted);"></i>
-              <input type="text" id="mat-search-input" class="form-input" placeholder="Cari materi..." style="width: 100%; padding-left: 32px; font-size: 13px; padding-top: 6px; padding-bottom: 6px; border-radius: 9999px;">
+              <i data-lucide="search" style="position: absolute; left: 13px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--color-text-muted); pointer-events: none; z-index: 2;"></i>
+              <input type="text" id="mat-search-input" placeholder="Cari materi..." style="width: 100%; padding: 8px 14px 8px 38px !important; font-size: 13px !important; min-height: 38px !important; border-radius: 9999px; background: var(--color-surface-glass); border: 1px solid var(--color-border-subtle); color: var(--color-text-primary); font-family: inherit; outline: none; box-sizing: border-box !important;">
             </div>
           </div>
 
@@ -752,9 +693,12 @@
           <!-- Dynamically populated -->
         </div>
 
-        <div id="mat-empty-state" class="empty-state-card" style="padding: 24px 16px; display: none; text-align: center;">
-          <p style="font-weight: 700; font-size: 14px; color: var(--color-primary-navy);">Belum Ada Materi</p>
-          <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 3px;">File modul dan materi perkuliahan untuk mata kuliah ini akan tersimpan di Google Drive.</p>
+        <div id="mat-empty-state" class="empty-state-card" style="padding: 28px 16px; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 6px;">
+          <div style="width: 44px; height: 44px; border-radius: 12px; background: var(--color-very-light-blue); display: flex; align-items: center; justify-content: center; margin-bottom: 2px;">
+            <i data-lucide="folder-open" style="width: 22px; height: 22px; color: var(--color-primary-blue);"></i>
+          </div>
+          <p style="font-weight: 700; font-size: 14px; color: var(--color-primary-navy); margin: 0;">Belum Ada Materi</p>
+          <p style="font-size: 12px; color: var(--color-text-secondary); margin: 0; max-width: 280px; line-height: 1.4;">File modul dan materi perkuliahan untuk mata kuliah ini akan tersimpan di Google Drive.</p>
         </div>
       </div>
     </div>
@@ -830,8 +774,8 @@
           <div class="loader"></div>
         </div>
         <p style="font-size: 12px; color: var(--color-text-muted); text-align: center; margin: 12px 0 0 0;">
-            Tugas yang disimpan akan terlihat oleh seluruh kelas TRJT 3A.
-          </p>
+          Materi yang diunggah akan tersimpan di Google Drive dan dapat diakses oleh seluruh kelas TRJT 3A.
+        </p>
       </form>
     </div>
   </div>
@@ -905,43 +849,43 @@
       </div>
 
       <div class="modal-body" style="padding: 16px 20px 24px 20px; display: flex; flex-direction: column; gap: 10px;">
-        <button class="theme-option-item" onclick="selectTheme('light')">
+        <button class="theme-option-item" data-theme-opt="light" onclick="selectTheme('light')">
           <div style="display: flex; align-items: center; gap: 12px;">
             <div class="settings-icon-circle" style="background: rgba(254, 243, 199, 0.8); border-color: #FDE68A; color: #D97706;">
               <i data-lucide="sun" style="width: 18px; height: 18px;"></i>
             </div>
             <div style="text-align: left;">
-              <p style="font-size: 14px; font-weight: 700; color: var(--color-primary-navy);">Tema Terang (Light Glass)</p>
-              <p style="font-size: 12px; color: var(--color-text-secondary);">Tampilan putih biru segar dan elegan</p>
+              <p class="theme-option-title">Tema Terang (Light Glass)</p>
+              <p class="theme-option-desc">Tampilan putih biru segar dan elegan</p>
             </div>
           </div>
-          <i id="theme-check-light" data-lucide="check" style="width: 18px; height: 18px; color: var(--color-primary-blue);"></i>
+          <i id="theme-check-light" data-lucide="check" class="theme-check-icon" style="color: var(--color-primary-blue);"></i>
         </button>
 
-        <button class="theme-option-item" onclick="selectTheme('dark')">
+        <button class="theme-option-item" data-theme-opt="dark" onclick="selectTheme('dark')">
           <div style="display: flex; align-items: center; gap: 12px;">
             <div class="settings-icon-circle" style="background: rgba(30, 41, 59, 0.8); border-color: #475569; color: #93C5FD;">
               <i data-lucide="moon" style="width: 18px; height: 18px;"></i>
             </div>
             <div style="text-align: left;">
-              <p style="font-size: 14px; font-weight: 700; color: var(--color-primary-navy);">Tema Gelap (Dark Glass)</p>
-              <p style="font-size: 12px; color: var(--color-text-secondary);">Mengurangi silau dan hemat baterai</p>
+              <p class="theme-option-title">Tema Gelap (Dark Glass)</p>
+              <p class="theme-option-desc">Mengurangi silau dan hemat baterai</p>
             </div>
           </div>
-          <i id="theme-check-dark" data-lucide="check" style="width: 18px; height: 18px; color: var(--color-primary-blue); display: none;"></i>
+          <i id="theme-check-dark" data-lucide="check" class="theme-check-icon" style="color: var(--color-primary-blue); display: none;"></i>
         </button>
 
-        <button class="theme-option-item" onclick="selectTheme('system')">
+        <button class="theme-option-item" data-theme-opt="system" onclick="selectTheme('system')">
           <div style="display: flex; align-items: center; gap: 12px;">
             <div class="settings-icon-circle">
               <i data-lucide="smartphone" style="width: 18px; height: 18px;"></i>
             </div>
             <div style="text-align: left;">
-              <p style="font-size: 14px; font-weight: 700; color: var(--color-primary-navy);">Otomatis (Sistem)</p>
-              <p style="font-size: 12px; color: var(--color-text-secondary);">Mengikuti setelan sistem perangkat</p>
+              <p class="theme-option-title">Otomatis (Sistem)</p>
+              <p class="theme-option-desc">Mengikuti setelan sistem perangkat</p>
             </div>
           </div>
-          <i id="theme-check-system" data-lucide="check" style="width: 18px; height: 18px; color: var(--color-primary-blue); display: none;"></i>
+          <i id="theme-check-system" data-lucide="check" class="theme-check-icon" style="color: var(--color-primary-blue); display: none;"></i>
         </button>
       </div>
     </div>
@@ -987,18 +931,17 @@
   <!-- ==========================================
        MODAL 6: TAMBAH / INPUT TUGAS KULIAH
        ========================================== -->
-  <div id="modal-add-assignment" class="modal-backdrop" role="dialog" aria-modal="true">
+  <div id="modal-add-assignment" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-add-task-title">
     <div class="modal-sheet">
       <div class="modal-drag-handle"></div>
       
       <div class="modal-header">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <div class="brand-logo-box" style="background: rgba(254, 243, 199, 0.9); border-color: #FDE68A; color: #D97706;">
+          <div class="brand-logo-box">
             <i data-lucide="file-plus" style="width: 20px; height: 20px;"></i>
           </div>
           <div>
-            <h2 id="modal-add-task-title" style="font-size: 15px; font-weight: 700; color: var(--color-primary-navy); line-height: 1.25;">Tambah Tugas Kuliah</h2>
-            <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 2px;">Tugas yang disimpan akan dapat dilihat oleh seluruh kelas TRJT 3A</p>
+            <h2 id="modal-add-task-title" style="font-size: 16px; font-weight: 700; color: var(--color-primary-navy); line-height: 1.25; margin: 0;">Tambah Tugas Kuliah</h2>
           </div>
         </div>
         <button id="btn-close-add-task-modal" class="btn-close-modal" onclick="closeAddAssignmentModal()" aria-label="Tutup">
@@ -1007,7 +950,7 @@
       </div>
 
       <form id="form-add-assignment" class="modal-body" novalidate>
-        <div id="task-input-error-msg" class="task-form-error-alert" style="display: none;" role="alert">
+        <div id="task-input-error-msg" class="task-form-error-alert" style="display: none;" role="alert" aria-live="assertive">
           <i data-lucide="alert-circle" style="width: 18px; height: 18px; flex-shrink: 0;"></i>
           <span id="task-input-error-text">Mohon lengkapi kolom yang wajib diisi.</span>
         </div>
@@ -1018,7 +961,7 @@
             <span>Mata Kuliah</span>
             <span class="form-badge-req">Wajib</span>
           </label>
-          <select id="task-input-course" class="form-input" required>
+          <select id="task-input-course" class="form-input" required aria-required="true" aria-describedby="error-task-course">
             <option value="">Pilih Mata Kuliah...</option>
             <option value="Praktikum Antena dan Propagasi">Praktikum Antena dan Propagasi</option>
             <option value="Jaringan Komputer Lanjut">Jaringan Komputer Lanjut</option>
@@ -1032,6 +975,10 @@
             <option value="Sistem Komunikasi Seluler">Sistem Komunikasi Seluler</option>
             <option value="Metodologi Penelitian">Metodologi Penelitian</option>
           </select>
+          <div class="field-error-hint" id="error-task-course" style="display: none;">
+            <i data-lucide="alert-circle" style="width: 14px; height: 14px; flex-shrink: 0;"></i>
+            <span>Pilih salah satu mata kuliah</span>
+          </div>
         </div>
 
         <!-- Judul Tugas -->
@@ -1040,31 +987,41 @@
             <span>Nama / Judul Tugas</span>
             <span class="form-badge-req">Wajib</span>
           </label>
-          <input type="text" id="task-input-title" class="form-input" placeholder="Contoh: Laporan Bab 1 Karakteristik Antena" required autocomplete="off">
+          <input type="text" id="task-input-title" class="form-input" placeholder="Contoh: Laporan Bab 1 Karakteristik Antena" required aria-required="true" autocomplete="off" aria-describedby="error-task-title">
+          <div class="field-error-hint" id="error-task-title" style="display: none;">
+            <i data-lucide="alert-circle" style="width: 14px; height: 14px; flex-shrink: 0;"></i>
+            <span>Nama atau judul tugas wajib diisi</span>
+          </div>
         </div>
 
         <!-- Tanggal Pengumpulan & Pilihan Cepat -->
         <div class="form-group" id="group-due-date">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-            <label for="task-input-due-date" class="form-label" style="margin: 0;">
-              <span>Tanggal pengumpulan</span>
-              <span class="form-badge-req">Wajib</span>
-            </label>
-            <span class="quick-date-label">Pilihan cepat:</span>
-          </div>
-          <input type="date" id="task-input-due-date" class="form-input" required>
-          
-          <!-- Tombol Pilihan Tanggal Cepat -->
-          <div class="quick-date-chips" style="margin-top: 8px;">
-            <button type="button" class="quick-date-btn" data-days="1" onclick="setQuickDueDate(1)">Besok</button>
-            <button type="button" class="quick-date-btn active" data-days="3" onclick="setQuickDueDate(3)">3 Hari lagi</button>
-            <button type="button" class="quick-date-btn" data-days="7" onclick="setQuickDueDate(7)">1 Minggu</button>
+          <label for="task-input-due-date" class="form-label">
+            <span>Tanggal pengumpulan</span>
+            <span class="form-badge-req">Wajib</span>
+          </label>
+          <input type="date" id="task-input-due-date" class="form-input" required aria-required="true" aria-describedby="error-task-due-date">
+          <div class="field-error-hint" id="error-task-due-date" style="display: none;">
+            <i data-lucide="alert-circle" style="width: 14px; height: 14px; flex-shrink: 0;"></i>
+            <span>Tanggal pengumpulan wajib ditentukan</span>
           </div>
 
-          <!-- Preview Tanggal Format Indonesia -->
+          <!-- Preview Tanggal Format Indonesia (Acuan Jelas) -->
           <div id="task-due-date-preview" class="task-date-preview" style="margin-top: 8px;">
-            <i data-lucide="calendar" style="width: 14px; height: 14px; flex-shrink: 0;"></i>
+            <i data-lucide="calendar" style="width: 15px; height: 15px; flex-shrink: 0; color: var(--color-primary-blue);"></i>
             <span id="task-due-date-preview-text">Batas: Terpilih</span>
+          </div>
+
+          <!-- Tombol Pilihan Tanggal Cepat -->
+          <div class="quick-date-wrapper" style="margin-top: 10px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+              <span class="quick-date-label">Pilihan cepat:</span>
+            </div>
+            <div class="quick-date-chips">
+              <button type="button" class="quick-date-btn" data-days="1" onclick="setQuickDueDate(1)">Besok</button>
+              <button type="button" class="quick-date-btn active" data-days="3" onclick="setQuickDueDate(3)">3 Hari lagi</button>
+              <button type="button" class="quick-date-btn" data-days="7" onclick="setQuickDueDate(7)">1 Minggu</button>
+            </div>
           </div>
         </div>
 
@@ -1095,7 +1052,7 @@
         </div>
 
         <!-- Catatan Tambahan (Opsional) -->
-        <div class="form-group">
+        <div class="form-group" style="margin-bottom: 12px;">
           <label for="task-input-desc" class="form-label">
             <span>Catatan Tambahan</span>
             <span class="form-badge-opt">Opsional</span>
@@ -1103,13 +1060,13 @@
           <textarea id="task-input-desc" class="form-input" rows="2" placeholder="Ketentuan tugas, bab laporan..."></textarea>
         </div>
 
-        <!-- Catatan Transparansi Seluruh Kelas -->
+        <!-- Catatan Transparansi Seluruh Kelas (sekali saja dekat tombol Simpan) -->
         <div class="form-sync-note">
           <i data-lucide="users" style="width: 16px; height: 16px; flex-shrink: 0;"></i>
-          <span>Tugas yang disimpan akan disinkronkan otomatis dan dapat dilihat oleh seluruh mahasiswa TRJT 3A.</span>
+          <span>Tugas yang disimpan akan disinkronkan otomatis dan dapat dilihat oleh seluruh kelas TRJT 3A.</span>
         </div>
 
-        <button type="submit" id="btn-submit-task" class="btn-submit-upload" style="margin-top: 14px;">
+        <button type="submit" id="btn-submit-task" class="btn-submit-upload">
           <i data-lucide="check-circle" style="width: 18px; height: 18px;"></i>
           <span>Simpan Tugas Kuliah</span>
         </button>
@@ -1206,8 +1163,8 @@
         <!-- Search & Course Filter -->
         <div style="display: flex; flex-direction: column; gap: 8px;">
           <div style="position: relative;">
-            <i data-lucide="search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--color-text-muted);"></i>
-            <input type="text" id="all-tasks-search-input" class="form-input" placeholder="Cari judul tugas atau mata kuliah..." style="width: 100%; padding-left: 36px; padding-top: 8px; padding-bottom: 8px; border-radius: 12px; font-size: 13px;">
+            <i data-lucide="search" style="position: absolute; left: 13px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--color-text-muted); pointer-events: none; z-index: 2;"></i>
+            <input type="text" id="all-tasks-search-input" placeholder="Cari judul tugas atau mata kuliah..." style="width: 100%; padding: 8px 14px 8px 38px !important; min-height: 38px !important; border-radius: 12px; font-size: 13px !important; background: var(--color-surface-glass); border: 1px solid var(--color-border-subtle); color: var(--color-text-primary); font-family: inherit; outline: none; box-sizing: border-box !important;">
           </div>
 
           <div style="display: flex; gap: 8px;">
@@ -1314,6 +1271,6 @@
   <script src="./js/drive-service.js?v=6.9"></script>
   <script src="./js/material-service.js?v=6.9"></script>
   <script src="./js/assignment-service.js?v=6.9"></script>
-  <script src="./js/app.js?v=6.9"></script>
+  <script src="./js/app.js?v=9.0"></script>
 </body>
 </html>

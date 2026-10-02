@@ -118,19 +118,38 @@
       });
   }
 
+  // Helper: Find folder match in a list
+  function findFolderInList(list, query) {
+    if (!list || !list.length || !query) return null;
+    const cleanQuery = query.toLowerCase().trim();
+    return list.find((f) => 
+      (f.courseName && f.courseName.toLowerCase() === cleanQuery) ||
+      (f.scheduleId && f.scheduleId.toLowerCase() === cleanQuery) ||
+      (f.id && f.id.toLowerCase() === cleanQuery) ||
+      (f.courseName && f.courseName.toLowerCase().includes(cleanQuery)) ||
+      (cleanQuery.includes((f.id || '').toLowerCase()))
+    ) || null;
+  }
+
   // Get Connection Status
   async function getConnectionStatus() {
+    if (cachedConnectionStatus && cachedConnectionStatus.connected) {
+      return cachedConnectionStatus;
+    }
+
     const db = window.firebase ? window.firebase.firestore() : null;
     if (db) {
       try {
-        const doc = await db.collection('systemConfig').doc('googleDrive').get();
-        if (doc.exists) {
+        const fetchPromise = db.collection('systemConfig').doc('googleDrive').get();
+        const timeoutPromise = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 1000));
+        const doc = await Promise.race([fetchPromise, timeoutPromise]);
+        if (doc && doc.exists) {
           cachedConnectionStatus = doc.data();
         } else {
           cachedConnectionStatus = DEFAULT_DRIVE_CONFIG;
         }
       } catch (e) {
-        console.warn('Get drive status error:', e);
+        console.warn('Get drive status note (using cached/default):', e.message);
       }
     }
 
@@ -139,34 +158,41 @@
 
   // Get All 11 Course Folders
   async function getCourseFolders() {
+    if (cachedFolders && cachedFolders.length > 0) {
+      return cachedFolders;
+    }
+
     const db = window.firebase ? window.firebase.firestore() : null;
     if (db) {
       try {
-        const snapshot = await db.collection('courseFolders').get();
-        if (!snapshot.empty) {
+        const fetchPromise = db.collection('courseFolders').get();
+        const timeoutPromise = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 1000));
+        const snapshot = await Promise.race([fetchPromise, timeoutPromise]);
+        if (snapshot && !snapshot.empty) {
           const list = [];
           snapshot.forEach((d) => list.push(d.data()));
           cachedFolders = list;
           return list;
         }
       } catch (e) {
-        console.warn('Get course folders error:', e);
+        console.warn('Get course folders note (using default/cache):', e.message);
       }
     }
 
     return cachedFolders || DEFAULT_COURSE_FOLDERS;
   }
 
-  // Find Folder ID for Course
+  // Find Folder ID for Course (Cache-first, instantaneous resolution)
   async function getFolderForCourse(courseNameOrId) {
-    const folders = await getCourseFolders();
-    const cleanQuery = (courseNameOrId || '').toLowerCase().trim();
+    if (!courseNameOrId) return null;
 
-    return folders.find((f) => 
-      (f.courseName && f.courseName.toLowerCase() === cleanQuery) ||
-      (f.scheduleId && f.scheduleId.toLowerCase() === cleanQuery) ||
-      (f.id && f.id.toLowerCase() === cleanQuery)
-    ) || null;
+    // 1. Fast immediate synchronous cache hit
+    const fastHit = findFolderInList(cachedFolders || DEFAULT_COURSE_FOLDERS, courseNameOrId);
+    if (fastHit) return fastHit;
+
+    // 2. Fallback to getCourseFolders()
+    const folders = await getCourseFolders();
+    return findFolderInList(folders, courseNameOrId);
   }
 
   // Extract Folder ID from URL or Raw ID

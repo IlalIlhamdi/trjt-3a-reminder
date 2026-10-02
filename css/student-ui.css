@@ -1,0 +1,3269 @@
+/* ==========================================================================
+   TRJT 3A REMINDER — STUDENT UI (WHITE & BLUE AMBIENT DESIGN SYSTEM)
+   Scoped to .student-app to keep admin interface completely independent.
+   Strict adherence to original TRJT 3A palette: #2F80ED, #1E6DEB, #0F3D91, #0F2942, #F4F8FE
+   ========================================================================== */
+
+:root {
+  /* Brand Tokens (Mature Executive White & Navy System) */
+  --color-primary-navy: #173F7A;
+  --color-deep-blue: #123568;
+  --color-primary-blue: #173F7A;
+  --color-blue-hover: #123568;
+  --color-soft-blue: #EEF4FB;
+  --color-very-light-blue: #EEF4FB;
+  --color-app-bg: #F5F8FC;
+
+  /* Typography Colors */
+  --color-text-primary: #172B4D;
+  --color-text-secondary: #718096;
+  --color-text-muted: #8C9BAE;
+
+  /* Semantic Status Tokens (Strictly for real status only) */
+  --color-success: #2FB67C;
+  --color-success-bg: #EEF8F4;
+  --color-success-border: #D1FAE5;
+  --color-success-text: #2FB67C;
+
+  --color-warning: #D97706;
+  --color-warning-bg: #FFFBEB;
+  --color-warning-border: #FEF3C7;
+  --color-warning-text: #D97706;
+
+  --color-danger: #DC2626;
+  --color-danger-bg: #FEF2F2;
+  --color-danger-border: #FEE2E2;
+  --color-danger-text: #DC2626;
+
+  /* Surface & Borders */
+  --color-surface-card: #FFFFFF;
+  --color-border-subtle: #E3EAF2;
+  --ui-surface: #F5F8FC;
+  --ui-card: #FFFFFF;
+  --ui-line: #E3EAF2;
+  --ui-shadow: 0 3px 12px rgba(23, 63, 122, 0.04);
+  --ui-shadow-hover: 0 6px 18px rgba(23, 63, 122, 0.08);
+
+  /* Geometry */
+  --radius-card: 20px;
+  --radius-hero: 26px;
+  --radius-modal: 28px;
+  --radius-full: 9999px;
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --nav-height: 68px;
+}
+
+[data-theme="dark"] {
+  --color-primary-navy: #F8FAFC;
+  --color-primary-blue: #3B82F6;
+  --color-blue-hover: #60A5FA;
+  --color-deep-blue: #60A5FA;
+  --color-soft-blue: rgba(59, 130, 246, 0.2);
+  --color-very-light-blue: rgba(59, 130, 246, 0.12);
+  --color-app-bg: #090E17;
+
+  --color-text-primary: #F8FAFC;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #64748B;
+
+  --color-surface-card: #131B2E;
+  --color-border-subtle: #1E293B;
+  --ui-surface: #0E1526;
+  --ui-card: #131B2E;
+  --ui-line: #1E293B;
+  --ui-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+  --ui-shadow-hover: 0 14px 30px -10px rgba(0, 0, 0, 0.65);
+}
+
+/* ==========================================================================
+   APP STRUCTURE & RESET FOR STUDENT APP
+   ========================================================================== */
+body.student-app {
+  background: var(--color-app-bg);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+.student-app .app-viewport {
+  background: transparent;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+}
+
+.student-app .app-container {
+  max-width: 1080px !important;
+  width: 100%;
+  min-height: 100dvh;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+  padding-top: 0 !important;
+  padding-bottom: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==========================================================================
+   HEADER
+   ========================================================================== */
+.student-app .app-header {
+  padding: calc(16px + var(--safe-area-top)) 20px 14px;
+  background: var(--color-app-bg);
+  border: 0;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.student-app .beranda-greeting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.student-app .greeting-heading {
+  font-size: clamp(20px, 4vw, 24px);
+  font-weight: 800;
+  color: var(--color-primary-navy);
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+  margin: 0;
+  padding-top: 2px;
+}
+
+.student-app .greeting-date {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.student-app .brand-logo-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--color-primary-blue) 0%, var(--color-deep-blue) 100%);
+  border: 0;
+  color: #FFFFFF;
+  box-shadow: 0 6px 16px -6px rgba(47, 128, 237, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.student-app .brand-title {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--color-text-primary);
+  line-height: 1.2;
+}
+
+.student-app .brand-subtitle {
+  font-size: 11.5px;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+  line-height: 1.2;
+}
+
+.student-app .btn-header-bell {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--ui-card);
+  border: 1px solid var(--ui-line);
+  box-shadow: var(--ui-shadow);
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.student-app .btn-header-bell:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--ui-shadow-hover);
+}
+
+.student-app .bell-unread-dot {
+  position: absolute;
+  top: 10px;
+  right: 11px;
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-primary-blue);
+  border-radius: 50%;
+  border: 2px solid var(--ui-card);
+}
+
+/* ==========================================================================
+   MAIN CONTENT & VIEWS
+   ========================================================================== */
+.student-app .main-content {
+  padding: 12px 20px calc(110px + var(--safe-area-bottom));
+  gap: 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.student-app .view-section {
+  display: none;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.student-app .view-section.active {
+  display: flex;
+}
+
+.student-app #view-beranda.active {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Eyebrows & Headings */
+.greeting-eyebrow,
+.section-eyebrow {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--color-primary-blue);
+  text-transform: uppercase;
+}
+
+.student-app .beranda-greeting-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.student-app .greeting-text-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.student-app .greeting-heading {
+  font-size: clamp(24px, 4vw, 32px);
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: var(--color-text-primary);
+  line-height: 1.2;
+}
+
+.student-app .greeting-date {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+/* Status Pill Chip */
+.student-app .status-pill-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: normal;
+  line-height: 1.3;
+  background: var(--color-success-bg);
+  border: 1px solid var(--color-success-border);
+  color: var(--color-success-text);
+  box-shadow: none;
+}
+
+.student-app .status-pill-chip.in-progress {
+  background: var(--color-very-light-blue);
+  border-color: rgba(191, 219, 254, 0.9);
+  color: var(--color-primary-blue);
+}
+
+.student-app .status-pill-chip.starting-soon {
+  background: var(--color-warning-bg);
+  border-color: var(--color-warning-border);
+  color: var(--color-warning-text);
+}
+
+.student-app .status-pill-chip.neutral {
+  background: var(--ui-card);
+  border-color: var(--ui-line);
+  color: var(--color-text-secondary);
+}
+
+/* ========================================================================== 
+   HOME OVERVIEW (DAILY SUMMARY; HERO LIVES IN CAMPUS BANNER)
+   ========================================================================== */
+.home-overview {
+  display: none !important;
+}
+
+.home-overview > *,
+.home-board > * {
+  min-width: 0;
+}
+
+/* Next Class Hero Card */
+.student-app #hero-card-container .hero-glass-card {
+  padding: 24px;
+  min-height: 280px;
+  gap: 16px;
+  border: 0;
+  border-radius: var(--radius-hero);
+  background: linear-gradient(135deg, #1E6DEB 0%, #0F3D91 100%);
+  box-shadow: 0 16px 36px -12px rgba(15, 61, 145, 0.42);
+  color: #FFFFFF;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  isolation: isolate;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.student-app #hero-card-container .hero-glass-card::before {
+  content: '';
+  position: absolute;
+  inset: -140px -130px auto auto;
+  width: 380px;
+  height: 380px;
+  border-radius: 50%;
+  background: repeating-radial-gradient(circle at center, transparent 0 24px, rgba(255, 255, 255, 0.07) 25px 26px, transparent 27px 48px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.student-app #hero-card-container .hero-tag-pill {
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  padding: 5px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+  align-self: flex-start;
+}
+
+.student-app #hero-card-container .hero-tag-pill.in-progress {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #FFFFFF;
+}
+
+.student-app #hero-card-container .hero-time-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.student-app #hero-card-container .hero-clock-circle {
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: #FFFFFF !important;
+  border-radius: 12px;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.student-app #hero-card-container .hero-day-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #DCEEFF;
+}
+
+.student-app #hero-card-container .hero-time-dot {
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 700;
+}
+
+.student-app #hero-card-container .hero-time-text {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #FFFFFF;
+}
+
+.student-app #hero-card-container .hero-course-title {
+  font-size: clamp(20px, 3.2vw, 26px);
+  line-height: 1.3;
+  color: #FFFFFF;
+  letter-spacing: -0.6px;
+  font-weight: 800;
+  max-width: 540px;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.student-app #hero-card-container .hero-meta-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.student-app #hero-card-container .hero-meta-chip {
+  color: #EBF4FE;
+  font-size: 12.5px;
+  line-height: 1.4;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.student-app #hero-card-container .hero-meta-chip :is(i, svg) {
+  color: #93C5FD;
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.student-app #hero-card-container .hero-reminder-badge {
+  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-full);
+  color: #DCEEFF;
+  font-size: 11.5px;
+  font-weight: 600;
+  box-shadow: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+.student-app #hero-card-container .hero-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #60A5FA;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.3);
+}
+
+.student-app #hero-card-container .hero-countdown-wrap {
+  background: rgba(0, 0, 0, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.student-app #hero-card-container .hero-countdown-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #DCEEFF;
+}
+
+.student-app #hero-card-container .hero-countdown-digits {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #FFFFFF;
+}
+
+.student-app #hero-card-container .hero-progress-track {
+  width: 100%;
+  height: 5px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.student-app #hero-card-container .hero-progress-bar {
+  height: 100%;
+  background-color: #34D399;
+  border-radius: var(--radius-full);
+}
+
+.student-app #hero-card-container .hero-glass-card > p {
+  color: #EBF4FE !important;
+}
+
+/* "Lihat jadwal" button inside hero */
+.hero-view-schedule {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  align-self: flex-start;
+  min-height: 44px;
+  margin-top: auto;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 12px;
+  background: #FFFFFF;
+  color: var(--color-deep-blue);
+  font: 700 13px var(--font-family);
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  transition: background 0.18s ease, transform 0.18s ease;
+}
+
+.hero-view-schedule svg {
+  width: 15px;
+  height: 15px;
+}
+
+.hero-view-schedule:hover {
+  background: var(--color-very-light-blue);
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   DAILY SUMMARY (RINGKASAN HARI INI)
+   ========================================================================== */
+.home-insights {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  justify-content: center;
+}
+
+.student-app .section-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.student-app .section-main-title {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--color-text-primary);
+  line-height: 1.3;
+}
+
+.insights-caption {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+}
+
+.insights-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 12px;
+  background: var(--color-very-light-blue);
+  color: var(--color-primary-blue);
+  border: 1px solid rgba(191, 219, 254, 0.8);
+  flex-shrink: 0;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.insights-icon:hover {
+  background: var(--color-soft-blue);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(47, 128, 237, 0.15);
+}
+
+.insights-icon:active {
+  transform: scale(0.96);
+}
+
+.insights-icon :is(i, svg) {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2;
+}
+
+.dashboard-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 16px 14px;
+  border-radius: 18px;
+  background: #FFFFFF !important;
+  border: 1px solid #E1EAF4 !important;
+  box-shadow: 0 3px 12px rgba(20, 49, 79, 0.04) !important;
+  min-height: 96px;
+  box-sizing: border-box;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.summary-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(20, 49, 79, 0.08) !important;
+}
+
+/* Consistent neutral card backgrounds for all 3 summary cards */
+.summary-item:first-child,
+.summary-item-total,
+.summary-item:nth-child(2),
+.summary-item-completed,
+.summary-item:nth-child(3),
+.summary-item-remaining {
+  background: #FFFFFF !important;
+  border-color: #E1EAF4 !important;
+}
+
+/* Card 1: Kelas hari ini (Primary Blue value) */
+.summary-item:first-child .summary-value,
+.summary-item-total .summary-value {
+  color: #2F80ED !important;
+}
+
+/* Card 2: Kelas selesai (Dark Green value) */
+.summary-item:nth-child(2) .summary-value,
+.summary-item-completed .summary-value {
+  color: #059669 !important;
+}
+
+/* Card 3: Kelas tersisa (Dark Orange value) */
+.summary-item:nth-child(3) .summary-value,
+.summary-item-remaining .summary-value {
+  color: #D97706 !important;
+}
+
+/* Labels: Consistent neutral typography */
+.summary-item:first-child .summary-label,
+.summary-item-total .summary-label,
+.summary-item:nth-child(2) .summary-label,
+.summary-item-completed .summary-label,
+.summary-item:nth-child(3) .summary-label,
+.summary-item-remaining .summary-label {
+  color: #718096 !important;
+  font-weight: 500;
+}
+
+.summary-value {
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.8px;
+  font-variant-numeric: tabular-nums;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.summary-label {
+  font-size: 12.5px;
+  line-height: 1.3;
+  font-weight: 500;
+  color: #718096;
+  word-break: break-word;
+}
+
+/* Remove checkmark icon from summary (0 ✓ -> 0) */
+.summary-check-icon {
+  display: none !important;
+}
+
+/* ==========================================================================
+   QUICK ACCESS SHORTCUTS
+   ========================================================================== */
+.home-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  grid-auto-rows: 1fr;
+}
+
+@media (max-width: 640px) {
+  .home-shortcuts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+}
+
+.class-shortcut {
+  min-width: 0;
+  height: 100%;
+  min-height: 112px;
+  padding: 16px 14px;
+  border: 1px solid var(--ui-line);
+  background: var(--ui-card);
+  border-radius: 20px;
+  font-family: inherit;
+  text-align: left;
+  color: var(--color-text-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  position: relative;
+  box-shadow: var(--ui-shadow);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  box-sizing: border-box;
+}
+
+.class-shortcut:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--ui-shadow-hover);
+  border-color: rgba(47, 128, 237, 0.4);
+}
+
+.shortcut-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--color-very-light-blue);
+  color: var(--color-primary-blue);
+  border: 1px solid rgba(191, 219, 254, 0.8);
+  flex-shrink: 0;
+}
+
+.shortcut-icon :is(i, svg) {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
+}
+
+.shortcut-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  width: 100%;
+}
+
+.shortcut-copy strong {
+  font-size: 13.5px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.shortcut-copy :is(span, .badge-piket-today-chip) {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.shortcut-arrow {
+  width: 16px;
+  height: 16px;
+  color: var(--color-text-secondary);
+  position: absolute;
+  top: 14px;
+  right: 12px;
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+
+.class-shortcut:hover .shortcut-arrow {
+  color: var(--color-primary-blue);
+  transform: translate(2px, -2px);
+}
+
+/* ==========================================================================
+   TODAY'S SCHEDULE & UPCOMING TASKS (HOME BOARD)
+   ========================================================================== */
+.home-board {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.section-link {
+  border: 0;
+  background: none;
+  color: #173F7A;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font: 700 12px var(--font-family);
+  cursor: pointer;
+  min-height: 44px;
+  padding: 4px 0 4px 8px;
+  white-space: nowrap;
+  transition: gap 0.15s ease, color 0.15s ease;
+}
+
+.section-link:hover {
+  gap: 8px;
+  color: #123568;
+}
+
+.section-link svg {
+  width: 15px;
+  height: 15px;
+  color: inherit;
+  stroke: currentColor;
+}
+
+/* Today's Timeline Cards */
+.student-app .today-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.student-app .today-class-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  background: var(--ui-card);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--ui-shadow);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  box-sizing: border-box;
+}
+
+.student-app .today-class-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--ui-shadow-hover);
+  border-color: var(--color-primary-blue);
+}
+
+.student-app .today-card-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.student-app .today-time-rail,
+.today-time-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: stretch;
+  justify-content: center;
+  gap: 3px;
+  width: 58px;
+  min-width: 58px;
+  max-width: 58px;
+  flex-shrink: 0;
+  border-right: 1.5px solid var(--ui-line);
+  padding-right: 10px;
+  font-variant-numeric: tabular-nums;
+  box-sizing: border-box;
+}
+
+.student-app .today-time-start,
+.today-time-start {
+  font-size: 13.5px;
+  color: #172B4D !important;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.student-app .today-time-end,
+.today-time-end {
+  font-size: 11px;
+  color: #718096 !important;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.student-app .today-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.student-app .today-card-title {
+  font-size: 13.5px;
+  line-height: 1.35;
+  font-weight: 700;
+  color: #172B4D !important;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+.student-app .today-card-room,
+.today-card-room {
+  font-size: 11.5px;
+  color: #718096 !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.student-app .today-card-room :is(i, svg),
+.today-card-room :is(i, svg) {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  color: #718096 !important;
+  stroke: #718096 !important;
+}
+
+.student-app .today-card-chevron,
+.today-card-chevron {
+  width: 16px;
+  height: 16px;
+  color: #173F7A !important;
+  stroke: #173F7A !important;
+  flex-shrink: 0;
+}
+
+.student-app .today-state-label,
+.today-state-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--color-primary-blue);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  line-height: 1.2;
+  align-self: flex-start;
+  width: fit-content;
+}
+
+.student-app .today-state-label::before,
+.today-state-label::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* Hide SELESAI label and green dot completely from completed schedule cards */
+.student-app .today-class-card.is-past .today-state-label,
+.is-past .today-state-label {
+  display: none !important;
+}
+
+/* Active class highlight in royal blue */
+.student-app .today-class-card.is-active {
+  background: linear-gradient(135deg, #1E6DEB 0%, #0F3D91 100%);
+  border-color: #0F3D91;
+  box-shadow: 0 12px 28px -10px rgba(15, 61, 145, 0.4);
+}
+
+.student-app .today-class-card.is-active :is(.today-card-title, .today-time-start, .today-card-chevron) {
+  color: #FFFFFF;
+}
+
+.student-app .today-class-card.is-active :is(.today-time-end, .today-card-room) {
+  color: #DCEEFF;
+}
+
+.student-app .today-class-card.is-active .today-card-room :is(i, svg) {
+  color: #EBF4FE;
+}
+
+.student-app .today-class-card.is-active .today-time-rail {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Active status on blue card: clean text + glowing dot, NO card/pill wrapper */
+.student-app .today-class-card.is-active .today-state-label {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  color: #FFFFFF !important;
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+  white-space: nowrap !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  text-transform: uppercase !important;
+  align-self: flex-start !important;
+  width: fit-content !important;
+  box-shadow: none !important;
+}
+
+.student-app .today-class-card.is-active .today-state-label::before {
+  content: '' !important;
+  width: 5px !important;
+  height: 5px !important;
+  border-radius: 50% !important;
+  background: #38BDF8 !important;
+  box-shadow: 0 0 5px rgba(56, 189, 248, 0.9) !important;
+  flex-shrink: 0 !important;
+}
+
+/* Tasks Widget on Home */
+.student-app .tugas-home-section {
+  margin-top: 0;
+}
+
+/* Empty state for tasks: soft check circle */
+.student-app .today-status-circle.finished {
+  background: #EEF8F4 !important;
+  border: 1px solid rgba(37, 168, 117, 0.2) !important;
+  color: #25A875 !important;
+}
+
+.student-app .today-status-circle.finished :is(i, svg) {
+  color: #25A875 !important;
+  stroke: #25A875 !important;
+}
+
+.student-app .tugas-header-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  width: 100% !important;
+  margin-bottom: 12px !important;
+  flex-wrap: nowrap !important;
+}
+
+.student-app .tugas-header-left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+  flex: 0 1 auto !important;
+}
+
+.student-app .tugas-header-left .section-main-title,
+.student-app #tasks-home-heading {
+  font-size: 15.5px !important;
+  font-weight: 700 !important;
+  color: #172B4D !important;
+  white-space: nowrap !important;
+  margin: 0 !important;
+  line-height: 1.2 !important;
+}
+
+/* 6. Subtle badge "0 Tugas": #EEF2F6 bg, #657487 color, 10px, radius 8px, no strong border */
+.student-app .tugas-header-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 3px 7px !important;
+  border-radius: 8px !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  background: #EEF2F6 !important;
+  color: #657487 !important;
+  border: none !important;
+  box-shadow: none !important;
+  line-height: 1.2 !important;
+}
+
+.student-app .tugas-header-actions {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  width: auto !important;
+  flex: 0 0 auto !important;
+  flex-shrink: 0 !important;
+}
+
+/* 7. "Lihat semua" text button: #173F7A, 11-12px, font-weight 600, no bg, no border */
+.student-app .btn-tugas-view-all {
+  background: transparent !important;
+  border: none !important;
+  color: #173F7A !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  padding: 0 4px !important;
+  white-space: nowrap !important;
+  text-decoration: none !important;
+  min-height: 40px !important;
+  height: 40px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  font-family: inherit !important;
+  transition: opacity 0.15s ease, color 0.15s ease !important;
+}
+
+[data-theme="dark"] .student-app .btn-tugas-view-all {
+  color: #60A5FA !important;
+}
+
+[data-theme="dark"] .student-app .tugas-header-left .section-main-title,
+[data-theme="dark"] .student-app #tasks-home-heading {
+  color: #F1F5F9 !important;
+}
+
+[data-theme="dark"] .student-app .tugas-header-badge {
+  background: #1E293B !important;
+  color: #94A3B8 !important;
+}
+
+.student-app .btn-tugas-view-all:hover {
+  opacity: 0.85;
+  color: #123568 !important;
+}
+
+/* 8. Button "+ Tambah": #173F7A bg, #FFFFFF color, height 40px, padding 14px, radius 11px, soft shadow */
+.student-app .btn-tugas-add-header {
+  min-height: 40px !important;
+  height: 40px !important;
+  padding: 0 14px !important;
+  border-radius: 11px !important;
+  background: #173F7A !important;
+  color: #FFFFFF !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  box-shadow: 0 4px 10px rgba(23, 63, 122, 0.18) !important;
+  border: none !important;
+  cursor: pointer !important;
+  font-family: inherit !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease !important;
+}
+
+.student-app .btn-tugas-add-header:hover,
+.student-app .btn-tugas-add-header:active {
+  background: #123568 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(23, 63, 122, 0.22) !important;
+}
+
+.student-app #home-upcoming-tasks-container {
+  margin-top: 0 !important;
+  min-height: 0 !important;
+}
+
+/* 1 & 2. Clean Minimal Empty State — no white card, no border, no outline, no box-shadow */
+.student-app #home-upcoming-tasks-container .today-class-card {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 6px 0 10px 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+  cursor: default !important;
+  min-height: 0 !important;
+  width: 100% !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+.student-app #home-upcoming-tasks-container .today-class-card:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* 3. Small Soft Green Check Icon Indicator (28px container, #ECF8F3 bg, #3BAA7A icon) */
+.student-app #home-upcoming-tasks-container .today-status-circle.finished {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  max-width: 28px !important;
+  border-radius: 50% !important;
+  background: #ECF8F3 !important;
+  border: none !important;
+  box-shadow: none !important;
+  display: grid !important;
+  place-items: center !important;
+  flex-shrink: 0 !important;
+  color: #3BAA7A !important;
+}
+
+.student-app #home-upcoming-tasks-container .today-status-circle.finished :is(i, svg) {
+  width: 14px !important;
+  height: 14px !important;
+  color: #3BAA7A !important;
+  stroke: #3BAA7A !important;
+  stroke-width: 2.2 !important;
+}
+
+/* 4. Text layout: horizontal alignment with 2-3px vertical text gap */
+.student-app #home-upcoming-tasks-container .today-class-card > div:last-child {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  min-width: 0 !important;
+  text-align: left !important;
+}
+
+/* Title: #172B4D, 13px, font-weight 700 */
+.student-app #home-upcoming-tasks-container .today-class-card p:first-child,
+.student-app #home-upcoming-tasks-container .empty-state-title {
+  color: #172B4D !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  margin: 0 !important;
+}
+
+/* Description: #7B8794, 11.5px, font-weight 500 */
+.student-app #home-upcoming-tasks-container .today-class-card p:last-child,
+.student-app #home-upcoming-tasks-container .empty-state-desc {
+  color: #7B8794 !important;
+  font-size: 11.5px !important;
+  font-weight: 500 !important;
+  line-height: 1.3 !important;
+  margin: 0 !important;
+}
+
+.student-app #home-upcoming-tasks-container .empty-state-card {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 6px 0 !important;
+}
+
+[data-theme="dark"] .student-app #home-upcoming-tasks-container .today-status-circle.finished {
+  background: rgba(59, 170, 122, 0.18) !important;
+  color: #34D399 !important;
+}
+
+[data-theme="dark"] .student-app #home-upcoming-tasks-container .today-status-circle.finished :is(i, svg) {
+  color: #34D399 !important;
+  stroke: #34D399 !important;
+}
+
+[data-theme="dark"] .student-app #home-upcoming-tasks-container .today-class-card p:first-child,
+[data-theme="dark"] .student-app #home-upcoming-tasks-container .empty-state-title {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .student-app #home-upcoming-tasks-container .today-class-card p:last-child,
+[data-theme="dark"] .student-app #home-upcoming-tasks-container .empty-state-desc {
+  color: #94A3B8 !important;
+}
+
+/* ==========================================================================
+   SCHEDULE PAGE (VIEW JADWAL)
+   ========================================================================== */
+.student-app .view-page-title {
+  font-size: clamp(22px, 3.5vw, 26px);
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  color: var(--color-text-primary);
+}
+
+.student-app .view-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Capsule Day Selector matching Reference Pill Buttons */
+.student-app .day-selector-capsule {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.student-app .day-btn-item {
+  border-radius: 18px;
+  min-height: 74px;
+  background: #FFFFFF !important;
+  color: #718096 !important;
+  border: 1px solid #E5EDF5 !important;
+  box-shadow: 0 3px 12px rgba(20, 49, 79, 0.04) !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+}
+
+.student-app .day-btn-item:hover:not(.active) {
+  border-color: #173F7A !important;
+  color: #173F7A !important;
+  transform: translateY(-2px);
+}
+
+.student-app .day-btn-item.active {
+  background: #173F7A !important;
+  color: #FFFFFF !important;
+  border-color: #173F7A !important;
+  box-shadow: 0 6px 18px rgba(23, 63, 122, 0.22) !important;
+  transform: translateY(-2px);
+}
+
+.student-app .day-btn-item:focus-visible,
+.student-app .schedule-glass-card:focus-visible,
+.student-app .btn-piket-action:focus-visible {
+  outline: 3px solid #173F7A;
+  outline-offset: 3px;
+}
+
+.student-app .day-label-text {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #718096;
+}
+
+.student-app .day-num-text {
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #172B4D;
+}
+
+.student-app .day-btn-item.active .day-label-text,
+.student-app .day-btn-item.active .day-num-text {
+  color: #FFFFFF !important;
+}
+
+/* Weekly Cards & Panels */
+.student-app .schedule-glass-card,
+.student-app .dosen-glass-card,
+.student-app .notif-card,
+.student-app .settings-glass-panel,
+.student-app .btn-piket-action {
+  background: var(--ui-card);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--ui-shadow);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.student-app .weekly-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.student-app .schedule-glass-card {
+  position: relative;
+  overflow: hidden;
+  padding: 14px 16px !important;
+  background: #FFFFFF !important;
+  border: 1px solid #E5EBF2 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 3px 10px rgba(20, 49, 79, 0.04) !important;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.student-app .schedule-glass-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(20, 49, 79, 0.07) !important;
+}
+
+/* Remove colored vertical accent line completely */
+.student-app .schedule-glass-card::before {
+  display: none !important;
+}
+
+/* Remove finished status opacity / green lines */
+.student-app .schedule-glass-card.status-finished {
+  opacity: 1 !important;
+  border-color: #E5EBF2 !important;
+}
+
+/* In-progress emphasis: subtle soft navy border & shadow, not green */
+.student-app .schedule-glass-card.is-active,
+.student-app .schedule-glass-card.status-in-progress {
+  border-color: rgba(23, 63, 122, 0.35) !important;
+  box-shadow: 0 4px 14px rgba(23, 63, 122, 0.08) !important;
+}
+
+/* Progress bar tipis kartu berlangsung (tinggi 3px, radius penuh) */
+.student-app .schedule-card-progress-track {
+  width: 100%;
+  height: 3px;
+  background: #EAF3FF;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.student-app .schedule-card-progress-fill {
+  height: 100%;
+  background: #173F7A;
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease;
+}
+
+/* 2 Kolom Utama: Kolom Kiri (Waktu) & Kolom Kanan (Informasi) */
+.student-app .schedule-card-body-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+/* Kolom Waktu: Sederhana tanpa card besar di dalam card */
+.student-app .schedule-time-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  width: 56px;
+  min-width: 56px;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  gap: 2px;
+}
+
+.student-app .schedule-time-start {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: #172B4D !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.01em;
+}
+
+.student-app .schedule-time-divider {
+  display: none !important;
+}
+
+.student-app .schedule-time-end {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  color: #8A98A8 !important;
+  line-height: 1.2 !important;
+}
+
+.student-app .schedule-time-duration {
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  color: #173F7A !important;
+  background: #EEF4FB !important;
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 3px 6px !important;
+  margin-top: 4px;
+  line-height: 1.2 !important;
+  white-space: nowrap;
+  letter-spacing: 0.1px;
+  display: inline-block;
+}
+
+/* Kolom Kanan: Nama mata kuliah, Lokasi, Nama dosen */
+.student-app .schedule-card-main-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hide SELESAI and all status badges on schedule card completely */
+.student-app .schedule-status-badge {
+  display: none !important;
+}
+
+/* 1. Nama Mata Kuliah: Elemen dominan setelah jam (13.5px-14px bold #172B4D) */
+.student-app .schedule-subject-heading {
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+  color: #172B4D !important;
+  line-height: 1.3 !important;
+  letter-spacing: -0.01em;
+  margin: 0 0 4px 0 !important;
+  word-break: break-word;
+}
+
+/* 2. Lokasi: Informasi secondary biasa tanpa badge tebal */
+.student-app .schedule-room-badge {
+  color: #718096 !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  margin: 0 !important;
+  line-height: 1.3 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100% !important;
+}
+
+.student-app .schedule-room-badge span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #718096 !important;
+}
+
+.student-app .schedule-room-badge :is(i, svg) {
+  color: #55789C !important;
+  stroke: #55789C !important;
+  width: 12px;
+  height: 12px;
+  stroke-width: 2.2;
+  flex-shrink: 0;
+}
+
+/* 3. Dosen: Baris sederhana [user icon] Nama Dosen (jarak 8-10px dari lokasi) */
+.student-app .schedule-lecturer-row {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 5px !important;
+  margin-top: 9px !important;
+}
+
+.student-app .schedule-lecturer-icon,
+.student-app .schedule-lecturer-avatar :is(i, svg),
+.student-app .schedule-lecturer-row > :is(i, svg) {
+  color: #173F7A !important;
+  stroke: #173F7A !important;
+  width: 13px;
+  height: 13px;
+  stroke-width: 2;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.student-app .schedule-lecturer-avatar {
+  display: none !important;
+}
+
+.student-app .schedule-lecturer-name {
+  color: #40556C !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  line-height: 1.3 !important;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Wadah Tombol Aksi: Flex 1 1 0 agar 2 maupun 3 tombol selalu mengisi lebar kartu secara proporsional */
+.student-app .btn-schedule-actions-row {
+  display: flex !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding-top: 0 !important;
+  border-top: none !important;
+}
+
+/* Tiap tombol: min-height 44px, border halus terdefinisi, latar soft-blue, teks & ikon primary-navy */
+.student-app .btn-schedule-actions-row > button {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  min-height: 44px;
+  height: 44px;
+  font: 700 12px/1 'Inter', sans-serif;
+  white-space: nowrap;
+  padding: 0 10px;
+  border: 1px solid #DCE5EE !important;
+  border-radius: 14px;
+  background: #EEF4FB !important;
+  color: #173F7A !important;
+  box-shadow: 0 1px 3px rgba(23, 63, 122, 0.04) !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  position: relative;
+}
+
+.student-app .btn-schedule-actions-row > button:hover {
+  background: var(--color-soft-blue) !important;
+  border-color: rgba(47, 128, 237, 0.4) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(47, 128, 237, 0.15) !important;
+}
+
+.student-app .btn-schedule-actions-row > button:active {
+  transform: scale(0.97);
+}
+
+.student-app .btn-schedule-actions-row > button :is(i, svg) {
+  width: 16px !important;
+  height: 16px !important;
+  stroke-width: 2.2 !important;
+  flex-shrink: 0;
+  color: currentColor !important;
+  stroke: currentColor !important;
+}
+
+/* Badge counter pada tombol Tugas */
+.student-app .btn-schedule-actions-row .badge-task-counter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-blue);
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  margin-left: 2px;
+}
+
+/* Responsif: Jika sempit (<= 420px), layout vertikal ikon atas label bawah agar teks tidak terpotong */
+@media (max-width: 420px) {
+  .student-app .btn-schedule-actions-row > button {
+    flex-direction: column;
+    gap: 3px;
+    padding: 6px 2px;
+    min-height: 48px;
+    height: auto;
+    font-size: 11px;
+    line-height: 1.1;
+  }
+}
+
+/* ==========================================================================
+   NOTIFICATIONS, DOSEN & SETTINGS
+   ========================================================================== */
+.student-app .filter-glass-pill {
+  background: var(--ui-card);
+  border: 1px solid var(--ui-line);
+  color: var(--color-text-secondary);
+  min-height: 40px;
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.student-app .filter-glass-pill.active {
+  background: var(--color-primary-blue);
+  color: #FFFFFF;
+  border-color: var(--color-primary-blue);
+  box-shadow: 0 4px 12px rgba(47, 128, 237, 0.3);
+}
+
+.student-app .settings-icon-circle {
+  background: var(--color-very-light-blue);
+  border: 1px solid rgba(191, 219, 254, 0.8);
+  color: var(--color-primary-blue);
+}
+
+.student-app .settings-item-row {
+  padding: 16px 18px;
+}
+
+.student-app .btn-panel-action {
+  border: 1.5px solid rgba(191, 219, 254, 0.9);
+  background: var(--color-very-light-blue);
+  color: var(--color-primary-blue);
+  font-weight: 700;
+}
+
+/* Piket Action Button */
+.student-app .btn-piket-action {
+  padding: 16px 18px;
+  border-radius: 22px;
+  box-shadow: 0 8px 24px -12px rgba(15, 61, 145, 0.14);
+}
+
+.student-app .btn-piket-action::before {
+  display: none !important;
+}
+
+.student-app .btn-piket-icon-box {
+  background: linear-gradient(135deg, var(--color-primary-blue) 0%, var(--color-deep-blue) 100%);
+  box-shadow: 0 4px 12px rgba(47, 128, 237, 0.28);
+}
+
+/* Piket Badges & Indicators: Soft blue instead of heavy green */
+.student-app .piket-today-pill,
+.piket-today-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 4px 10px !important;
+  border-radius: 9999px !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  background: #EEF4FB !important;
+  color: #173F7A !important;
+  border: 1px solid #DCE5EE !important;
+  box-shadow: none !important;
+}
+
+.student-app .piket-today-pill::before,
+.piket-today-pill::before {
+  content: '' !important;
+  display: inline-block !important;
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 50% !important;
+  background-color: #173F7A !important;
+  box-shadow: 0 0 0 2px rgba(23, 63, 122, 0.2) !important;
+  flex-shrink: 0 !important;
+}
+
+/* ==========================================================================
+   BOTTOM NAVIGATION
+   ========================================================================== */
+.student-app .bottom-nav {
+  position: fixed;
+  bottom: calc(14px + var(--safe-area-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 480px !important;
+  padding: 6px;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 12px 36px -8px rgba(15, 61, 145, 0.16);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  z-index: 50;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+}
+
+.student-app .nav-item {
+  min-height: 48px;
+  gap: 3px;
+  border-radius: var(--radius-full);
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 0;
+  outline: none !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+  padding: 4px 2px;
+}
+
+.student-app .nav-item:hover:not(.active) {
+  color: var(--color-primary-blue);
+  background: var(--color-very-light-blue);
+}
+
+.student-app .nav-item:focus,
+.student-app .nav-item:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.student-app .nav-item.active {
+  border: 0 !important;
+  background: var(--color-primary-blue) !important;
+  color: #FFFFFF !important;
+  border-radius: var(--radius-full) !important;
+  box-shadow: 0 4px 12px rgba(23, 63, 122, 0.22) !important;
+  outline: none !important;
+}
+
+.student-app .nav-item.active .nav-label {
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+}
+
+.student-app .nav-item.active .nav-icon-wrap :is(i, svg) {
+  stroke: #FFFFFF !important;
+  color: #FFFFFF !important;
+  stroke-width: 2.4;
+}
+
+.student-app .nav-label {
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.student-app .nav-icon-wrap :is(i, svg) {
+  width: 20px;
+  height: 20px;
+}
+
+/* ==========================================================================
+   MODALS
+   ========================================================================== */
+.student-app .modal-sheet {
+  background: var(--ui-card);
+  border-color: var(--ui-line);
+  border-radius: var(--radius-modal) var(--radius-modal) 0 0;
+  box-shadow: 0 -12px 50px rgba(15, 61, 145, 0.16);
+}
+
+.student-app .modal-header {
+  border-color: var(--ui-line);
+}
+
+.student-app .form-input {
+  background: var(--ui-surface);
+  border-color: var(--ui-line);
+  color: var(--color-text-primary);
+}
+
+.student-app .form-input:focus {
+  border-color: var(--color-primary-blue);
+  background: var(--ui-card);
+}
+
+/* Modal Search Inputs (Cari materi & Cari tugas) */
+.student-app #mat-search-input,
+.student-app #all-tasks-search-input {
+  padding-left: 38px !important;
+  min-height: 38px !important;
+  font-size: 13px !important;
+  box-sizing: border-box !important;
+}
+
+.student-app #mat-search-input:focus,
+.student-app #all-tasks-search-input:focus {
+  border-color: var(--color-primary-blue) !important;
+  box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.15) !important;
+}
+
+/* ==========================================================================
+   ACCESSIBILITY & FOCUS
+   ========================================================================== */
+.student-app :is(button:not(.nav-item), a, input, select, textarea):focus-visible {
+  outline: 2.5px solid var(--color-primary-blue);
+  outline-offset: 3px;
+}
+
+.student-app #hero-card-container button:focus-visible {
+  outline-color: #FFFFFF;
+}
+
+.student-app :is(.btn-header-bell, .class-shortcut, .hero-view-schedule, .section-link):active {
+  transform: translateY(1px);
+}
+
+/* ==========================================================================
+   DARK THEME OVERRIDES
+   ========================================================================== */
+[data-theme="dark"] .student-app .app-header {
+  background: var(--color-app-bg);
+}
+
+[data-theme="dark"] .student-app .bottom-nav {
+  background: rgba(19, 27, 46, 0.94);
+  border-color: #1E293B;
+  box-shadow: 0 12px 36px -8px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="dark"] .summary-item:first-child,
+[data-theme="dark"] .summary-item-total {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #93C5FD;
+}
+
+[data-theme="dark"] .summary-item:first-child .summary-value,
+[data-theme="dark"] .summary-item-total .summary-value {
+  color: #60A5FA;
+}
+
+[data-theme="dark"] .summary-item:first-child .summary-label,
+[data-theme="dark"] .summary-item-total .summary-label {
+  color: #93C5FD;
+}
+
+[data-theme="dark"] .summary-item:nth-child(2),
+[data-theme="dark"] .summary-item-completed {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #6EE7B7;
+}
+
+[data-theme="dark"] .summary-item:nth-child(2) .summary-value,
+[data-theme="dark"] .summary-item-completed .summary-value {
+  color: #34D399;
+}
+
+[data-theme="dark"] .summary-item:nth-child(2) .summary-label,
+[data-theme="dark"] .summary-item-completed .summary-label {
+  color: #6EE7B7;
+}
+
+[data-theme="dark"] .summary-item:nth-child(3),
+[data-theme="dark"] .summary-item-remaining {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #FDE68A;
+}
+
+[data-theme="dark"] .summary-item:nth-child(3) .summary-value,
+[data-theme="dark"] .summary-item-remaining .summary-value {
+  color: #FBBF24;
+}
+
+[data-theme="dark"] .summary-item:nth-child(3) .summary-label,
+[data-theme="dark"] .summary-item-remaining .summary-label {
+  color: #FDE68A;
+}
+
+[data-theme="dark"] .summary-check-icon {
+  color: #34D399;
+}
+
+[data-theme="dark"] .insights-icon {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.35);
+  color: #93C5FD;
+}
+
+[data-theme="dark"] .insights-icon:hover {
+  background: rgba(59, 130, 246, 0.25);
+}
+
+[data-theme="dark"] .shortcut-icon {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #93C5FD;
+}
+
+[data-theme="dark"] .shortcut-arrow {
+  color: #94A3B8;
+}
+
+[data-theme="dark"] .class-shortcut:hover .shortcut-arrow {
+  color: #60A5FA;
+}
+
+[data-theme="dark"] .student-app .greeting-heading {
+  color: #F1F5F9;
+}
+
+[data-theme="dark"] .student-app .greeting-date {
+  color: #94A3B8;
+}
+
+[data-theme="dark"] .student-app .today-card-title {
+  color: #F1F5F9;
+}
+
+[data-theme="dark"] .student-app .tugas-header-left .section-main-title {
+  color: #F1F5F9 !important;
+}
+
+[data-theme="dark"] .student-app .status-pill-chip {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #6EE7B7;
+}
+
+[data-theme="dark"] .student-app .status-pill-chip.in-progress {
+  background: rgba(59, 130, 246, 0.18);
+  border-color: rgba(59, 130, 246, 0.45);
+  color: #93C5FD;
+}
+
+[data-theme="dark"] .student-app .status-pill-chip.in-progress :is(i, svg) {
+  color: #3B82F6;
+}
+
+[data-theme="dark"] .student-app .btn-header-bell {
+  background: #131B2E;
+  border-color: #1E293B;
+  color: #F8FAFC;
+}
+
+[data-theme="dark"] .student-app .day-btn-item {
+  background: #131B2E !important;
+  border-color: #1E293B !important;
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .student-app .day-btn-item .day-num-text {
+  color: #F1F5F9 !important;
+}
+
+[data-theme="dark"] .student-app .day-btn-item.active {
+  background: #3B82F6 !important;
+  border-color: #3B82F6 !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .summary-item,
+[data-theme="dark"] .summary-item:first-child,
+[data-theme="dark"] .summary-item-total,
+[data-theme="dark"] .summary-item:nth-child(2),
+[data-theme="dark"] .summary-item-completed,
+[data-theme="dark"] .summary-item:nth-child(3),
+[data-theme="dark"] .summary-item-remaining {
+  background: #131B2E !important;
+  border-color: #1E293B !important;
+}
+
+[data-theme="dark"] .summary-item:first-child .summary-value,
+[data-theme="dark"] .summary-item-total .summary-value {
+  color: #60A5FA !important;
+}
+
+[data-theme="dark"] .summary-item:nth-child(2) .summary-value,
+[data-theme="dark"] .summary-item-completed .summary-value {
+  color: #34D399 !important;
+}
+
+[data-theme="dark"] .summary-item:nth-child(3) .summary-value,
+[data-theme="dark"] .summary-item-remaining .summary-value {
+  color: #FBBF24 !important;
+}
+
+[data-theme="dark"] .summary-label {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .student-app .today-status-circle.finished {
+  background: rgba(37, 168, 117, 0.15) !important;
+  border-color: rgba(37, 168, 117, 0.3) !important;
+  color: #34D399 !important;
+}
+
+[data-theme="dark"] .student-app .today-status-circle.finished :is(i, svg) {
+  color: #34D399 !important;
+  stroke: #34D399 !important;
+}
+
+[data-theme="dark"] .student-app .piket-today-pill,
+[data-theme="dark"] .piket-today-pill {
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: #60A5FA !important;
+  border-color: rgba(96, 165, 250, 0.3) !important;
+}
+
+[data-theme="dark"] .student-app .piket-today-pill::before,
+[data-theme="dark"] .piket-today-pill::before {
+  background-color: #60A5FA !important;
+  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.25) !important;
+}
+
+[data-theme="dark"] .student-app .today-class-card.is-active {
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+  border-color: #3B82F6;
+}
+
+[data-theme="dark"] .student-app .schedule-glass-card {
+  background: #131B2E !important;
+  border-color: #1E293B !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2) !important;
+}
+
+[data-theme="dark"] .student-app .schedule-time-start {
+  color: #F1F5F9 !important;
+}
+
+[data-theme="dark"] .student-app .schedule-time-end {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .student-app .schedule-time-duration {
+  background: rgba(59, 130, 246, 0.18) !important;
+  border: none !important;
+  color: #93C5FD !important;
+}
+
+[data-theme="dark"] .student-app .schedule-subject-heading {
+  color: #F1F5F9 !important;
+}
+
+[data-theme="dark"] .student-app .schedule-glass-card.status-finished .schedule-subject-heading {
+  color: #F1F5F9 !important;
+}
+
+[data-theme="dark"] .student-app .schedule-time-col {
+  background: transparent !important;
+  border: none !important;
+}
+
+[data-theme="dark"] .student-app .schedule-room-badge {
+  background: transparent !important;
+  border: none !important;
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .student-app .schedule-room-badge span {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .student-app .schedule-room-badge :is(i, svg) {
+  color: #60A5FA !important;
+  stroke: #60A5FA !important;
+}
+
+[data-theme="dark"] .student-app .schedule-lecturer-row {
+  background: transparent !important;
+  border: none !important;
+}
+
+[data-theme="dark"] .student-app .schedule-lecturer-icon,
+[data-theme="dark"] .student-app .schedule-lecturer-row > :is(i, svg) {
+  color: #93C5FD !important;
+  stroke: #93C5FD !important;
+}
+
+[data-theme="dark"] .student-app .schedule-lecturer-name {
+  color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] .student-app .btn-schedule-actions-row > button {
+  color: #93C5FD !important;
+  background: rgba(59, 130, 246, 0.15) !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .student-app .btn-schedule-actions-row > button:hover {
+  background: rgba(59, 130, 246, 0.25) !important;
+}
+
+[data-theme="dark"] .student-app .schedule-card-progress-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .student-app .schedule-card-progress-fill {
+  background: #3B82F6;
+}
+
+/* Sleek Native Scrollbar (No ugly default grey gutter) */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(47, 128, 237, 0.28) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(47, 128, 237, 0.28);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(47, 128, 237, 0.5);
+}
+
+[data-theme="dark"] html {
+  scrollbar-color: rgba(59, 130, 246, 0.35) transparent;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.35);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.6);
+}
+
+[data-theme="dark"] .student-app .modal-sheet {
+  background: #131B2E;
+  border-color: #1E293B;
+}
+
+/* ==========================================================================
+   THEME SELECTOR MODAL & TOAST NOTIFICATION
+   ========================================================================== */
+.student-app .theme-option-item,
+.theme-option-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  min-height: 56px;
+  border-radius: 18px;
+  background: var(--color-surface);
+  border: 1.5px solid var(--ui-line);
+  box-shadow: 0 4px 14px rgba(15, 61, 145, 0.05);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+  box-sizing: border-box;
+}
+
+.student-app .theme-option-item:hover,
+.theme-option-item:hover {
+  transform: translateY(-1px);
+  border-color: rgba(47, 128, 237, 0.4);
+  box-shadow: 0 6px 18px rgba(15, 61, 145, 0.08);
+}
+
+.student-app .theme-option-item:focus-visible,
+.theme-option-item:focus-visible {
+  outline: 2px solid var(--color-primary-blue);
+  outline-offset: 2px;
+}
+
+.student-app .theme-option-item.is-selected,
+.theme-option-item.is-selected {
+  border: 2px solid var(--color-primary-blue) !important;
+  background: var(--color-soft-blue-extra) !important;
+}
+
+.student-app .theme-option-item .settings-icon-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.student-app .theme-option-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-primary-navy);
+  line-height: 1.3;
+  margin: 0;
+}
+
+.student-app .theme-option-desc {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.3;
+  margin: 2px 0 0 0;
+}
+
+.student-app .theme-option-item :is(#theme-check-light, #theme-check-dark, #theme-check-system) {
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 50% !important;
+  background: var(--color-primary-blue) !important;
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+  padding: 5px !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 2px 6px rgba(47, 128, 237, 0.35) !important;
+}
+
+.student-app #modal-theme-selector .modal-sheet {
+  max-height: 85vh;
+}
+
+.student-app #modal-theme-selector .modal-body {
+  max-height: calc(85vh - 75px);
+  overflow-y: auto;
+}
+
+.student-app .btn-close-modal,
+.student-app #btn-close-theme-modal {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+[data-theme="dark"] .student-app .theme-option-item,
+[data-theme="dark"] .theme-option-item {
+  background: var(--ui-surface);
+  border-color: var(--ui-line);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="dark"] .student-app .theme-option-item.is-selected,
+[data-theme="dark"] .theme-option-item.is-selected {
+  border-color: #3B82F6 !important;
+  background: rgba(59, 130, 246, 0.12) !important;
+}
+
+[data-theme="dark"] .student-app .theme-option-title {
+  color: #F1F5F9;
+}
+
+[data-theme="dark"] .student-app .theme-option-desc {
+  color: #94A3B8;
+}
+
+[data-theme="dark"] .student-app .theme-option-item :is(#theme-check-light, #theme-check-dark, #theme-check-system) {
+  background: #3B82F6 !important;
+}
+
+/* Toast Notification (Floating above Bottom Navigation) */
+.student-app .toast-container,
+.toast-container {
+  position: fixed;
+  bottom: calc(96px + var(--safe-area-bottom));
+  top: auto !important;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 440px;
+  z-index: 95;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.student-app .toast-item,
+.toast-item {
+  pointer-events: auto;
+  background: rgba(15, 41, 66, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 8px 12px 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  animation: toastSlideUp 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes toastSlideUp {
+  from { opacity: 0; transform: translateY(12px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.student-app .toast-close-btn,
+.toast-close-btn {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  border-radius: 50%;
+  transition: color 0.15s ease, background-color 0.15s ease;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.student-app .toast-close-btn:hover,
+.toast-close-btn:hover {
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+[data-theme="dark"] .student-app .toast-item,
+[data-theme="dark"] .toast-item {
+  background: rgba(19, 27, 46, 0.96);
+  border-color: #1E293B;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* ==========================================================================
+   RESPONSIVE BREAKPOINTS (360px, 390px, 430px, 768px, 1280px)
+   ========================================================================== */
+
+/* Tablet & Desktop (>= 768px) */
+@media (min-width: 768px) {
+  .student-app .app-header {
+    padding: 24px 36px 18px;
+  }
+  .student-app .main-content {
+    padding: 16px 36px 120px;
+  }
+  .student-app #view-beranda.active {
+    gap: 28px;
+  }
+  .student-app .home-overview {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 28px !important;
+    align-items: stretch !important;
+  }
+  .student-app .home-overview .home-insights {
+    grid-column: 1 !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .summary-item {
+    padding: 20px 16px;
+    min-height: 110px;
+  }
+  .summary-value {
+    font-size: 32px;
+    font-weight: 700;
+  }
+  .class-shortcut {
+    flex-direction: row;
+    align-items: center;
+    padding: 18px;
+    gap: 14px;
+    min-height: auto;
+  }
+  .shortcut-copy {
+    padding-right: 8px;
+  }
+  .shortcut-copy strong {
+    font-size: 14px;
+  }
+  .shortcut-arrow {
+    top: 14px;
+    right: 12px;
+  }
+  .home-board {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: 28px;
+  }
+  .student-app .tugas-home-section {
+    padding: 20px;
+    border-radius: var(--radius-card);
+    background: var(--ui-surface);
+    border: 1px solid var(--ui-line);
+  }
+  .student-app #weekly-cards-container,
+  .student-app #dosen-cards-container {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    align-items: start;
+  }
+  .student-app .day-selector-capsule {
+    max-width: 520px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .student-app .bottom-nav.nav-hidden {
+    transform: translateX(-50%);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .student-app .modal-backdrop {
+    align-items: center;
+    padding: 24px;
+  }
+  .student-app .modal-sheet {
+    border-radius: var(--radius-modal);
+    max-width: 560px;
+  }
+}
+
+/* Mobile inputs >= 16px to prevent iOS auto-zoom */
+@media (max-width: 767px) {
+  .student-app .form-input,
+  .student-app select.form-input {
+    font-size: 16px !important;
+  }
+}
+
+/* Standard mobile phones (<= 479px) */
+@media (max-width: 479px) {
+  .student-app .app-header {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .student-app .main-content {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .student-app .bottom-nav {
+    width: calc(100% - 24px);
+  }
+}
+
+/* Compact mobile phones (<= 375px, covers 360px & 375px) */
+@media (max-width: 375px) {
+  .student-app .app-header {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .student-app .main-content {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .student-app #hero-card-container .hero-glass-card {
+    padding: 16px;
+  }
+  .student-app .bottom-nav {
+    width: calc(100% - 16px);
+    padding: 4px;
+    gap: 2px;
+  }
+  .student-app .nav-label {
+    font-size: 9px;
+  }
+  .student-app .tugas-header-left .section-main-title {
+    font-size: 15px !important;
+  }
+  .student-app .btn-schedule-actions-row {
+    gap: 5px;
+  }
+  .student-app .btn-schedule-actions-row > button {
+    font-size: 10.5px;
+    gap: 4px;
+    padding: 0 4px;
+  }
+  .dashboard-summary {
+    gap: 6px;
+  }
+  .summary-item {
+    padding: 12px 6px;
+    min-height: 90px;
+  }
+  .summary-value {
+    font-size: 26px;
+  }
+  .summary-label {
+    font-size: 11.5px;
+  }
+  .home-shortcuts {
+    gap: 6px;
+  }
+  .class-shortcut {
+    padding: 12px 8px;
+  }
+  .shortcut-copy strong {
+    font-size: 12px;
+  }
+  .shortcut-copy :is(span, .badge-piket-today-chip) {
+    font-size: 10px;
+  }
+  .shortcut-arrow {
+    display: none;
+  }
+  .student-app .view-page-title {
+    font-size: 21px;
+  }
+  .student-app .day-btn-item {
+    min-height: 64px;
+  }
+  .student-app .day-num-text {
+    font-size: 17px;
+  }
+}
+
+/* Prefers Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .student-app *,
+  .student-app *::before,
+  .student-app *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ========================================================================== 
+   CAMPUS MENU — reference-inspired home composition, using TRJT blue tokens
+   ========================================================================== */
+.student-app {
+  --menu-navy: #172B4D;
+  --menu-blue: #173F7A;
+  --menu-paper: #F5F8FC;
+}
+
+/* Navy header background: 
+   On Beranda: tall cover background for greeting.
+   On other views: header itself is a sticky navy bar in normal document flow with 0 overlap. */
+.student-app.home-active .app-container::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: clamp(235px, 28vw, 305px);
+  background: linear-gradient(112deg, var(--menu-navy), var(--menu-blue));
+  border-radius: 0 0 32px 32px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.student-app:not(.home-active) .app-container::before {
+  display: none !important;
+}
+
+.student-app .app-header {
+  border: 0;
+  box-shadow: none;
+  z-index: 30;
+  box-sizing: border-box;
+}
+
+.student-app.home-active .app-header {
+  background: transparent !important;
+  position: relative;
+  padding-top: calc(16px + var(--safe-area-top));
+  padding-bottom: 0px;
+}
+
+.student-app:not(.home-active) .app-header {
+  background: linear-gradient(112deg, var(--menu-navy), var(--menu-blue)) !important;
+  border-radius: 0 0 28px 28px !important;
+  padding: calc(14px + var(--safe-area-top)) 20px 14px !important;
+  position: sticky !important;
+  top: 0 !important;
+  box-shadow: 0 4px 20px rgba(15, 41, 66, 0.12) !important;
+}
+
+.student-app .main-content {
+  position: relative;
+  z-index: 1;
+}
+
+.student-app.home-active .main-content {
+  padding-top: 0 !important;
+}
+
+.student-app:not(.home-active) .main-content {
+  padding-top: 18px !important;
+}
+
+/* Unified Page Titles across all non-Beranda views (Jadwal, Dosen, Notifikasi, Pengaturan) */
+.student-app :is(#view-jadwal, #view-dosen, #view-notifikasi, #view-pengaturan) .view-page-title {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  color: #172B4D !important;
+  line-height: 1.25 !important;
+  margin: 0 !important;
+  letter-spacing: -0.01em !important;
+}
+
+.student-app :is(#view-jadwal, #view-dosen, #view-notifikasi, #view-pengaturan) .notif-subtitle-text {
+  font-size: 12px !important;
+  color: #718096 !important;
+  margin-top: 4px !important;
+  margin-bottom: 0 !important;
+  font-weight: 500 !important;
+  line-height: 1.3 !important;
+}
+
+[data-theme="dark"] .student-app :is(#view-jadwal, #view-dosen, #view-notifikasi, #view-pengaturan) .view-page-title {
+  color: #F1F5F9 !important;
+}
+
+[data-theme="dark"] .student-app :is(#view-jadwal, #view-dosen, #view-notifikasi, #view-pengaturan) .notif-subtitle-text {
+  color: #94A3B8 !important;
+}
+
+/* Consistent spacing from Subtitle to Content (20–24px) */
+.student-app :is(#view-jadwal, #view-dosen, #view-notifikasi, #view-pengaturan) {
+  gap: 20px !important;
+}
+
+.student-app :is(#view-jadwal, #view-dosen, #view-notifikasi, #view-pengaturan) :is(.view-title-row, .notif-header-box) {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.student-app #view-jadwal .view-title-row {
+  margin-bottom: 0 !important;
+}
+
+.student-app #view-dosen .view-title-row {
+  margin-bottom: 0 !important;
+}
+
+.student-app #view-dosen .view-title-row + div {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.student-app #view-notifikasi .notif-header-box {
+  margin-bottom: 0 !important;
+}
+
+.student-app #view-notifikasi .filter-pills-bar {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.student-app #view-pengaturan .notif-header-box {
+  margin-bottom: 4px !important; /* 20px flex gap + 4px = exactly 24px */
+}
+
+.student-app #view-pengaturan .settings-panel-wrap {
+  margin-top: 0 !important;
+}
+
+.student-app #view-pengaturan .settings-section-title {
+  margin-top: 0 !important;
+}
+
+.student-app .brand-logo-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  color: var(--menu-navy);
+  background: #FFFFFF;
+  border: 3px solid rgba(220, 238, 255, 0.8);
+  box-shadow: 0 6px 18px rgba(4, 29, 54, 0.16);
+}
+
+.student-app .app-header .brand-title {
+  color: #FFFFFF;
+  font-size: 19px;
+  letter-spacing: 0.02em;
+}
+
+.student-app .app-header .brand-subtitle {
+  color: #DCEEFF;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.student-app .app-header .btn-header-bell,
+.student-app .btn-header-bell {
+  display: none !important;
+}
+
+.student-app.home-active .beranda-greeting-row {
+  margin-top: 30px !important;
+  padding: 0 4px !important;
+}
+
+.student-app.home-active .greeting-heading {
+  color: #FFFFFF;
+  font-size: clamp(24px, 5vw, 30px);
+  letter-spacing: -0.025em;
+  padding-top: 0 !important;
+  margin: 0 !important;
+}
+
+.student-app.home-active .greeting-date {
+  color: #DCEEFF;
+  font-size: 13px;
+  margin-top: 3px !important;
+}
+
+.student-app.home-active #view-beranda.active {
+  gap: 22px !important;
+}
+
+.student-app .campus-cover {
+  position: relative;
+  width: 100%;
+  height: clamp(215px, 26vw, 245px);
+  margin: 0;
+  overflow: hidden;
+  border-radius: 26px;
+  background: var(--menu-blue);
+  box-shadow: 0 18px 38px -18px rgba(15, 41, 66, 0.42);
+  isolation: isolate;
+}
+
+.student-app .campus-cover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(4, 37, 66, 0.94) 0%, rgba(4, 37, 66, 0.82) 58%, rgba(4, 37, 66, 0.16) 88%, transparent 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.student-app .campus-cover img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center 30%;
+}
+
+.student-app .campus-cover figcaption {
+  position: absolute;
+  z-index: 2;
+  left: 18px;
+  right: 18px;
+  bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #FFFFFF;
+  max-width: 600px;
+}
+
+.student-app .campus-cover-kicker {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  color: #DCEEFF;
+}
+
+.student-app .campus-cover #hero-card-container .hero-glass-card {
+  min-height: 0;
+  padding: 0;
+  gap: 8px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.student-app .campus-cover #hero-card-container .hero-glass-card::before {
+  display: none;
+}
+
+.student-app .campus-cover #hero-card-container .hero-tag-pill {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: #93C5FD;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.student-app .campus-cover #hero-card-container .hero-tag-pill :is(i, svg) {
+  width: 13px;
+  height: 13px;
+}
+
+.student-app .campus-cover #hero-card-container .hero-tag-pill.in-progress {
+  color: #34D399;
+}
+
+.student-app .campus-cover #hero-card-container .hero-time-row {
+  gap: 8px;
+}
+
+.student-app .campus-cover #hero-card-container .hero-clock-circle {
+  width: auto;
+  height: auto;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0;
+  color: #93C5FD !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.student-app .campus-cover #hero-card-container .hero-clock-circle :is(i, svg) {
+  width: 17px;
+  height: 17px;
+}
+
+.student-app .campus-cover #hero-card-container .hero-day-text {
+  font-size: 12px;
+}
+
+.student-app .campus-cover #hero-card-container .hero-time-text {
+  font-size: 17px;
+}
+
+.student-app .campus-cover #hero-card-container .hero-course-title {
+  max-width: 100%;
+  font-size: clamp(19px, 4.6vw, 27px);
+  line-height: 1.18;
+}
+
+.student-app .campus-cover #hero-card-container .hero-meta-grid {
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.student-app .campus-cover #hero-card-container .hero-meta-chip {
+  font-size: 11.5px;
+}
+
+.student-app .campus-cover #hero-card-container .hero-reminder-badge {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  color: #DCEEFF;
+  font-size: 11.5px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 3px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.student-app .campus-cover #hero-card-container .hero-reminder-badge :is(i, svg) {
+  width: 13px;
+  height: 13px;
+  color: #93C5FD;
+}
+
+.student-app .campus-cover #hero-card-container .hero-countdown-wrap {
+  padding: 6px 10px;
+  background: rgba(15, 41, 66, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+}
+
+.student-app #view-beranda .home-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px 10px;
+  width: min(100%, 700px);
+  margin: 18px auto 10px;
+  align-items: start;
+}
+
+.student-app #view-beranda .home-shortcuts .class-shortcut {
+  width: 100%;
+  min-height: 0;
+  height: auto;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 9px;
+  text-align: center;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  border-radius: 20px;
+  color: var(--menu-navy);
+}
+
+.student-app #view-beranda .home-shortcuts .class-shortcut:hover {
+  transform: translateY(-3px);
+  box-shadow: none;
+}
+
+.student-app #view-beranda .home-shortcuts .shortcut-icon {
+  width: min(100%, 88px);
+  aspect-ratio: 1;
+  height: auto;
+  border: 0;
+  border-radius: 25px;
+  background: #FFFFFF;
+  color: var(--menu-navy);
+  box-shadow: 0 6px 18px rgba(15, 41, 66, 0.08), 0 1px 3px rgba(15, 41, 66, 0.04);
+  transition: box-shadow 0.18s ease, color 0.18s ease, background 0.18s ease;
+}
+
+.student-app #view-beranda .home-shortcuts .shortcut-icon :is(i, svg) {
+  width: 31px;
+  height: 31px;
+  stroke-width: 1.8;
+}
+
+.student-app #view-beranda .home-shortcuts .class-shortcut:hover .shortcut-icon {
+  color: var(--color-primary-blue);
+  box-shadow: 0 12px 24px rgba(15, 61, 145, 0.14);
+}
+
+.student-app #view-beranda .home-shortcuts .shortcut-copy {
+  width: 100%;
+  min-height: 34px;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0;
+}
+
+.student-app #view-beranda .home-shortcuts .shortcut-copy strong {
+  display: block;
+  width: 100%;
+  color: var(--menu-navy);
+  font-size: clamp(11px, 2.9vw, 14px);
+  font-weight: 600;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.student-app #view-beranda .home-overview {
+  margin-top: 12px;
+}
+
+.student-app .bottom-nav {
+  bottom: 0;
+  width: 100%;
+  max-width: 620px !important;
+  padding: 9px 10px calc(8px + var(--safe-area-bottom));
+  border: 0;
+  border-radius: 30px 30px 0 0;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 -10px 32px rgba(15, 41, 66, 0.12);
+  z-index: 90;
+  overflow: visible;
+}
+
+.student-app .bottom-nav.nav-hidden,
+.student-app .bottom-nav:not(.nav-hidden) {
+  transform: translateX(-50%);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.student-app .bottom-nav .nav-item,
+.student-app .bottom-nav .nav-item.active {
+  min-height: 54px;
+  padding: 3px 0;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 14px !important;
+}
+
+/* Inactive bottom navigation: icon #7C8B9A, text #526273 */
+.student-app .bottom-nav .nav-item .nav-label,
+.student-app .bottom-nav .nav-item:not(.active) .nav-label {
+  color: #526273 !important;
+  font-weight: 600 !important;
+}
+
+.student-app .bottom-nav .nav-item .nav-icon-wrap :is(i, svg),
+.student-app .bottom-nav .nav-item:not(.active) .nav-icon-wrap :is(i, svg) {
+  color: #7C8B9A !important;
+  stroke: #7C8B9A !important;
+}
+
+/* Active bottom navigation: primary navy #173F7A */
+.student-app .bottom-nav .nav-item.active,
+.student-app .bottom-nav .nav-item.active .nav-label {
+  color: #173F7A !important;
+  font-weight: 800 !important;
+}
+
+.student-app .bottom-nav .nav-item.active:not(.nav-primary) .nav-icon-wrap :is(i, svg) {
+  color: #173F7A !important;
+  stroke: #173F7A !important;
+}
+
+/* Floating center Jadwal button: background #173F7A, icon #FFFFFF, border 3px solid #FFFFFF, shadow 0 5px 14px rgba(23, 63, 122, 0.22) */
+.student-app .bottom-nav .nav-item.nav-primary .nav-icon-wrap {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #FFFFFF !important;
+  background: #173F7A !important;
+  box-shadow: 0 5px 14px rgba(23, 63, 122, 0.22) !important;
+  transform: translateY(-24px);
+  margin-bottom: -22px;
+  border: 3px solid #FFFFFF !important;
+  box-sizing: content-box;
+}
+
+.student-app .bottom-nav .nav-item.nav-primary .nav-icon-wrap :is(i, svg),
+.student-app .bottom-nav .nav-item.nav-primary.active .nav-icon-wrap :is(i, svg) {
+  width: 25px;
+  height: 25px;
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+}
+
+.student-app .bottom-nav .nav-item.nav-primary.active .nav-label {
+  color: #173F7A !important;
+}
+
+.student-app .bottom-nav .nav-item.nav-primary:not(.active) .nav-label {
+  color: #526273 !important;
+}
+
+.student-app .bottom-nav .nav-item:focus-visible {
+  outline: 2px solid #173F7A !important;
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .student-app #view-beranda .home-shortcuts {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .student-app #view-beranda .home-shortcuts .shortcut-icon {
+    width: min(100%, 78px);
+  }
+}
+
+@media (max-width: 375px) {
+  .student-app #view-beranda .home-shortcuts {
+    gap: 22px 7px;
+  }
+  .student-app #view-beranda .home-shortcuts .shortcut-icon {
+    width: min(100%, 70px);
+    border-radius: 21px;
+  }
+  .student-app #view-beranda .home-shortcuts .shortcut-icon :is(i, svg) {
+    width: 27px;
+    height: 27px;
+  }
+  .student-app .campus-cover figcaption {
+    left: 14px;
+    right: 14px;
+    bottom: 12px;
+  }
+}
+
+@media (min-width: 768px) {
+  .student-app .app-header {
+    padding-left: 36px;
+    padding-right: 36px;
+  }
+  .student-app.home-active .app-container::before {
+    height: 350px;
+  }
+  .student-app #view-beranda .home-shortcuts {
+    margin-top: 24px;
+    margin-bottom: 20px;
+    gap: 16px 32px;
+  }
+  .student-app .campus-cover {
+    height: 260px;
+  }
+}
+
+[data-theme="dark"] .student-app {
+  --menu-paper: #090E17;
+}
+
+[data-theme="dark"] .student-app .app-header {
+  background: transparent;
+}
+
+[data-theme="dark"] .student-app #view-beranda .home-shortcuts .shortcut-icon {
+  background: #17243A;
+  color: #DCEEFF;
+  box-shadow: 0 7px 20px rgba(0, 0, 0, 0.27);
+}
+
+[data-theme="dark"] .student-app #view-beranda .home-shortcuts .shortcut-copy strong {
+  color: #F1F5F9;
+}
+
+[data-theme="dark"] .student-app .bottom-nav {
+  background: rgba(19, 27, 46, 0.98);
+  box-shadow: 0 -10px 32px rgba(0, 0, 0, 0.34);
+}
+
+[data-theme="dark"] .student-app .bottom-nav .nav-item,
+[data-theme="dark"] .student-app .bottom-nav .nav-item.active {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .student-app .bottom-nav .nav-item.active,
+[data-theme="dark"] .student-app .bottom-nav .nav-item.active .nav-label {
+  color: #93C5FD !important;
+}
+
+[data-theme="dark"] .student-app .bottom-nav .nav-item.active:not(.nav-primary) .nav-icon-wrap :is(i, svg) {
+  color: #93C5FD !important;
+  stroke: #93C5FD !important;
+}

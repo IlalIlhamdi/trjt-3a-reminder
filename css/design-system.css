@@ -1134,7 +1134,7 @@ body {
   min-width: 14px;
   min-height: 14px;
   stroke-width: 2.2;
-  color: #FFFFFF;
+  color: currentColor;
   display: block;
 }
 
@@ -4566,51 +4566,8 @@ select,
   background: #FEE2E2;
 }
 
-/* Modal Form Styles */
-#modal-add-assignment .form-label {
-  font-size: 14px !important;
-  font-weight: 600 !important;
-  color: var(--color-primary-navy) !important;
-  margin-bottom: 6px !important;
-  display: block;
-}
+/* Modal Form Styles managed in section 5 below */
 
-#modal-add-assignment .form-input,
-#modal-add-assignment select.form-input {
-  font-size: 16px !important;
-  min-height: 46px !important;
-  padding: 12px 14px !important;
-  border-radius: 14px !important;
-  border: 1px solid var(--color-border-subtle) !important;
-  background: var(--color-surface-glass-strong) !important;
-  color: var(--color-primary-navy) !important;
-  outline: none !important;
-  box-sizing: border-box !important;
-  width: 100% !important;
-}
-
-#modal-add-assignment .form-group {
-  margin-bottom: 18px !important;
-}
-
-#modal-add-assignment .quick-date-btn {
-  min-height: 44px !important;
-  padding: 8px 14px !important;
-  font-size: 13px !important;
-  font-weight: 600 !important;
-  border-radius: 12px !important;
-}
-
-#modal-add-assignment .task-type-btn {
-  min-height: 46px !important;
-  font-size: 14px !important;
-  font-weight: 600 !important;
-  border-radius: 12px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 8px !important;
-}
 
 
 /* ==========================================================================
@@ -4994,52 +4951,82 @@ select,
   box-shadow: 0 16px 40px rgba(15, 61, 145, 0.12) !important;
 }
 
+#modal-add-assignment .modal-header {
+  padding: 14px 20px !important;
+  border-bottom: 1px solid var(--color-border-subtle) !important;
+}
+
 #modal-add-assignment .modal-body {
   flex: 1 1 auto !important;
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
-  padding: 20px 24px calc(36px + env(safe-area-inset-bottom, 0px)) 24px !important;
+  scroll-behavior: smooth !important;
+  scroll-padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)) !important;
+  padding: 18px 22px calc(24px + env(safe-area-inset-bottom, 0px)) 22px !important;
 }
 
 #modal-add-assignment .form-group {
-  margin-bottom: 18px !important;
+  margin-bottom: 15px !important;
 }
 
 #modal-add-assignment .form-label {
-  font-size: 14px !important;
+  font-size: 13.5px !important;
   font-weight: 600 !important;
   color: var(--color-primary-navy) !important;
   margin-bottom: 7px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
+  gap: 12px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Unified, Consistent Badge Styling */
+.form-badge-req,
+.form-badge-opt {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  padding: 3px 8px !important;
+  border-radius: 6px !important;
+  letter-spacing: 0.02em !important;
+  flex-shrink: 0 !important;
 }
 
 .form-badge-req {
-  font-size: 12px !important;
-  font-weight: 600 !important;
   color: #DC2626 !important;
-  background: rgba(254, 242, 242, 0.9) !important;
-  border: 1px solid rgba(254, 202, 202, 0.8) !important;
-  padding: 1.5px 7px !important;
-  border-radius: 6px !important;
+  background: rgba(254, 242, 242, 0.95) !important;
+  border: 1px solid rgba(254, 202, 202, 0.9) !important;
 }
 
 .form-badge-opt {
-  font-size: 12px !important;
-  font-weight: 500 !important;
-  color: var(--color-text-secondary) !important;
-  background: var(--color-very-light-blue) !important;
-  border: 1px solid var(--color-border-subtle) !important;
-  padding: 1.5px 7px !important;
-  border-radius: 6px !important;
+  color: #475569 !important;
+  background: rgba(241, 245, 249, 0.95) !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
 }
 
+[data-theme="dark"] .form-badge-req {
+  color: #F87171 !important;
+  background: rgba(239, 68, 68, 0.15) !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+}
+
+[data-theme="dark"] .form-badge-opt {
+  color: #94A3B8 !important;
+  background: rgba(30, 41, 59, 0.5) !important;
+  border: 1px solid rgba(71, 85, 105, 0.4) !important;
+}
+
+/* Inputs, Select, Textarea */
 #modal-add-assignment .form-input,
 #modal-add-assignment select.form-input {
-  font-size: 16px !important;
-  min-height: 46px !important;
-  height: 46px !important;
+  font-size: 15px !important;
+  min-height: 44px !important;
+  height: 44px !important;
   padding: 10px 14px !important;
   border-radius: 12px !important;
   border: 1px solid var(--color-border-subtle) !important;
@@ -5048,94 +5035,234 @@ select,
   outline: none !important;
   box-sizing: border-box !important;
   width: 100% !important;
-  transition: border-color 0.2s, box-shadow 0.2s !important;
+  scroll-margin: 20px 0 !important;
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s !important;
 }
 
 #modal-add-assignment textarea.form-input {
-  min-height: 80px !important;
+  min-height: 72px !important;
   height: auto !important;
-  padding: 12px 14px !important;
+  padding: 10px 14px !important;
   resize: vertical !important;
   line-height: 1.45 !important;
+  font-size: 14px !important;
 }
 
 #modal-add-assignment .form-input:focus,
 #modal-add-assignment select.form-input:focus {
   border-color: var(--color-primary-blue) !important;
-  box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.16) !important;
+  box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.18) !important;
+}
+
+/* Validation Error Alert and Field Hints */
+.task-form-error-alert {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  color: #DC2626;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.task-form-error-alert.is-visible {
+  display: flex !important;
+}
+
+[data-theme="dark"] .task-form-error-alert {
+  background: rgba(127, 29, 29, 0.4);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #FECACA;
 }
 
 .form-input-error {
-  border-color: #DC2626 !important;
+  border-color: #EF4444 !important;
   background: #FEF2F2 !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15) !important;
 }
 
 [data-theme="dark"] .form-input-error {
   background: rgba(127, 29, 29, 0.25) !important;
   border-color: #EF4444 !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25) !important;
 }
 
-.task-form-error-alert {
+.field-error-hint {
+  display: none;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #DC2626;
+  margin-top: 5px;
+  line-height: 1.3;
+}
+
+.field-error-hint.is-visible {
+  display: flex !important;
+}
+
+[data-theme="dark"] .field-error-hint {
+  color: #F87171;
+}
+
+/* Indonesian Date Preview */
+.task-date-preview {
   display: flex !important;
   align-items: center !important;
   gap: 8px !important;
-  background: #FEF2F2 !important;
-  border: 1px solid #FECACA !important;
-  color: #DC2626 !important;
-  padding: 10px 14px !important;
-  border-radius: 12px !important;
-  font-size: 13.5px !important;
-  font-weight: 500 !important;
-  margin-bottom: 16px !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  color: var(--color-primary-navy) !important;
+  background: var(--color-very-light-blue) !important;
+  border: 1px solid rgba(191, 219, 254, 0.8) !important;
+  padding: 8px 12px !important;
+  border-radius: 10px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
-[data-theme="dark"] .task-form-error-alert {
-  background: rgba(127, 29, 29, 0.4) !important;
-  border-color: rgba(239, 68, 68, 0.5) !important;
-  color: #FECACA !important;
+[data-theme="dark"] .task-date-preview {
+  color: #93C5FD !important;
+  background: rgba(30, 58, 138, 0.3) !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
 }
 
+/* Quick Date Chips */
 .quick-date-label {
   font-size: 12px !important;
   font-weight: 500 !important;
   color: var(--color-text-muted) !important;
 }
 
-.task-date-preview {
-  display: inline-flex !important;
+.quick-date-chips {
+  display: flex !important;
   align-items: center !important;
   gap: 6px !important;
-  font-size: 13px !important;
-  font-weight: 500 !important;
-  color: var(--color-text-blue) !important;
-  background: var(--color-very-light-blue) !important;
-  border: 1px solid var(--color-border-subtle) !important;
-  padding: 6px 12px !important;
-  border-radius: 8px !important;
+  width: 100% !important;
 }
 
-[data-theme="dark"] .task-date-preview {
-  color: #93C5FD !important;
-  background: rgba(30, 58, 138, 0.3) !important;
+.quick-date-btn {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  min-height: 42px !important;
+  padding: 8px 10px !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  font-family: inherit !important;
+  border-radius: 10px !important;
+  cursor: pointer !important;
+  background: rgba(244, 248, 254, 0.9) !important;
+  border: 1px solid rgba(220, 235, 252, 0.9) !important;
+  color: var(--color-text-secondary) !important;
+  transition: all var(--transition-fast) !important;
+  text-align: center !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
 }
 
+.quick-date-btn:hover {
+  background: #FFFFFF !important;
+  border-color: var(--color-primary-blue) !important;
+  color: var(--color-primary-blue) !important;
+}
+
+.quick-date-btn.active {
+  background: var(--color-primary-blue) !important;
+  border-color: var(--color-primary-blue) !important;
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 6px rgba(47, 128, 237, 0.25) !important;
+}
+
+[data-theme="dark"] .quick-date-btn {
+  background: rgba(30, 41, 59, 0.6) !important;
+  border-color: rgba(51, 65, 85, 0.8) !important;
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .quick-date-btn:hover {
+  background: rgba(51, 65, 85, 0.8) !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .quick-date-btn.active {
+  background: #2563EB !important;
+  border-color: #3B82F6 !important;
+  color: #FFFFFF !important;
+}
+
+/* Bottom Area: Sync Transparency Note & Submit Button */
 .form-sync-note {
   display: flex !important;
-  align-items: flex-start !important;
-  gap: 8px !important;
-  font-size: 12.5px !important;
-  line-height: 1.45 !important;
-  color: var(--color-text-secondary) !important;
-  background: var(--color-light-sky) !important;
-  border: 1px solid var(--color-border-subtle) !important;
-  padding: 10px 14px !important;
+  align-items: center !important;
+  gap: 10px !important;
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+  color: var(--color-primary-navy) !important;
+  background: var(--color-very-light-blue) !important;
+  border: 1px solid rgba(191, 219, 254, 0.7) !important;
+  padding: 10px 12px !important;
   border-radius: 12px !important;
-  margin-top: 14px !important;
+  margin: 4px 0 12px 0 !important;
 }
 
 [data-theme="dark"] .form-sync-note {
   background: rgba(30, 58, 138, 0.25) !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
   color: #CBD5E1 !important;
+}
+
+#modal-add-assignment #btn-submit-task {
+  width: 100% !important;
+  min-height: 48px !important;
+  margin-top: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+}
+
+/* Dark Theme Specific Overrides for Add Assignment Form */
+[data-theme="dark"] #modal-add-assignment .form-label {
+  color: #F1F5F9 !important;
+}
+
+[data-theme="dark"] #modal-add-assignment .form-input,
+[data-theme="dark"] #modal-add-assignment select.form-input {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border-color: rgba(51, 65, 85, 0.9) !important;
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] #modal-add-assignment select.form-input option {
+  background: #0F172A;
+  color: #F8FAFC;
+}
+
+[data-theme="dark"] #modal-add-assignment #modal-add-task-title {
+  color: #F8FAFC !important;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 420px) {
+  #modal-add-assignment .modal-body {
+    padding: 14px 16px calc(24px + env(safe-area-inset-bottom, 0px)) 16px !important;
+  }
+  
+  #modal-add-assignment .quick-date-btn {
+    font-size: 11.5px !important;
+    padding: 8px 4px !important;
+  }
 }
 
 
@@ -5189,4 +5316,54 @@ select,
   --color-1: rgba(255, 255, 255, 0.15);
   --color-2: #38BDF8;
   background: rgba(15, 23, 42, 0.6);
+}
+
+/* ==========================================================================
+   Dark Mode Support for Course Materials Modal
+   ========================================================================== */
+[data-theme="dark"] #modal-course-materials .modal-sheet {
+  background: rgba(15, 23, 42, 0.96) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+[data-theme="dark"] #mat-modal-course-name {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] #mat-modal-course-meta {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] #mat-course-select {
+  background: rgba(24, 38, 64, 0.85) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] #mat-course-select option {
+  background: #0F172A !important;
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] #mat-search-input {
+  background: rgba(24, 38, 64, 0.85) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] #mat-search-input::placeholder {
+  color: #64748B !important;
+}
+
+[data-theme="dark"] #mat-empty-state {
+  background: rgba(24, 38, 64, 0.4) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] #mat-empty-state p:first-of-type {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] #mat-empty-state p:last-of-type {
+  color: #94A3B8 !important;
 }

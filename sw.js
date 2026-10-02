@@ -1,21 +1,24 @@
-const CACHE_NAME = 'trjt3a-reminder-v6.9';
+const CACHE_NAME = 'trjt3a-reminder-v9.0';
 const ASSETS = [
   './',
   './index.html',
   './css/design-system.css',
   './css/design-system.css?v=6.9',
+  './css/student-ui.css',
+  './css/student-ui.css?v=9.0',
   './js/firebase-config.js?v=6.9',
   './js/drive-service.js?v=6.9',
   './js/material-service.js?v=6.9',
   './js/assignment-service.js?v=6.9',
   './js/time-provider.js?v=6.9',
   './js/data.js?v=6.9',
-  './js/app.js?v=6.9',
+  './js/app.js?v=9.0',
   './manifest.json',
   './favicon.svg',
   './assets/icons/favicon.svg',
   './assets/icons/app-icon.svg',
-  './assets/icons/trjt-logo.svg'
+  './assets/icons/trjt-logo.svg',
+  './assets/images/campus-inspired-banner.png'
 ];
 
 self.addEventListener('install', (event) => {

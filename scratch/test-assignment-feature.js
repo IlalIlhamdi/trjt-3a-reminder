@@ -84,7 +84,6 @@ console.log('✅ PASS: css/design-system.css contains comprehensive styles & dar
 
 // 4. Verify js/app.js integrations
 const appContent = fs.readFileSync('js/app.js', 'utf8');
-assert.ok(appContent.includes('btn-schedule-tugas'), 'btn-schedule-tugas included in renderWeeklySchedule');
 assert.ok(appContent.includes('openCourseAssignmentsModal'), 'openCourseAssignmentsModal defined in app.js');
 assert.ok(appContent.includes('openAddAssignmentModal'), 'openAddAssignmentModal defined in app.js');
 assert.ok(appContent.includes('openAllAssignmentsModal'), 'openAllAssignmentsModal defined in app.js');

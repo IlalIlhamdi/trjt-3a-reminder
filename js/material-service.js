@@ -39,6 +39,17 @@
   function initMaterialsListener() {
     if (isMaterialsListening) return;
 
+    // Load from local storage cache immediately
+    try {
+      const saved = localStorage.getItem('trjt_materials_cache');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          allMaterialsCache = parsed;
+        }
+      }
+    } catch (e) {}
+
     const db = getFirestoreDb();
     if (!db) {
       const onFirebaseReady = () => {
@@ -200,13 +211,15 @@
 
   // Get materials for a specific course
   async function getMaterialsForCourse(courseNameOrScheduleId) {
-    if (!courseNameOrScheduleId) return [];
+    if (!courseNameOrScheduleId) return allMaterialsCache;
     const query = courseNameOrScheduleId.toLowerCase().trim();
 
     // Filter from local cache
     return allMaterialsCache.filter((m) => 
       (m.courseName && m.courseName.toLowerCase() === query) ||
-      (m.scheduleId && m.scheduleId.toLowerCase() === query)
+      (m.scheduleId && m.scheduleId.toLowerCase() === query) ||
+      (m.courseName && m.courseName.toLowerCase().includes(query)) ||
+      (query.includes((m.courseName || '').toLowerCase()))
     );
   }
 

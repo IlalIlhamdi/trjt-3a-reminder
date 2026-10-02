@@ -6,11 +6,12 @@
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'trjt3a-reminder-v7.0';
+const CACHE_NAME = 'trjt3a-reminder-v9.0';
 const ASSETS = [
   './',
   './index.html',
   './css/design-system.css',
+  './css/student-ui.css',
   './js/firebase-config.js',
   './js/drive-service.js',
   './js/material-service.js',
@@ -22,7 +23,8 @@ const ASSETS = [
   './favicon.svg',
   './assets/icons/favicon.svg',
   './assets/icons/app-icon.svg',
-  './assets/icons/trjt-logo.svg'
+  './assets/icons/trjt-logo.svg',
+  './assets/images/campus-inspired-banner.png'
 ];
 
 self.addEventListener('install', (event) => {

@@ -71,84 +71,27 @@ fun HomeScreen(
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Greeting & Status Pill Chip Row
-        Row(
+        // Greeting Row
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(
-                    text = uiState.greeting,
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 24.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+            Text(
+                text = uiState.greeting,
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 24.sp,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-                Text(
-                    text = uiState.formattedDate,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium
-                    )
+            )
+            Text(
+                text = uiState.formattedDate,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium
                 )
-            }
-
-            // Status Pill Chip
-            val isAllFinished = uiState.todaySchedules.isNotEmpty() && uiState.completedCount == uiState.todaySchedules.size
-            val (chipBg, chipBorder, chipTextCol, chipIcon) = when {
-                uiState.inProgressSchedule != null -> Tuple4(
-                    VeryLightBlue,
-                    SoftBlue,
-                    PrimaryBlue,
-                    Icons.Outlined.PlayArrow
-                )
-                uiState.currentStatus == ClassStatus.STARTING_SOON_H10 -> Tuple4(
-                    StatusWarningBg,
-                    StatusWarningBorder,
-                    StatusWarningText,
-                    Icons.Outlined.Notifications
-                )
-                isAllFinished -> Tuple4(
-                    StatusSuccessBg,
-                    StatusSuccessBorder,
-                    StatusSuccessText,
-                    Icons.Outlined.Check
-                )
-                else -> Tuple4(
-                    VeryLightBlue,
-                    SoftBlue,
-                    PrimaryBlue,
-                    Icons.Outlined.Schedule
-                )
-            }
-
-            Surface(
-                shape = RoundedCornerShape(99.dp),
-                color = chipBg,
-                border = androidx.compose.foundation.BorderStroke(1.dp, chipBorder)
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Icon(
-                        imageVector = chipIcon,
-                        contentDescription = null,
-                        tint = chipTextCol,
-                        modifier = Modifier.size(12.dp)
-                    )
-                    Text(
-                        text = uiState.statusChipText,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = chipTextCol
-                    )
-                }
-            }
+            )
         }
 
         // Hero Card (Ongoing / Upcoming Today / Next Academic Day)

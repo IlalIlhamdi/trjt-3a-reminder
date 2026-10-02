@@ -133,6 +133,7 @@ function getOrCreateElement(id, tag = 'div', className = '') {
 }
 
 globalThis.document = {
+  body: new MockElement('body'),
   getElementById: (id) => elementsMap.get(id) || null,
   querySelector: (sel) => {
     for (const el of elementsMap.values()) {
