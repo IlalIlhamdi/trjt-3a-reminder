@@ -1207,6 +1207,8 @@ function getErrorFallbackHtml(message, retryFuncStr) {
       renderDosenList();
     } else if (tabId === 'pengaturan') {
       renderSettingsUI();
+    } else if (tabId === 'galeri') {
+      renderGallery();
     }
 
     if (window.lucide) window.lucide.createIcons();
@@ -1729,6 +1731,120 @@ function getErrorFallbackHtml(message, retryFuncStr) {
       if (activeCourseTaskCourse) renderCourseAssignmentsList();
       if (document.getElementById('modal-all-assignments')?.classList.contains('is-open')) {
         renderAllAssignmentsList();
+      }
+    });
+
+    // ==========================================
+    // GALLERY EVENT LISTENERS (TRJT 3A GALERI)
+    // ==========================================
+    const btnGalleryUpload = document.getElementById('btn-gallery-upload-trigger');
+    const fileInputGallery = document.getElementById('gallery-file-input');
+    const btnEmptyUpload = document.getElementById('btn-gallery-empty-upload');
+    const btnRefreshGallery = document.getElementById('btn-gallery-refresh');
+    const btnRetryGallery = document.getElementById('btn-gallery-retry');
+
+    if (btnGalleryUpload && fileInputGallery) {
+      btnGalleryUpload.addEventListener('click', () => fileInputGallery.click());
+    }
+    if (btnEmptyUpload && fileInputGallery) {
+      btnEmptyUpload.addEventListener('click', () => fileInputGallery.click());
+    }
+    if (fileInputGallery) {
+      fileInputGallery.addEventListener('change', handleGalleryFileSelected);
+    }
+    if (btnRefreshGallery) {
+      btnRefreshGallery.addEventListener('click', () => refreshGallery(true));
+    }
+    if (btnRetryGallery) {
+      btnRetryGallery.addEventListener('click', () => refreshGallery(true));
+    }
+
+    // Gallery Upload Modal Buttons
+    const btnCloseUploadModal = document.getElementById('btn-close-gallery-upload-modal');
+    const btnCancelUploadModal = document.getElementById('btn-cancel-gallery-upload');
+    const btnSubmitUpload = document.getElementById('btn-submit-gallery-upload');
+    const modalUploadGallery = document.getElementById('modal-upload-gallery');
+
+    if (btnCloseUploadModal) btnCloseUploadModal.addEventListener('click', closeGalleryUploadModal);
+    if (btnCancelUploadModal) btnCancelUploadModal.addEventListener('click', closeGalleryUploadModal);
+    if (btnSubmitUpload) btnSubmitUpload.addEventListener('click', submitGalleryPhoto);
+    if (modalUploadGallery) {
+      modalUploadGallery.addEventListener('click', (e) => {
+        if (e.target === modalUploadGallery) closeGalleryUploadModal();
+      });
+    }
+
+    // Gallery Lightbox Modal
+    const btnCloseLightbox = document.getElementById('btn-close-gallery-lightbox');
+    const modalLightbox = document.getElementById('gallery-lightbox-modal');
+    const backdropLightbox = modalLightbox ? modalLightbox.querySelector('.gallery-lightbox-backdrop') : null;
+
+    if (btnCloseLightbox) btnCloseLightbox.addEventListener('click', closeGalleryLightbox);
+
+    const btnDeleteLightbox = document.getElementById('btn-delete-gallery-lightbox');
+    if (btnDeleteLightbox) {
+      btnDeleteLightbox.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (activeLightboxPhotoId) {
+          promptDeleteGalleryPhoto(activeLightboxPhotoId);
+        }
+      });
+    }
+
+    const modalDeleteConfirm = document.getElementById('modal-delete-gallery-confirm');
+    const btnCancelDelete = document.getElementById('btn-cancel-delete-gallery');
+    const btnConfirmDelete = document.getElementById('btn-confirm-delete-gallery');
+    if (btnCancelDelete) btnCancelDelete.addEventListener('click', closeDeleteGalleryModal);
+    if (btnConfirmDelete) btnConfirmDelete.addEventListener('click', confirmDeleteGalleryPhoto);
+    if (modalDeleteConfirm) {
+      modalDeleteConfirm.addEventListener('click', (e) => {
+        if (e.target === modalDeleteConfirm) closeDeleteGalleryModal();
+      });
+    }
+    if (backdropLightbox) backdropLightbox.addEventListener('click', closeGalleryLightbox);
+
+    // Lightbox Swipe support for mobile devices
+    if (modalLightbox) {
+      modalLightbox.addEventListener('touchstart', handleTouchStart, { passive: true });
+      modalLightbox.addEventListener('touchend', handleTouchEnd, { passive: true });
+    }
+
+    // Keyboard navigation (Escape to close lightbox or modal, Left/Right for next/prev photo)
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (modalLightbox && modalLightbox.classList.contains('is-open')) {
+          closeGalleryLightbox();
+        } else if (modalUploadGallery && modalUploadGallery.classList.contains('is-open')) {
+          closeGalleryUploadModal();
+        }
+      } else if (modalLightbox && modalLightbox.classList.contains('is-open')) {
+        if (e.key === 'ArrowRight') navigateLightbox(1);
+        else if (e.key === 'ArrowLeft') navigateLightbox(-1);
+      }
+    });
+
+    // Listen for gallery background updates
+    window.addEventListener('trjt:gallery-updated', () => {
+      if (state.currentTab === 'galeri') renderGallery();
+    });
+    window.addEventListener('trjt:gallery-loading', (e) => {
+      if (state.currentTab === 'galeri' && e.detail && e.detail.loading) {
+        renderGallerySkeleton();
+      }
+    });
+    window.addEventListener('trjt:gallery-error', (e) => {
+      if (state.currentTab === 'galeri') {
+        const errorState = document.getElementById('gallery-error-state');
+        const container = document.getElementById('gallery-grid-container');
+        const emptyState = document.getElementById('gallery-empty-state');
+        const photos = window.TRJT_GALLERY ? window.TRJT_GALLERY.getPhotos() : [];
+        if (!photos || photos.length === 0) {
+          if (container) container.style.display = 'none';
+          if (emptyState) emptyState.style.display = 'none';
+          if (errorState) errorState.style.display = 'flex';
+          const errMsg = document.getElementById('gallery-error-message');
+          if (errMsg && e.detail && e.detail.error) errMsg.innerText = e.detail.error;
+        }
       }
     });
   }
@@ -3022,6 +3138,9 @@ function getErrorFallbackHtml(message, retryFuncStr) {
   }
 
   function openAllAssignmentsModal() {
+    if (window.TRJT_ASSIGNMENTS && typeof window.TRJT_ASSIGNMENTS.cleanupExpiredAssignments === 'function') {
+      window.TRJT_ASSIGNMENTS.cleanupExpiredAssignments();
+    }
     activeAllTasksFilter = 'all';
     activeAllTasksCourse = '';
     activeAllTasksSearch = '';
@@ -3106,12 +3225,12 @@ function getErrorFallbackHtml(message, retryFuncStr) {
 
   function buildAssignmentCardHtml(task, showCoursePill = true) {
     if (!window.TRJT_ASSIGNMENTS) return '';
-    const isDone = window.TRJT_ASSIGNMENTS.isPersonalCompleted(task.id);
-    const deadlineInfo = window.TRJT_ASSIGNMENTS.formatDeadlineCountdown(task.dueDate, task.dueTime);
+    // Section W: Filter expired tasks before render
+    if (window.TRJT_ASSIGNMENTS.isAssignmentExpired && window.TRJT_ASSIGNMENTS.isAssignmentExpired(task.dueDate, task.dueTime)) {
+      return '';
+    }
 
-    const checkClass = isDone ? 'checked' : '';
-    const checkIcon = isDone ? '<i data-lucide="check" style="width: 18px; height: 18px;" aria-hidden="true"></i>' : '';
-    const cardDoneClass = isDone ? 'completed' : '';
+    const deadlineInfo = window.TRJT_ASSIGNMENTS.formatDeadlineCountdown(task.dueDate, task.dueTime);
 
     const typeIcon = task.type === 'kelompok' ? 'users' : 'user';
     const typeLabel = task.type === 'kelompok' ? 'Kelompok' : 'Individu';
@@ -3129,86 +3248,57 @@ function getErrorFallbackHtml(message, retryFuncStr) {
       if (!task.submissionPlace) methodLabel = 'Google Drive';
     }
 
-    // Format Indonesian Full Date
-    let formattedDueDateStr = deadlineInfo.fullText || task.dueDate || '';
-    if (task.dueDate && task.dueDate.includes('-')) {
-      try {
-        const [y, m, d] = task.dueDate.split('-');
-        const dateObj = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
-        if (!isNaN(dateObj.getTime())) {
-          formattedDueDateStr = dateObj.toLocaleDateString('id-ID', {
-            weekday: 'short',
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-          });
-        }
-      } catch (e) {}
-    }
+    // Format Indonesian Date (Short e.g. "Sel, 6 Okt 2026")
+    const batasText = deadlineInfo.shortText || deadlineInfo.fullText || task.dueDate || '';
 
     const descHtml = task.description ? `
       <p class="assignment-card-desc" title="${escapeHtml(task.description)}">${escapeHtml(task.description)}</p>
     ` : '';
 
-    // Deadline badge text: Ensure exact "Terlambat X hari" phrasing
-    let statusText = deadlineInfo.text || '';
-    if (statusText.toLowerCase().includes('lewat')) {
-      statusText = statusText.replace(/lewat\s*/i, 'Terlambat ').replace(/lalu/i, '').trim();
-    }
-    if (isDone) {
-      statusText = 'Selesai';
-    }
-
-    const badgeClass = isDone ? 'soft-badge-success deadline-completed' : (deadlineInfo.badgeClass || 'soft-badge-neutral');
-
     return `
-      <div class="assignment-card ${cardDoneClass}" id="task-card-${task.id}">
-        <!-- Top Row: Checkbox, Judul Tugas, and Delete Action -->
+      <div class="assignment-card" id="task-card-${task.id}">
+        <!-- ROW 1: Judul tugas & Tombol delete -->
         <div class="assignment-card-header">
-          <button type="button" class="task-check-btn ${checkClass}" onclick="toggleAssignmentTask('${task.id}')" aria-label="${isDone ? 'Tandai tugas belum selesai' : 'Tandai tugas selesai'}" title="${isDone ? 'Tandai tugas belum selesai' : 'Tandai tugas selesai'}">
-            ${checkIcon}
-          </button>
-          
-          <div class="assignment-title-wrap">
-            <h3 class="assignment-card-title">${escapeHtml(task.title)}</h3>
-            ${task.courseName ? `
-              <div class="assignment-course-name">
-                <i data-lucide="book-open" style="width: 14px; height: 14px; flex-shrink: 0;" aria-hidden="true"></i>
-                <span>${escapeHtml(task.courseName)}</span>
-              </div>
-            ` : ''}
-          </div>
-
+          <h3 class="assignment-card-title">${escapeHtml(task.title)}</h3>
           <button type="button" class="btn-task-delete" onclick="deleteAssignmentTask('${task.id}')" aria-label="Hapus tugas ${escapeHtml(task.title)}" title="Hapus tugas">
-            <i data-lucide="trash-2" style="width: 18px; height: 18px;" aria-hidden="true"></i>
+            <i data-lucide="trash-2" style="width: 16px; height: 16px;" aria-hidden="true"></i>
           </button>
+        </div>
+
+        <!-- ROW 2: Icon buku kecil + Nama mata kuliah -->
+        <div class="assignment-course-name">
+          <i data-lucide="book-open" aria-hidden="true"></i>
+          <span>${escapeHtml(task.courseName || 'Mata Kuliah')}</span>
         </div>
 
         ${descHtml}
 
-        <!-- Middle Row: Status Deadline & Tanggal Pengumpulan -->
+        <!-- ROW 3: Countdown + Deadline -->
         <div class="assignment-deadline-row">
-          <span class="badge-deadline ${badgeClass}" title="Status batas pengumpulan">
-            <i data-lucide="${isDone ? 'check-circle' : 'clock'}" style="width: 13px; height: 13px; flex-shrink: 0;" aria-hidden="true"></i>
-            <span>${escapeHtml(statusText)}</span>
+          <span class="badge-deadline badge-deadline-countdown" title="Status batas pengumpulan">
+            <i data-lucide="clock" style="width: 12px; height: 12px; flex-shrink: 0;" aria-hidden="true"></i>
+            <span>${escapeHtml(deadlineInfo.text)}</span>
           </span>
 
           <div class="assignment-due-date-text">
-            <i data-lucide="calendar" style="width: 14px; height: 14px; flex-shrink: 0;" aria-hidden="true"></i>
-            <span>Batas: ${escapeHtml(formattedDueDateStr)}</span>
+            <i data-lucide="calendar" aria-hidden="true"></i>
+            <span>Batas: ${escapeHtml(batasText)}</span>
           </div>
         </div>
 
-        <!-- Bottom Row: Tipe Pengerjaan & Media Pengumpulan -->
+        <!-- ROW 4: Divider tipis -->
+        <div class="assignment-card-divider" aria-hidden="true"></div>
+
+        <!-- ROW 5: Tipe pengerjaan + metode pengumpulan -->
         <div class="assignment-meta-footer">
           <div class="assignment-meta-details">
             <span class="assignment-meta-item">
-              <i data-lucide="${typeIcon}" style="width: 13px; height: 13px; flex-shrink: 0;" aria-hidden="true"></i>
+              <i data-lucide="${typeIcon}" aria-hidden="true"></i>
               <span>${typeLabel}</span>
             </span>
             <span class="assignment-meta-divider" aria-hidden="true">•</span>
             <span class="assignment-meta-item" title="${escapeHtml(methodLabel)}">
-              <i data-lucide="${methodIcon}" style="width: 13px; height: 13px; flex-shrink: 0;" aria-hidden="true"></i>
+              <i data-lucide="${methodIcon}" aria-hidden="true"></i>
               <span class="assignment-badge-truncate">${escapeHtml(methodLabel)}</span>
             </span>
           </div>
@@ -3340,6 +3430,388 @@ function getErrorFallbackHtml(message, retryFuncStr) {
     }
   }
 
+  // =============================================================================
+  // GALERI KELAS TRJT 3A ?" GOOGLE DRIVE INTEGRATION MODULE
+  // =============================================================================
+  let selectedGalleryUploadFile = null;
+  let activeLightboxPhotoId = null;
+  let galleryTouchStartX = 0;
+  let galleryTouchEndX = 0;
+
+  async function renderGallery() {
+    const container = document.getElementById('gallery-grid-container');
+    const emptyState = document.getElementById('gallery-empty-state');
+    const errorState = document.getElementById('gallery-error-state');
+    if (!container) return;
+
+    if (!window.TRJT_GALLERY) {
+      console.warn('TRJT_GALLERY service is not loaded.');
+      return;
+    }
+
+    const photos = window.TRJT_GALLERY.getPhotos();
+
+    if (!photos || photos.length === 0) {
+      container.style.display = 'none';
+      if (emptyState) emptyState.style.display = 'flex';
+      if (errorState) errorState.style.display = 'none';
+      if (window.lucide) window.lucide.createIcons();
+      return;
+    }
+
+    if (emptyState) emptyState.style.display = 'none';
+    if (errorState) errorState.style.display = 'none';
+    container.style.display = 'grid';
+
+    container.innerHTML = photos.map((photo) => {
+      const displayDate = photo.createdAt ? new Date(photo.createdAt).toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      }) : '';
+      const safeCaption = photo.caption ? escapeHtml(photo.caption) : '';
+      const safeName = photo.name ? escapeHtml(photo.name) : 'Foto Dokumentasi';
+      const imgSrc = photo.thumbnailUrl || photo.imageUrl || './assets/images/campus-inspired-banner.png';
+
+      return `
+        <div class="gallery-card" data-id="${photo.id}" tabindex="0" role="button" aria-label="Buka foto ${safeCaption || safeName}">
+          <img class="gallery-card-img" src="${imgSrc}" alt="${safeCaption || safeName}" loading="lazy" onerror="this.onerror=null; this.src='./assets/images/campus-inspired-banner.png';" />
+          <button type="button" class="gallery-card-delete-btn" data-id="${photo.id}" title="Hapus foto" aria-label="Hapus foto">
+            <i data-lucide="trash-2"></i>
+          </button>
+          ${safeCaption ? `<div class="gallery-card-caption-pill" title="${safeCaption}">${safeCaption}</div>` : ''}
+        </div>
+      `;
+    }).join('');
+
+    // Attach click and keyboard events to cards
+    container.querySelectorAll('.gallery-card').forEach((card) => {
+      const photoId = card.getAttribute('data-id');
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.gallery-card-delete-btn')) return;
+        openGalleryLightbox(photoId);
+      });
+      const delBtn = card.querySelector('.gallery-card-delete-btn');
+      if (delBtn) {
+        delBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          promptDeleteGalleryPhoto(photoId);
+        });
+      }
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openGalleryLightbox(photoId);
+        }
+      });
+    });
+
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  function renderGallerySkeleton() {
+    const container = document.getElementById('gallery-grid-container');
+    const emptyState = document.getElementById('gallery-empty-state');
+    const errorState = document.getElementById('gallery-error-state');
+    if (!container) return;
+
+    if (emptyState) emptyState.style.display = 'none';
+    if (errorState) errorState.style.display = 'none';
+    container.style.display = 'grid';
+
+    container.innerHTML = Array.from({ length: 6 }).map(() => `
+      <div class="gallery-skeleton-card" aria-hidden="true"></div>
+    `).join('');
+  }
+
+  async function refreshGallery(showFeedback = false) {
+    const refreshBtn = document.getElementById('btn-gallery-refresh');
+    if (refreshBtn) refreshBtn.classList.add('spinning');
+    renderGallerySkeleton();
+
+    try {
+      if (window.TRJT_GALLERY) {
+        await window.TRJT_GALLERY.fetchPhotos(true);
+      }
+      renderGallery();
+      if (showFeedback) showToast('Galeri berhasil diperbarui.', 'success');
+    } catch (err) {
+      console.warn('Refresh gallery error:', err);
+      renderGallery();
+      if (showFeedback) showToast('Gagal memuat foto dari Google Drive.', 'error');
+    } finally {
+      if (refreshBtn) refreshBtn.classList.remove('spinning');
+    }
+  }
+
+  async function handleGalleryFileSelected(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    // Reset file input value so selecting the same file again triggers change
+    e.target.value = '';
+
+    // Validate MIME type
+    const isImage = file.type && file.type.startsWith('image/');
+    const hasImageExt = /\.(jpe?g|png|webp|heic|bmp)$/i.test(file.name);
+    if (!isImage && !hasImageExt) {
+      showToast('File yang dipilih bukan gambar. Harap pilih file JPG, PNG, atau WEBP.', 'error');
+      return;
+    }
+
+    // Validate size (max 10MB)
+    const MAX_SIZE = 10 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      showToast('Ukuran foto terlalu besar. Maksimal 10 MB.', 'error');
+      return;
+    }
+
+    selectedGalleryUploadFile = file;
+
+    // Open upload modal with preview
+    openGalleryUploadModal(file);
+  }
+
+  async function openGalleryUploadModal(file) {
+    const modal = document.getElementById('modal-upload-gallery');
+    const previewImg = document.getElementById('gallery-upload-preview-img');
+    const metaEl = document.getElementById('gallery-preview-meta');
+    const captionInput = document.getElementById('gallery-caption-input');
+    const submitBtn = document.getElementById('btn-submit-gallery-upload');
+    const submitText = document.getElementById('btn-submit-gallery-upload-text');
+
+    if (!modal) return;
+
+    if (captionInput) captionInput.value = '';
+    if (submitBtn) submitBtn.disabled = false;
+    if (submitText) submitText.innerText = 'Upload';
+
+    // Show temporary preview using ObjectURL
+    const objectUrl = URL.createObjectURL(file);
+    if (previewImg) {
+      previewImg.src = objectUrl;
+    }
+    const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+    if (metaEl) {
+      metaEl.innerText = `${sizeMb} MB`;
+    }
+
+    modal.style.display = 'flex';
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+
+    if (window.lucide) window.lucide.createIcons();
+    if (captionInput) {
+      setTimeout(() => captionInput.focus(), 150);
+    }
+  }
+
+  function closeGalleryUploadModal() {
+    const modal = document.getElementById('modal-upload-gallery');
+    if (modal) {
+      modal.classList.remove('is-open');
+      modal.setAttribute('aria-hidden', 'true');
+      modal.style.display = 'none';
+    }
+    selectedGalleryUploadFile = null;
+    const previewImg = document.getElementById('gallery-upload-preview-img');
+    if (previewImg && previewImg.src.startsWith('blob:')) {
+      URL.revokeObjectURL(previewImg.src);
+      previewImg.src = '';
+    }
+  }
+
+  async function submitGalleryPhoto() {
+    if (!selectedGalleryUploadFile) {
+      showToast('Pilih foto terlebih dahulu.', 'error');
+      return;
+    }
+
+    const captionInput = document.getElementById('gallery-caption-input');
+    const caption = captionInput ? captionInput.value.trim() : '';
+
+    const submitBtn = document.getElementById('btn-submit-gallery-upload');
+    const submitText = document.getElementById('btn-submit-gallery-upload-text');
+    const cancelBtn = document.getElementById('btn-cancel-gallery-upload');
+
+    // Prevent double submit
+    if (submitBtn) submitBtn.disabled = true;
+    if (cancelBtn) cancelBtn.disabled = true;
+    if (submitText) submitText.innerText = 'Mengupload...';
+
+    try {
+      if (!window.TRJT_GALLERY) {
+        throw new Error('Gallery service belum siap.');
+      }
+
+      await window.TRJT_GALLERY.uploadPhoto(selectedGalleryUploadFile, caption);
+
+      closeGalleryUploadModal();
+      showToast('Foto berhasil diupload.', 'success');
+
+      // Auto refresh gallery and render new photo at the top
+      renderGallery();
+
+      // Scroll smoothly to top of gallery view
+      const viewGaleri = document.getElementById('view-galeri');
+      if (viewGaleri) viewGaleri.scrollIntoView({ behavior: 'smooth' });
+    } catch (err) {
+      console.error('Submit photo error:', err);
+      showToast(err.message || 'Gagal mengupload foto. Silakan coba lagi.', 'error');
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
+      if (cancelBtn) cancelBtn.disabled = false;
+      if (submitText) submitText.innerText = 'Upload';
+      if (window.lucide) window.lucide.createIcons();
+    }
+  }
+
+    let pendingDeletePhotoId = null;
+
+  function promptDeleteGalleryPhoto(photoId) {
+    if (!photoId) return;
+    pendingDeletePhotoId = photoId;
+    const modal = document.getElementById('modal-delete-gallery-confirm');
+    if (modal) {
+      modal.style.display = 'flex';
+      modal.classList.add('is-open');
+      modal.setAttribute('aria-hidden', 'false');
+      if (window.lucide) window.lucide.createIcons();
+    }
+  }
+
+  function closeDeleteGalleryModal() {
+    const modal = document.getElementById('modal-delete-gallery-confirm');
+    if (modal) {
+      modal.classList.remove('is-open');
+      modal.setAttribute('aria-hidden', 'true');
+      modal.style.display = 'none';
+    }
+    pendingDeletePhotoId = null;
+  }
+
+  async function confirmDeleteGalleryPhoto() {
+    if (!pendingDeletePhotoId || !window.TRJT_GALLERY) {
+      closeDeleteGalleryModal();
+      return;
+    }
+
+    const photoIdToDelete = pendingDeletePhotoId;
+    const confirmBtn = document.getElementById('btn-confirm-delete-gallery');
+    const cancelBtn = document.getElementById('btn-cancel-delete-gallery');
+
+    if (confirmBtn) {
+      confirmBtn.disabled = true;
+      confirmBtn.innerText = 'Menghapus...';
+    }
+    if (cancelBtn) cancelBtn.disabled = true;
+
+    try {
+      showToast('Menghapus foto dari Google Drive...', 'info');
+      await window.TRJT_GALLERY.deletePhoto(photoIdToDelete);
+
+      if (activeLightboxPhotoId === photoIdToDelete) {
+        closeGalleryLightbox();
+      }
+
+      closeDeleteGalleryModal();
+      showToast('Foto berhasil dihapus.', 'success');
+      renderGallery();
+    } catch (err) {
+      console.error('Delete photo error:', err);
+      showToast(err.message || 'Gagal menghapus foto.', 'error');
+    } finally {
+      if (confirmBtn) {
+        confirmBtn.disabled = false;
+        confirmBtn.innerText = 'Hapus';
+      }
+      if (cancelBtn) cancelBtn.disabled = false;
+      if (window.lucide) window.lucide.createIcons();
+    }
+  }
+
+  function openGalleryLightbox(photoId) {
+    if (!window.TRJT_GALLERY) return;
+    const photo = window.TRJT_GALLERY.getPhotoById(photoId);
+    if (!photo) return;
+
+    activeLightboxPhotoId = photoId;
+    const modal = document.getElementById('gallery-lightbox-modal');
+    const imgEl = document.getElementById('gallery-lightbox-img');
+    const captionEl = document.getElementById('gallery-lightbox-caption');
+    const dateEl = document.getElementById('gallery-lightbox-date');
+    const filenameEl = document.getElementById('gallery-lightbox-filename');
+
+    if (!modal || !imgEl) return;
+
+    imgEl.src = photo.imageUrl || photo.thumbnailUrl || '';
+    imgEl.alt = photo.caption || photo.name || 'Pratinjau Foto';
+
+    if (captionEl) {
+      if (photo.caption) {
+        captionEl.innerText = photo.caption;
+        captionEl.style.display = 'block';
+      } else {
+        captionEl.innerText = '';
+        captionEl.style.display = 'none';
+      }
+    }
+
+    if (dateEl) {
+      dateEl.innerText = photo.createdAt ? new Date(photo.createdAt).toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      }) : '';
+    }
+
+    if (filenameEl) {
+      filenameEl.innerText = photo.name || '';
+    }
+
+    modal.style.display = 'flex';
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  function closeGalleryLightbox() {
+    const modal = document.getElementById('gallery-lightbox-modal');
+    if (modal) {
+      modal.classList.remove('is-open');
+      modal.setAttribute('aria-hidden', 'true');
+      modal.style.display = 'none';
+    }
+    activeLightboxPhotoId = null;
+  }
+
+  function navigateLightbox(direction) {
+    if (!activeLightboxPhotoId || !window.TRJT_GALLERY) return;
+    const photos = window.TRJT_GALLERY.getPhotos();
+    if (!photos || photos.length === 0) return;
+    const currentIndex = photos.findIndex((p) => p.id === activeLightboxPhotoId);
+    if (currentIndex === -1) return;
+    let nextIndex = currentIndex + direction;
+    if (nextIndex < 0) nextIndex = photos.length - 1;
+    if (nextIndex >= photos.length) nextIndex = 0;
+    openGalleryLightbox(photos[nextIndex].id);
+  }
+
+  function handleTouchStart(e) {
+    galleryTouchStartX = e.changedTouches[0].screenX;
+  }
+
+  function handleTouchEnd(e) {
+    galleryTouchEndX = e.changedTouches[0].screenX;
+    const swipeThreshold = 45;
+    if (galleryTouchEndX < galleryTouchStartX - swipeThreshold) {
+      navigateLightbox(1);
+    } else if (galleryTouchEndX > galleryTouchStartX + swipeThreshold) {
+      navigateLightbox(-1);
+    }
+  }
+
   function init() {
     setupEvents();
     applyTheme(state.settings.theme);
@@ -3356,6 +3828,11 @@ function getErrorFallbackHtml(message, retryFuncStr) {
     setupDragScroll();
     setupScrollHideBottomNav();
     tick();
+
+    // Pre-fetch gallery photos in background
+    if (window.TRJT_GALLERY) {
+      window.TRJT_GALLERY.fetchPhotos().catch(() => {});
+    }
 
     setInterval(tick, 1000);
 
@@ -3549,6 +4026,7 @@ function getErrorFallbackHtml(message, retryFuncStr) {
   }
 
   // Export engine and modals for testing & global triggers
+  window.switchTab = switchTab;
   window.evaluateScheduleState = evaluateScheduleState;
   window.processH10Reminder = processH10Reminder;
   window.triggerH10Notification = triggerH10Notification;
@@ -3582,6 +4060,15 @@ function getErrorFallbackHtml(message, retryFuncStr) {
   window.renderCourseGroups = renderCourseGroups;
   window.copyGroupMembers = copyGroupMembers;
   window.jumpToCourseGroupsFromTaskModal = jumpToCourseGroupsFromTaskModal;
+
+  window.renderGallery = renderGallery;
+  window.refreshGallery = refreshGallery;
+  window.openGalleryLightbox = openGalleryLightbox;
+  window.closeGalleryLightbox = closeGalleryLightbox;
+  window.openGalleryUploadModal = openGalleryUploadModal;
+  window.closeGalleryUploadModal = closeGalleryUploadModal;
+  window.submitGalleryPhoto = submitGalleryPhoto;
+  window.navigateLightbox = navigateLightbox;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

@@ -6,7 +6,7 @@
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'trjt3a-reminder-v9.0';
+const CACHE_NAME = 'trjt3a-reminder-v9.4';
 const ASSETS = [
   './',
   './index.html',
@@ -18,6 +18,7 @@ const ASSETS = [
   './js/assignment-service.js',
   './js/time-provider.js',
   './js/data.js',
+  './js/gallery-service.js',
   './js/app.js',
   './manifest.json',
   './favicon.svg',

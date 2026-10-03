@@ -25,7 +25,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <!-- Design System Stylesheet & Critical Inlined Styles -->
-  <link rel="stylesheet" href="./css/design-system.css?v=6.9">
+  <link rel="stylesheet" href="./css/design-system.css?v=9.1">
   <style>
     /* Critical Glassmorphism Inlined Styles for Instant Guaranteed Rendering */
     :root {
@@ -251,7 +251,7 @@
     .piket-avatar-dot { width: 22px; height: 22px; border-radius: 50%; background: var(--color-very-light-blue); color: var(--color-primary-blue); font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .piket-member-name { font-size: 12.5px; font-weight: 600; color: var(--color-primary-navy); line-height: 1.25; }
   </style>
-  <link rel="stylesheet" href="./css/student-ui.css?v=9.0">
+  <link rel="stylesheet" href="./css/student-ui.css?v=9.4">
 </head>
 <body class="student-app home-active">
 
@@ -298,7 +298,7 @@
           </figure>
 
           <div class="home-shortcuts" aria-label="Menu perkuliahan">
-            <button class="class-shortcut" type="button" onclick="document.querySelector('[data-tab=jadwal]').click()" aria-label="Buka jadwal kuliah"><span class="shortcut-icon"><i data-lucide="calendar-days"></i></span><span class="shortcut-copy"><strong>Jadwal</strong></span></button>
+            <button class="class-shortcut" type="button" onclick="switchTab('galeri')" aria-label="Buka galeri kelas"><span class="shortcut-icon"><i data-lucide="images"></i></span><span class="shortcut-copy"><strong>Galeri</strong></span></button>
             <button class="class-shortcut" type="button" onclick="openAllAssignmentsModal()" aria-label="Buka semua tugas"><span class="shortcut-icon"><i data-lucide="notebook-pen"></i></span><span class="shortcut-copy"><strong>Tugas</strong></span></button>
             <button class="class-shortcut" type="button" onclick="openCourseMaterialsModal()" aria-label="Buka materi kuliah"><span class="shortcut-icon"><i data-lucide="book-open"></i></span><span class="shortcut-copy"><strong>Materi</strong></span></button>
             <button class="class-shortcut" type="button" onclick="openPiketModal()" aria-label="Lihat daftar piket kelas"><span class="shortcut-icon"><i data-lucide="clipboard-list"></i></span><span class="shortcut-copy"><strong>Piket</strong></span></button>
@@ -315,7 +315,7 @@
                   <span class="section-eyebrow">AGENDA KELAS</span>
                   <h2 id="today-heading" class="section-main-title">Jadwal hari ini</h2>
                 </div>
-                <button type="button" class="section-link" onclick="document.querySelector('[data-tab=jadwal]').click()">Semua jadwal <i data-lucide="arrow-right" aria-hidden="true"></i></button>
+                <button type="button" class="section-link" onclick="switchTab('jadwal')">Semua jadwal <i data-lucide="arrow-right" aria-hidden="true"></i></button>
               </div>
               <div id="today-timeline-container" class="today-cards-list"></div>
             </section>
@@ -404,6 +404,69 @@
         </section>
 
         <!-- ==========================================
+               VIEW: GALERI (CLASS DOCUMENTATION GALLERY)
+               ========================================== -->
+          <section id="view-galeri" class="view-section">
+            
+            <!-- Title & Action Row -->
+            <div class="view-title-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <button type="button" class="btn-gallery-refresh" onclick="switchTab('beranda')" aria-label="Kembali ke Beranda" title="Kembali ke Beranda">
+                  <i data-lucide="arrow-left"></i>
+                </button>
+                <div>
+                  <h2 class="view-page-title" style="margin: 0; font-size: 20px; font-weight: 800; color: #172B4D; letter-spacing: -0.02em;">Galeri Kelas</h2>
+                  <p class="notif-subtitle-text" style="margin: 2px 0 0 0; font-size: 13px; color: #718096;">Dokumentasi kegiatan TRJT 3A</p>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <button type="button" id="btn-gallery-refresh" class="btn-gallery-refresh" aria-label="Segarkan foto" title="Segarkan foto">
+                  <i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i>
+                </button>
+                <button type="button" id="btn-gallery-upload-trigger" class="btn-upload-gallery" aria-label="Upload Foto">
+                  <i data-lucide="image-plus" style="width: 18px; height: 18px;"></i>
+                  <span>Upload</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Hidden file input for gallery upload -->
+            <input type="file" id="gallery-file-input" accept="image/jpeg,image/png,image/webp,image/heic,image/*" style="display: none;" />
+
+            <!-- Gallery Grid Container (2 Columns Mobile) -->
+            <div id="gallery-grid-container" class="gallery-grid">
+              <!-- Dynamically populated or skeleton loader -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="gallery-empty-state" class="gallery-empty-state" style="display: none;">
+              <div class="gallery-empty-icon-wrap">
+                <i data-lucide="images"></i>
+              </div>
+              <h3 class="gallery-empty-title">Belum ada foto</h3>
+              <p class="gallery-empty-desc">Dokumentasi kelas akan tampil di sini.</p>
+              <button type="button" id="btn-gallery-empty-upload" class="btn-upload-gallery" style="margin-top: 12px;">
+                <i data-lucide="image-plus" style="width: 18px; height: 18px;"></i>
+                <span>+ Upload Foto</span>
+              </button>
+            </div>
+
+            <!-- Error State -->
+            <div id="gallery-error-state" class="gallery-error-state" style="display: none;">
+              <div class="gallery-empty-icon-wrap" style="color: #E53E3E; background: #FFF5F5;">
+                <i data-lucide="alert-circle"></i>
+              </div>
+              <h3 class="gallery-empty-title" style="color: #172B4D;">Gagal Memuat Galeri</h3>
+              <p class="gallery-empty-desc" id="gallery-error-message">Tidak dapat terhubung ke Google Drive. Silakan periksa koneksi internet Anda.</p>
+              <button type="button" id="btn-gallery-retry" class="btn-upload-gallery" style="margin-top: 12px; background: #EEF4FB; color: #173F7A; border: 1px solid #E5EBF2;">
+                <i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i>
+                <span>Coba Lagi</span>
+              </button>
+            </div>
+
+          </section>
+
+          <!-- ==========================================
              VIEW 3: NOTIFIKASI (INBOX)
              ========================================== -->
         <section id="view-notifikasi" class="view-section">
@@ -1257,6 +1320,100 @@
     </div>
   </div>
 
+
+  <!-- ==========================================
+       MODAL: UPLOAD FOTO KE GOOGLE DRIVE
+       ========================================== -->
+  <div id="modal-upload-gallery" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true" style="display: none;">
+    <div class="modal-sheet">
+      <div class="modal-drag-handle"></div>
+      
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div class="brand-logo-box" style="background: #EEF4FB; color: #173F7A;">
+            <i data-lucide="image-plus" style="width: 20px; height: 20px;"></i>
+          </div>
+          <div>
+            <h2 style="font-size: 16px; font-weight: 700; color: #172B4D; margin: 0; line-height: 1.2;">Upload Foto</h2>
+            <p style="font-size: 12px; color: #718096; margin: 2px 0 0 0;">Dokumentasi kegiatan TRJT 3A</p>
+          </div>
+        </div>
+        <button type="button" id="btn-close-gallery-upload-modal" class="btn-close-modal" aria-label="Tutup">
+          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+        </button>
+      </div>
+
+      <div class="modal-body" style="padding-top: 8px;">
+        <!-- Preview Area -->
+        <div class="gallery-preview-wrapper">
+          <img id="gallery-upload-preview-img" src="" alt="Preview Foto" class="gallery-preview-img" />
+          <div id="gallery-preview-meta" class="gallery-preview-meta"></div>
+        </div>
+
+        <!-- Caption Input (Optional) -->
+        <div style="margin-top: 14px;">
+          <label for="gallery-caption-input" class="form-label" style="font-size: 12px; font-weight: 600; color: #172B4D; margin-bottom: 6px; display: block;">
+            Keterangan <span style="font-weight: 400; color: #718096;">(opsional)</span>
+          </label>
+          <input type="text" id="gallery-caption-input" class="form-input" placeholder="Contoh: Praktikum Antena Rooftop..." maxlength="120" style="width: 100%; border-radius: 12px; font-size: 13px; padding: 10px 14px; border: 1px solid #E5EBF2; box-sizing: border-box;" />
+        </div>
+
+        <!-- Action Buttons [ Batal ] [ Upload ] -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px;">
+          <button type="button" id="btn-cancel-gallery-upload" class="btn-modal-cancel" style="height: 44px; border-radius: 12px; border: 1px solid #E5EBF2; background: #FFFFFF; color: #718096; font-weight: 600; font-size: 14px; cursor: pointer;">
+            Batal
+          </button>
+          <button type="button" id="btn-submit-gallery-upload" class="btn-modal-submit" style="height: 44px; border-radius: 12px; border: none; background: #173F7A; color: #FFFFFF; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i data-lucide="upload" style="width: 18px; height: 18px;"></i>
+            <span id="btn-submit-gallery-upload-text">Upload</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       LIGHTBOX: FULLSCREEN PHOTO VIEWER
+       ========================================== -->
+  
+  <!-- =========================================================================
+       MODAL KONFIRMASI HAPUS FOTO GALERI
+       ========================================================================= -->
+  <div id="modal-delete-gallery-confirm" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true" style="display: none; z-index: 2500;">
+    <div class="modal-sheet" style="max-width: 360px; margin: auto; border-radius: 20px; text-align: center; padding: 24px 20px;">
+      <div style="width: 52px; height: 52px; border-radius: 50%; background: #FEE2E2; color: #DC2626; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px;">
+        <i data-lucide="trash-2" style="width: 26px; height: 26px;"></i>
+      </div>
+      <h3 style="font-size: 16px; font-weight: 700; color: #0F172A; margin: 0 0 6px 0;">Hapus Foto Dokumentasi?</h3>
+      <p style="font-size: 13px; color: #64748B; margin: 0 0 20px 0; line-height: 1.4;">
+        Foto ini akan dihapus dari galeri dan dipindahkan ke tempat sampah Google Drive.
+      </p>
+      <div style="display: flex; gap: 10px;">
+        <button type="button" id="btn-cancel-delete-gallery" class="btn btn-secondary" style="flex: 1; padding: 11px; border-radius: 12px; font-weight: 600;">Batal</button>
+        <button type="button" id="btn-confirm-delete-gallery" class="btn" style="flex: 1; padding: 11px; border-radius: 12px; font-weight: 600; background: #DC2626; color: #FFFFFF; border: none; cursor: pointer;">Hapus</button>
+      </div>
+    </div>
+  </div>
+  <div id="gallery-lightbox-modal" class="gallery-lightbox" style="display: none;" role="dialog" aria-modal="true" aria-label="Pratinjau Foto Penuh">
+    <div class="gallery-lightbox-backdrop"></div>
+    <button type="button" id="btn-delete-gallery-lightbox" class="gallery-lightbox-delete" aria-label="Hapus Foto" title="Hapus Foto">
+      <i data-lucide="trash-2"></i>
+    </button>
+    <button type="button" id="btn-close-gallery-lightbox" class="gallery-lightbox-close" aria-label="Tutup Pratinjau">
+      <i data-lucide="x"></i>
+    </button>
+    <div class="gallery-lightbox-content">
+      <img id="gallery-lightbox-img" src="" alt="Pratinjau Foto" class="gallery-lightbox-image" />
+      <div class="gallery-lightbox-caption-box" id="gallery-lightbox-caption-box">
+        <p id="gallery-lightbox-caption" class="gallery-lightbox-caption-text"></p>
+        <div class="gallery-lightbox-meta-row">
+          <span id="gallery-lightbox-date" class="gallery-lightbox-date"></span>
+          <span id="gallery-lightbox-filename" class="gallery-lightbox-filename"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Firebase App & Services (v10 compat SDK) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -1270,7 +1427,8 @@
   <script src="./js/data.js?v=6.9"></script>
   <script src="./js/drive-service.js?v=6.9"></script>
   <script src="./js/material-service.js?v=6.9"></script>
-  <script src="./js/assignment-service.js?v=6.9"></script>
-  <script src="./js/app.js?v=9.0"></script>
+  <script src="./js/assignment-service.js?v=9.1"></script>
+  <script src="./js/gallery-service.js?v=9.4"></script>
+  <script src="./js/app.js?v=9.4"></script>
 </body>
 </html>
