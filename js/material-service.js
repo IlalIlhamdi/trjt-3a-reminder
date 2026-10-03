@@ -19,6 +19,59 @@
   const MAX_DOC_SIZE = 25 * 1024 * 1024;      // 25 MB
 
   let allMaterialsCache = [];
+  const STORAGE_KEY_DELETED_MATERIALS = 'trjt_deleted_material_ids_v1';
+  const STORAGE_KEY_MY_MATERIALS = 'trjt_my_material_ids_v1';
+
+  function getDeletedMaterialIds() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_DELETED_MATERIALS);
+      if (raw) return new Set(JSON.parse(raw));
+    } catch (e) {}
+    return new Set();
+  }
+
+  function addDeletedMaterialId(id) {
+    if (!id) return;
+    try {
+      const s = getDeletedMaterialIds();
+      s.add(id);
+      localStorage.setItem(STORAGE_KEY_DELETED_MATERIALS, JSON.stringify(Array.from(s)));
+    } catch (e) {}
+  }
+
+  function getMyMaterialIds() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_MY_MATERIALS);
+      if (raw) return new Set(JSON.parse(raw));
+    } catch (e) {}
+    return new Set();
+  }
+
+  function addMyMaterialId(id) {
+    if (!id) return;
+    try {
+      const s = getMyMaterialIds();
+      s.add(id);
+      localStorage.setItem(STORAGE_KEY_MY_MATERIALS, JSON.stringify(Array.from(s)));
+    } catch (e) {}
+  }
+
+  function canDeleteMaterial(material) {
+    if (!material) return false;
+    const isAdmin = localStorage.getItem('trjt_is_admin') === 'true' || 
+                    (window.firebase && window.firebase.auth && window.firebase.auth().currentUser);
+    if (isAdmin) return true;
+
+    const myIds = getMyMaterialIds();
+    if (myIds.has(material.id)) return true;
+
+    // Student uploader or default class student role
+    if (!material.uploaderRole || material.uploaderRole === 'student' || !material.uploadedBy || material.uploadedBy.includes('Mahasiswa')) {
+      return true;
+    }
+    return false;
+  }
+
   let uploadSettingsCache = { allowStudentUpload: true };
   let isMaterialsListening = false;
 
@@ -36,10 +89,58 @@
   }
 
   // Initialize Firestore realtime listener for course materials
+    const DEFAULT_SAMPLE_MATERIALS = [
+    {
+      id: 'mat-sample-01',
+      scheduleId: 'senin-praktikum-antena-dan-propagasi',
+      courseName: 'Praktikum Antena dan Propagasi',
+      fileName: 'Modul-01-Pengukuran-Pola-Radiasi-Antena.pdf',
+      fileExtension: 'pdf',
+      fileSize: '2.4 MB',
+      uploadedBy: 'Mahasiswa TRJT 3A',
+      uploadedAt: '2026-09-28T08:30:00.000Z',
+      driveFileId: '12hBWioSC03r6wVLqlYTyQCWjNnwb20ht',
+      webViewLink: 'https://drive.google.com/drive/folders/12hBWioSC03r6wVLqlYTyQCWjNnwb20ht'
+    },
+    {
+      id: 'mat-sample-02',
+      scheduleId: 'senin-praktikum-antena-dan-propagasi',
+      courseName: 'Praktikum Antena dan Propagasi',
+      fileName: 'WhatsApp Image 2026-09-28 at 09.15.22.jpeg',
+      fileExtension: 'jpeg',
+      isImage: true,
+      fileSize: '35.9 KB',
+      uploadedBy: 'Mahasiswa TRJT 3A',
+      uploadedAt: '2026-09-28T09:15:00.000Z',
+      driveFileId: '12hBWioSC03r6wVLqlYTyQCWjNnwb20ht',
+      webViewLink: 'https://drive.google.com/drive/folders/12hBWioSC03r6wVLqlYTyQCWjNnwb20ht'
+    },
+    {
+      id: 'mat-sample-03',
+      scheduleId: 'senin-jaringan-komputer-lanjut',
+      courseName: 'Jaringan Komputer Lanjut',
+      fileName: 'Jobsheet-02-BGP-Routing-Configuration.docx',
+      fileExtension: 'docx',
+      fileSize: '840 KB',
+      uploadedBy: 'Mahasiswa TRJT 3A',
+      uploadedAt: '2026-09-29T10:45:00.000Z',
+      driveFileId: '1-K_w0rZHHfrNn1fOArSsKtFs6pu3y2ra',
+      webViewLink: 'https://drive.google.com/drive/folders/1-K_w0rZHHfrNn1fOArSsKtFs6pu3y2ra'
+    }
+  ];
+
+  function ensureInitialMaterials() {
+    if (allMaterialsCache.length === 0) {
+      const deleted = getDeletedMaterialIds();
+      allMaterialsCache = DEFAULT_SAMPLE_MATERIALS.filter((m) => !deleted.has(m.id));
+    }
+  }
+
   function initMaterialsListener() {
     if (isMaterialsListening) return;
 
     // Load from local storage cache immediately
+    ensureInitialMaterials();
     try {
       const saved = localStorage.getItem('trjt_materials_cache');
       if (saved) {
@@ -47,6 +148,7 @@
         if (Array.isArray(parsed) && parsed.length > 0) {
           allMaterialsCache = parsed;
         }
+        ensureInitialMaterials();
       }
     } catch (e) {}
 
@@ -487,10 +589,31 @@
     }
   }
 
-  // Delete Material
+  // Delete Material (Drive + Firestore + Local)
   async function deleteCourseMaterial(materialId) {
     if (!materialId) return false;
 
+    const item = allMaterialsCache.find((m) => m.id === materialId);
+
+    // 1. Delete from Google Drive if stored in Drive
+    if (item && item.driveFileId && !item.driveFileId.startsWith('gdrive-file-')) {
+      try {
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyXgjJ4CXqFqI45E1WQ_eua30gHSKI3a6auxWQqVACYLrExHKjw8-PQfhqjSsljlMFwLQ/exec';
+        // Kirim request delete (POST & GET fallback)
+        fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          redirect: 'follow',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'delete', fileId: item.driveFileId, id: item.driveFileId })
+        }).catch(() => {});
+
+        fetch(`${APPS_SCRIPT_URL}?action=delete&fileId=${encodeURIComponent(item.driveFileId)}&t=${Date.now()}`, { redirect: 'follow' }).catch(() => {});
+      } catch (e) {
+        console.warn('Delete Drive file note:', e);
+      }
+    }
+
+    // 2. Delete from Firestore database
     const db = window.firebase ? window.firebase.firestore() : null;
     if (db) {
       try {
@@ -500,7 +623,23 @@
       }
     }
 
+    // 3. Delete from IndexedDB local storage
+    try {
+      const idb = await openIndexedDB();
+      if (idb) {
+        const tx = idb.transaction('materialFiles', 'readwrite');
+        tx.objectStore('materialFiles').delete(materialId);
+      }
+    } catch (e) {}
+
+    // 4. Update memory cache and localStorage
     allMaterialsCache = allMaterialsCache.filter((m) => m.id !== materialId);
+    try {
+      localStorage.setItem('trjt_materials_cache', JSON.stringify(allMaterialsCache.slice(0, 30)));
+    } catch (e) {}
+    addDeletedMaterialId(materialId);
+
+    // 5. Reactive UI update
     window.dispatchEvent(new CustomEvent('trjt:materials-updated', { detail: allMaterialsCache }));
     return true;
   }
@@ -533,6 +672,8 @@
     uploadCourseMaterial: uploadCourseMaterial,
     openOrDownloadMaterial: openOrDownloadMaterial,
     deleteCourseMaterial: deleteCourseMaterial,
+    canDeleteMaterial: canDeleteMaterial,
+    addMyMaterialId: addMyMaterialId,
     getUploadSettings: getUploadSettings,
     updateUploadSettings: updateUploadSettings,
     formatFileSize: formatFileSize

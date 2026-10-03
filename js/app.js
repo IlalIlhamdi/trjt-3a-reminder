@@ -1725,6 +1725,12 @@ function getErrorFallbackHtml(message, retryFuncStr) {
     }
 
     // Listen to assignment updates (realtime sync / local updates)
+    window.addEventListener('trjt:materials-updated', () => {
+      if (document.getElementById('modal-course-materials')?.classList.contains('is-open')) {
+        renderCourseMaterialsList();
+      }
+    });
+
     window.addEventListener('trjt:assignments-updated', () => {
       renderUpcomingTasksWidget();
       renderWeeklySchedule();
@@ -1801,6 +1807,25 @@ function getErrorFallbackHtml(message, retryFuncStr) {
         if (e.target === modalDeleteConfirm) closeDeleteGalleryModal();
       });
     }
+    // Course Material Delete Confirmation Modal Listeners
+    const modalDeleteMat = document.getElementById('modal-delete-material-confirm');
+    const btnCancelDeleteMat = document.getElementById('btn-cancel-delete-material');
+    const btnConfirmDeleteMat = document.getElementById('btn-confirm-delete-material');
+    if (btnCancelDeleteMat) btnCancelDeleteMat.addEventListener('click', closeDeleteMaterialModal);
+    if (btnConfirmDeleteMat) btnConfirmDeleteMat.addEventListener('click', confirmDeleteMaterial);
+    if (modalDeleteMat) {
+      modalDeleteMat.addEventListener('click', (e) => {
+        if (e.target === modalDeleteMat) closeDeleteMaterialModal();
+      });
+    }
+
+    // Close material popover when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.material-menu-anchor')) {
+        closeAllMaterialPopovers();
+      }
+    });
+
     if (backdropLightbox) backdropLightbox.addEventListener('click', closeGalleryLightbox);
 
     // Lightbox Swipe support for mobile devices
@@ -1812,7 +1837,10 @@ function getErrorFallbackHtml(message, retryFuncStr) {
     // Keyboard navigation (Escape to close lightbox or modal, Left/Right for next/prev photo)
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        if (modalLightbox && modalLightbox.classList.contains('is-open')) {
+        const modalDeleteMat = document.getElementById('modal-delete-material-confirm');
+        if (modalDeleteMat && modalDeleteMat.classList.contains('is-open')) {
+          closeDeleteMaterialModal();
+        } else if (modalLightbox && modalLightbox.classList.contains('is-open')) {
           closeGalleryLightbox();
         } else if (modalUploadGallery && modalUploadGallery.classList.contains('is-open')) {
           closeGalleryUploadModal();
@@ -2514,6 +2542,7 @@ function getErrorFallbackHtml(message, retryFuncStr) {
     }
   }
 
+  const renderMaterials = renderCourseMaterialsList;
   async function renderCourseMaterialsList() {
     const container = document.getElementById('mat-list-container');
     const emptyState = document.getElementById('mat-empty-state');
@@ -2580,6 +2609,10 @@ function getErrorFallbackHtml(message, retryFuncStr) {
         ? (typeof m.uploadedAt === 'string' ? new Date(m.uploadedAt).toLocaleDateString('id-ID') : 'Baru saja')
         : 'Baru saja';
 
+      const canDelete = window.TRJT_MATERIALS && typeof window.TRJT_MATERIALS.canDeleteMaterial === 'function'
+        ? window.TRJT_MATERIALS.canDeleteMaterial(m)
+        : true;
+
       return `
         <div class="today-class-card" style="padding: 12px 14px;">
           <div style="width: 42px; height: 42px; border-radius: 10px; background: var(--color-very-light-blue); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
@@ -2587,22 +2620,149 @@ function getErrorFallbackHtml(message, retryFuncStr) {
           </div>
           <div style="flex: 1; min-width: 0;">
             <h4 style="font-size: 13.5px; font-weight: 700; color: var(--color-primary-navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${m.fileName}</h4>
-            <div style="display: flex; gap: 6px; font-size: 11px; color: var(--color-text-secondary); margin-top: 2px;">
-              <span>${m.fileSize || '1 MB'}</span>
-              <span>·</span>
-              <span>${dateStr}</span>
-              <span>·</span>
-              <span style="color: var(--color-primary-blue); font-weight: 600;">${m.uploadedBy || 'Mahasiswa'}</span>
+            <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px 6px; font-size: 11px; color: var(--color-text-secondary); margin-top: 2px;">
+              <span style="white-space: nowrap;">${m.fileSize || '1 MB'}</span>
+              <span>&bull;</span>
+              <span style="white-space: nowrap;">${dateStr}</span>
+              <span>&bull;</span>
+              <span style="color: var(--color-primary-blue); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px;">${m.uploadedBy || 'Mahasiswa'}</span>
             </div>
           </div>
-          <button type="button" class="btn-schedule-mat" onclick="window.TRJT_MATERIALS.openOrDownloadMaterial('${m.id}')" style="padding: 6px 10px;">
-            <i data-lucide="external-link" style="width: 12px; height: 12px;"></i> Buka
-          </button>
+          <div class="material-actions" style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+            <button type="button" class="btn-schedule-mat" onclick="window.TRJT_MATERIALS.openOrDownloadMaterial('${m.id}')" style="padding: 6px 10px;" title="Buka file">
+              <i data-lucide="external-link" style="width: 12px; height: 12px;"></i> Buka
+            </button>
+            <div class="material-menu-anchor" style="position: relative;">
+              <button type="button" class="btn-mat-more" data-material-id="${m.id}" aria-label="Menu opsi materi" aria-haspopup="true" title="Opsi materi">
+                <i data-lucide="more-vertical"></i>
+              </button>
+              <div class="material-popover-menu" id="popover-mat-${m.id}" style="display: none;">
+                <button type="button" class="mat-menu-item item-open" data-material-id="${m.id}">
+                  <i data-lucide="external-link"></i>
+                  <span>Buka</span>
+                </button>
+                ${canDelete ? `
+                <button type="button" class="mat-menu-item item-delete" data-material-id="${m.id}">
+                  <i data-lucide="trash-2"></i>
+                  <span>Hapus</span>
+                </button>` : ''}
+              </div>
+            </div>
+          </div>
         </div>
       `;
     }).join('');
 
+    // Attach three-dots button and popover actions
+    container.querySelectorAll('.btn-mat-more').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const matId = btn.getAttribute('data-material-id');
+        toggleMaterialPopover(matId);
+      });
+    });
+
+    container.querySelectorAll('.mat-menu-item.item-open').forEach((item) => {
+      item.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const matId = item.getAttribute('data-material-id');
+        closeAllMaterialPopovers();
+        if (window.TRJT_MATERIALS) window.TRJT_MATERIALS.openOrDownloadMaterial(matId);
+      });
+    });
+
+    container.querySelectorAll('.mat-menu-item.item-delete').forEach((item) => {
+      item.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const matId = item.getAttribute('data-material-id');
+        closeAllMaterialPopovers();
+        promptDeleteMaterial(matId);
+      });
+    });
+
     if (window.lucide) window.lucide.createIcons();
+  }
+
+  // --- Material Popover & Delete Controllers ---
+  let pendingDeleteMaterialId = null;
+
+  function toggleMaterialPopover(matId) {
+    const targetMenu = document.getElementById(`popover-mat-${matId}`);
+    const isCurrentlyOpen = targetMenu && targetMenu.style.display === 'flex';
+    closeAllMaterialPopovers();
+    if (targetMenu && !isCurrentlyOpen) {
+      targetMenu.style.display = 'flex';
+      const parentCard = targetMenu.closest('.today-class-card');
+      if (parentCard) parentCard.classList.add('has-popover-open');
+      if (window.lucide) window.lucide.createIcons();
+    }
+  }
+
+  function closeAllMaterialPopovers() {
+    document.querySelectorAll('.material-popover-menu').forEach((menu) => {
+      menu.style.display = 'none';
+      const parentCard = menu.closest('.today-class-card');
+      if (parentCard) parentCard.classList.remove('has-popover-open');
+    });
+  }
+
+  function promptDeleteMaterial(matId) {
+    if (!matId) return;
+    pendingDeleteMaterialId = matId;
+    const modal = document.getElementById('modal-delete-material-confirm');
+    if (modal) {
+      modal.style.display = 'flex';
+      modal.classList.add('is-open');
+      modal.setAttribute('aria-hidden', 'false');
+      if (window.lucide) window.lucide.createIcons();
+    }
+  }
+
+  function closeDeleteMaterialModal() {
+    const modal = document.getElementById('modal-delete-material-confirm');
+    if (modal) {
+      modal.classList.remove('is-open');
+      modal.setAttribute('aria-hidden', 'true');
+      modal.style.display = 'none';
+    }
+    pendingDeleteMaterialId = null;
+  }
+
+  async function confirmDeleteMaterial() {
+    if (!pendingDeleteMaterialId || !window.TRJT_MATERIALS) {
+      closeDeleteMaterialModal();
+      return;
+    }
+
+    const matIdToDelete = pendingDeleteMaterialId;
+    const confirmBtn = document.getElementById('btn-confirm-delete-material');
+    const cancelBtn = document.getElementById('btn-cancel-delete-material');
+
+    if (confirmBtn) {
+      confirmBtn.disabled = true;
+      confirmBtn.innerText = 'Menghapus...';
+    }
+    if (cancelBtn) cancelBtn.disabled = true;
+
+    try {
+      const success = await window.TRJT_MATERIALS.deleteCourseMaterial(matIdToDelete);
+      if (success) {
+        closeDeleteMaterialModal();
+        showToast('Materi berhasil dihapus.', 'success');
+        await renderCourseMaterialsList();
+      } else {
+        throw new Error('Gagal menghapus');
+      }
+    } catch (err) {
+      console.error('Delete material error:', err);
+      showToast('Materi gagal dihapus. Silakan coba lagi.', 'error');
+    } finally {
+      if (confirmBtn) {
+        confirmBtn.disabled = false;
+        confirmBtn.innerText = 'Hapus';
+      }
+      if (cancelBtn) cancelBtn.disabled = false;
+    }
   }
 
   function openUploadModal() {

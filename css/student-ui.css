@@ -3736,3 +3736,171 @@ html {
   color: #E2E8F0 !important;
   border-color: #334155 !important;
 }
+
+
+/* ==========================================================================
+   MATERIAL THREE-DOTS MENU & POPOVER STYLES
+   ========================================================================== */
+#modal-course-materials .today-class-card {
+  position: relative;
+  z-index: 1;
+}
+#modal-course-materials .today-class-card.has-popover-open {
+  z-index: 150 !important;
+}
+.material-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.btn-mat-more {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  border-radius: 10px;
+  background: rgba(23, 63, 122, 0.06);
+  border: 1px solid rgba(23, 63, 122, 0.12);
+  color: #172B4D;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0;
+  box-sizing: border-box;
+}
+.btn-mat-more:hover {
+  background: rgba(23, 63, 122, 0.14);
+  color: #123568;
+}
+.btn-mat-more:active {
+  transform: scale(0.96);
+}
+.btn-mat-more svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.2;
+}
+
+.material-popover-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 148px;
+  background: #FFFFFF;
+  border: 1px solid #E5EBF2;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(15, 61, 145, 0.15), 0 8px 10px -6px rgba(15, 61, 145, 0.08);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 220;
+  box-sizing: border-box;
+  animation: matPopoverFadeIn 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes matPopoverFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.mat-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+  box-sizing: border-box;
+}
+
+.mat-menu-item.item-open {
+  color: #172B4D;
+}
+.mat-menu-item.item-open:hover {
+  background: #F0F4F9;
+}
+.mat-menu-item.item-open svg {
+  width: 15px;
+  height: 15px;
+  color: #172B4D;
+}
+
+.mat-menu-item.item-delete {
+  color: #D9534F;
+}
+.mat-menu-item.item-delete:hover {
+  background: #FFF1F0;
+}
+.mat-menu-item.item-delete svg {
+  width: 15px;
+  height: 15px;
+  color: #D9534F;
+}
+
+/* Dark mode overrides */
+[data-theme="dark"] .btn-mat-more {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #E2E8F0;
+}
+[data-theme="dark"] .btn-mat-more:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
+}
+[data-theme="dark"] .material-popover-menu {
+  background: #111C2E;
+  border-color: #1E293B;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+}
+[data-theme="dark"] .mat-menu-item.item-open {
+  color: #E2E8F0;
+}
+[data-theme="dark"] .mat-menu-item.item-open:hover {
+  background: #1E293B;
+}
+[data-theme="dark"] .mat-menu-item.item-open svg {
+  color: #94A3B8;
+}
+[data-theme="dark"] .mat-menu-item.item-delete {
+  color: #F87171;
+}
+[data-theme="dark"] .mat-menu-item.item-delete:hover {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+/* Modal Delete Material Confirmation Dark Mode */
+[data-theme="dark"] #modal-delete-material-confirm .modal-sheet {
+  background: #111C2E !important;
+  border: 1px solid #1E293B !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6) !important;
+}
+[data-theme="dark"] #modal-delete-material-confirm h3 {
+  color: #F8FAFC !important;
+}
+[data-theme="dark"] #modal-delete-material-confirm p {
+  color: #94A3B8 !important;
+}
+[data-theme="dark"] #modal-delete-material-confirm #btn-cancel-delete-material {
+  background: #1E293B !important;
+  color: #E2E8F0 !important;
+  border-color: #334155 !important;
+}
