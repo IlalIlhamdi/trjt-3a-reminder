@@ -543,3 +543,105 @@ exports.broadcastNotificationToAllStudents = functions.https.onCall(async (data,
     message: `Notifikasi berhasil disiarkan ke ${successCount} perangkat mahasiswa.`
   };
 });
+
+
+// -----------------------------------------------------------------------------
+// Auto-Delete Expired Assignments (Asia/Jakarta Timezone)
+// Runs every 1 hour via Cloud Scheduler and callable via HTTP
+// -----------------------------------------------------------------------------
+async function runExpiredAssignmentsCleanup(firestoreDb) {
+  // Current Jakarta time
+  const now = new Date();
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Jakarta',
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+    hour12: false
+  });
+  const parts = formatter.formatToParts(now);
+  const map = {};
+  parts.forEach(p => { map[p.type] = p.value; });
+
+  const currentJakartaTime = new Date(
+    parseInt(map.year, 10),
+    parseInt(map.month, 10) - 1,
+    parseInt(map.day, 10),
+    parseInt(map.hour, 10),
+    parseInt(map.minute, 10),
+    parseInt(map.second, 10)
+  );
+
+  const snapshot = await firestoreDb.collection('courseAssignments').get();
+  if (snapshot.empty) {
+    return { cleanedCount: 0, checkedCount: 0 };
+  }
+
+  const batch = firestoreDb.batch();
+  let expiredCount = 0;
+
+  snapshot.forEach((doc) => {
+    const data = doc.data();
+    const dueDate = data.dueDate;
+    if (!dueDate) return;
+
+    let dYear, dMonth, dDay;
+    if (typeof dueDate === 'string' && dueDate.includes('-')) {
+      const p = dueDate.split('T')[0].split('-');
+      dYear = parseInt(p[0], 10);
+      dMonth = parseInt(p[1], 10) - 1;
+      dDay = parseInt(p[2], 10);
+    } else if (dueDate && typeof dueDate.toDate === 'function') {
+      const dt = dueDate.toDate();
+      dYear = dt.getFullYear();
+      dMonth = dt.getMonth();
+      dDay = dt.getDate();
+    }
+
+    if (dYear !== undefined && dMonth !== undefined && dDay !== undefined) {
+      // End of deadline day in Jakarta is 23:59:59.999 WIB
+      const deadlineEndOfDay = new Date(dYear, dMonth, dDay, 23, 59, 59, 999);
+      if (currentJakartaTime.getTime() > deadlineEndOfDay.getTime()) {
+        batch.delete(doc.ref);
+        expiredCount++;
+      }
+    }
+  });
+
+  if (expiredCount > 0) {
+    await batch.commit();
+    console.log(`[AutoDelete Server] Successfully pruned ${expiredCount} expired assignment(s).`);
+  }
+
+  return { cleanedCount: expiredCount, checkedCount: snapshot.size };
+}
+
+exports.cleanupExpiredAssignmentsScheduled = functions.pubsub
+  .schedule('0 * * * *')
+  .timeZone('Asia/Jakarta')
+  .onRun(async (context) => {
+    try {
+      const result = await runExpiredAssignmentsCleanup(db);
+      console.log('[Scheduled Cleanup Expired Tasks]:', result);
+      return result;
+    } catch (err) {
+      console.error('[Scheduled Cleanup Expired Tasks Error]:', err);
+      return null;
+    }
+  });
+
+exports.cleanupExpiredAssignmentsHttp = functions.https.onRequest(async (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  if (req.method === 'OPTIONS') return res.status(204).end();
+
+  try {
+    const result = await runExpiredAssignmentsCleanup(db);
+    return res.status(200).json({ success: true, source: 'cloud-function-http', ...result });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});

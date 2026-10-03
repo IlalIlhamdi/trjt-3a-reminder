@@ -2,6 +2,7 @@
  * TRJT 3A REMINDER — Course Assignments Service
  * Realtime Firestore Sync + Offline LocalStorage Cache
  * Handles assignment creation, deadline calculations, and personal task completion tracking.
+ * Features automated expiration detection and background cleanup for overdue assignments.
  */
 
 (function () {
@@ -17,6 +18,7 @@
   let assignmentsCache = loadCachedAssignments();
   let completedSet = loadCompletedIds();
   let isFirestoreConnected = false;
+  let isCleaningUp = false;
 
   function loadDeletedIds() {
     try {
@@ -41,8 +43,8 @@
       if (raw !== null) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
-          // Filter out legacy dummy sample tasks & permanently deleted tasks
-          const cleaned = parsed.filter((t) => t && !DUMMY_TASK_IDS.has(t.id) && !deletedSet.has(t.id));
+          // Filter out legacy dummy sample tasks, deleted tombstones & expired tasks
+          const cleaned = parsed.filter((t) => t && !DUMMY_TASK_IDS.has(t.id) && !deletedSet.has(t.id) && !isAssignmentExpired(t.dueDate, t.dueTime));
           if (cleaned.length !== parsed.length) {
             saveAssignmentsToCache(cleaned);
           }
@@ -52,7 +54,7 @@
     } catch (e) {
       console.warn('Load assignments cache error:', e);
     }
-    // Clean initial state: start empty without fake dummy assignments
+    // Clean initial state
     saveAssignmentsToCache([]);
     return [];
   }
@@ -106,14 +108,12 @@
 
     const db = getFirestoreDb();
     if (!db) {
-      // Waiting for Firebase to complete initialization
       const onFirebaseReady = () => {
         window.removeEventListener('trjt:firebase-ready', onFirebaseReady);
         initAssignmentsListener();
       };
       window.addEventListener('trjt:firebase-ready', onFirebaseReady);
 
-      // Polling fallback in case event was already dispatched or missed
       let retries = 0;
       const pollInterval = setInterval(() => {
         retries++;
@@ -127,7 +127,7 @@
           initAssignmentsListener();
         } else if (retries >= 20) {
           clearInterval(pollInterval);
-          console.log('ℹ️ Local offline mode for assignments active.');
+          console.log('📡 Local offline mode for assignments active.');
         }
       }, 500);
       return;
@@ -143,11 +143,16 @@
         .onSnapshot((snapshot) => {
           if (snapshot) {
             const list = [];
+            let foundExpired = false;
             snapshot.forEach((doc) => {
               const item = { id: doc.id, ...doc.data() };
-              // Discard any dummy tasks or tasks explicitly deleted by the user
               if (item && !DUMMY_TASK_IDS.has(item.id) && !deletedSet.has(item.id)) {
-                list.push(item);
+                // Section W: Filter expired tasks before adding to display list
+                if (isAssignmentExpired(item.dueDate, item.dueTime)) {
+                  foundExpired = true;
+                } else {
+                  list.push(item);
+                }
               }
             });
 
@@ -155,6 +160,11 @@
             saveAssignmentsToCache(list);
             isFirestoreConnected = true;
             window.dispatchEvent(new CustomEvent('trjt:assignments-updated', { detail: list }));
+
+            // Cleanup expired tasks from Firestore in background
+            if (foundExpired) {
+              setTimeout(() => { cleanupExpiredAssignments(); }, 50);
+            }
           }
         }, (error) => {
           console.warn('Firestore assignments listener notice:', error.message);
@@ -175,102 +185,239 @@
     return isNaN(ts) ? Infinity : ts;
   }
 
+  function getRelativeDateStr(offsetDays = 0) {
+    const now = window.appTimeProvider ? window.appTimeProvider.now() : (window.RealJakartaTimeProvider ? new window.RealJakartaTimeProvider().now() : new Date());
+    const target = new Date(now.getTime() + offsetDays * 86400000);
+    const y = target.getFullYear();
+    const m = String(target.getMonth() + 1).padStart(2, '0');
+    const d = String(target.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  /**
+   * Safe Jakarta Date parser & time boundary helper
+   * Interpret dueDate ('YYYY-MM-DD' or Timestamp or Date) in Asia/Jakarta timezone
+   */
+  function getJakartaDateParts(dateInput) {
+    let d;
+    if (!dateInput) {
+      d = window.appTimeProvider ? window.appTimeProvider.now() : (window.RealJakartaTimeProvider ? new window.RealJakartaTimeProvider().now() : new Date());
+    } else if (typeof dateInput === 'string') {
+      if (/^\d{4}-\d{2}-\d{2}/.test(dateInput)) {
+        const parts = dateInput.split('T')[0].split('-');
+        return {
+          year: parseInt(parts[0], 10),
+          month: parseInt(parts[1], 10) - 1,
+          day: parseInt(parts[2], 10)
+        };
+      }
+      d = new Date(dateInput);
+    } else if (dateInput && typeof dateInput.toDate === 'function') {
+      d = dateInput.toDate();
+    } else {
+      d = new Date(dateInput);
+    }
+    return {
+      year: d.getFullYear(),
+      month: d.getMonth(),
+      day: d.getDate()
+    };
+  }
+
+  /**
+   * Helper to determine exact deadline boundary in Asia/Jakarta (WIB)
+   * The task expires ONLY after the end of the deadline day (after 23:59:59.999 WIB)
+   */
+  function getAssignmentDeadline(dueDate, dueTime) {
+    if (!dueDate) return null;
+    const parts = getJakartaDateParts(dueDate);
+    if (isNaN(parts.year) || isNaN(parts.month) || isNaN(parts.day)) {
+      return null;
+    }
+
+    // End of deadline day in Asia/Jakarta is strictly 23:59:59.999 WIB
+    const deadlineEndOfDay = new Date(parts.year, parts.month, parts.day, 23, 59, 59, 999);
+    const deadlineStartOfDay = new Date(parts.year, parts.month, parts.day, 0, 0, 0, 0);
+
+    const now = window.appTimeProvider ? window.appTimeProvider.now() : (window.RealJakartaTimeProvider ? new window.RealJakartaTimeProvider().now() : new Date());
+    const todayStartOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+
+    // Strictly expired ONLY when current time is past the end of the deadline day (after 23:59:59.999)
+    const isExpired = now.getTime() > deadlineEndOfDay.getTime();
+    const diffCalendarDays = Math.round((deadlineStartOfDay.getTime() - todayStartOfDay.getTime()) / (1000 * 60 * 60 * 24));
+
+    return {
+      deadlineEndOfDay,
+      deadlineStartOfDay,
+      todayStartOfDay,
+      diffDays: diffCalendarDays,
+      isExpired,
+      now
+    };
+  }
+
+  function isAssignmentExpired(dueDate, dueTime) {
+    if (!dueDate) return false;
+    const info = getAssignmentDeadline(dueDate, dueTime);
+    return info ? info.isExpired : false;
+  }
+
+  /**
+   * Cleanup expired assignments from cache and Firestore
+   * Protected against concurrent runs and double deletes
+   */
+  async function cleanupExpiredAssignments() {
+    if (isCleaningUp) return 0;
+    isCleaningUp = true;
+
+    try {
+      const all = [...assignmentsCache];
+      const expiredTasks = all.filter((task) => {
+        return task && task.id && isAssignmentExpired(task.dueDate, task.dueTime);
+      });
+
+      if (expiredTasks.length === 0) {
+        return 0;
+      }
+
+      console.log(`[AutoDelete] Found ${expiredTasks.length} expired assignment(s). Cleaning up...`);
+
+      // 1. Remove expired tasks from memory cache & track tombstone
+      let cacheChanged = false;
+      expiredTasks.forEach((t) => {
+        deletedSet.add(t.id);
+        completedSet.delete(t.id);
+        assignmentsCache = assignmentsCache.filter((a) => a.id !== t.id);
+        cacheChanged = true;
+      });
+
+      if (cacheChanged) {
+        saveDeletedIds();
+        saveCompletedIds();
+        saveAssignmentsToCache(assignmentsCache);
+        window.dispatchEvent(new CustomEvent('trjt:assignments-updated', { detail: assignmentsCache }));
+      }
+
+      // 2. Delete expired tasks from Firestore if connected
+      const db = getFirestoreDb();
+      if (db) {
+        for (const t of expiredTasks) {
+          try {
+            await db.collection('courseAssignments').doc(t.id).delete();
+            console.log(`[AutoDelete] Pruned expired assignment from Firestore: ${t.id} (${t.title})`);
+          } catch (err) {
+            console.warn(`[AutoDelete] Firestore notice for ${t.id}:`, err.message);
+          }
+        }
+      }
+
+      return expiredTasks.length;
+    } catch (e) {
+      console.error('[AutoDelete] Error in cleanupExpiredAssignments:', e);
+      return 0;
+    } finally {
+      isCleaningUp = false;
+    }
+  }
+
   // Format deadline countdown and friendly Indonesian labels
   function formatDeadlineCountdown(dueDate, dueTime) {
-    if (!dueDate) return { text: 'Tanpa deadline', urgency: 'normal', badgeClass: 'badge-deadline-normal', isPast: false };
+    if (!dueDate) return { text: 'Tanpa deadline', fullText: 'Tanpa deadline', shortText: 'Tanpa deadline', urgency: 'normal', badgeClass: 'badge-deadline-countdown', isPast: false, isExpired: false, diffDays: 999 };
 
-    const timeStr = dueTime || '23:59';
-    const dueDateTime = new Date(`${dueDate}T${timeStr}:00`);
-    const now = window.appTimeProvider ? window.appTimeProvider.now() : new Date();
+    const deadline = getAssignmentDeadline(dueDate, dueTime);
+    if (!deadline) {
+      return { text: 'Tanpa deadline', fullText: 'Tanpa deadline', shortText: 'Tanpa deadline', urgency: 'normal', badgeClass: 'badge-deadline-countdown', isPast: false, isExpired: false, diffDays: 999 };
+    }
 
-    const diffMs = dueDateTime.getTime() - now.getTime();
-    const diffHours = diffMs / (1000 * 60 * 60);
-    const diffDays = Math.ceil(diffHours / 24);
-
-    const isPast = diffMs < 0;
-
-    // Formatting date string: e.g. "Jumat, 11 Sep 2026 • 23:59 WIB"
-    const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    // Indonesian friendly day & month names
+    const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-    
-    const dayName = dayNames[dueDateTime.getDay()] || '';
-    const dateNum = dueDateTime.getDate();
-    const monthName = monthNames[dueDateTime.getMonth()] || '';
-    const formattedFull = `${dayName}, ${dateNum} ${monthName} ${dueDateTime.getFullYear()}`;
 
-    if (isPast) {
-      const pastHours = Math.abs(diffHours);
-      let pastLabel = 'Lewat batas';
-      if (pastHours < 24) {
-        pastLabel = 'Lewat hari ini';
-      } else {
-        const pastDays = Math.floor(pastHours / 24);
-        pastLabel = `Lewat ${pastDays} hari lalu`;
-      }
+    const parts = getJakartaDateParts(dueDate);
+    const targetDate = new Date(parts.year, parts.month, parts.day);
+    const dayName = dayNames[targetDate.getDay()] || '';
+    const monthName = monthNames[parts.month] || '';
+    const formattedShort = `${dayName}, ${parts.day} ${monthName} ${parts.year}`;
+
+    const fullDayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const fullDayName = fullDayNames[targetDate.getDay()] || '';
+    const formattedFull = `${fullDayName}, ${parts.day} ${monthName} ${parts.year}`;
+
+    if (deadline.isExpired) {
       return {
-        text: pastLabel,
+        text: 'Lewat batas',
         fullText: formattedFull,
+        shortText: formattedShort,
         urgency: 'passed',
-        badgeClass: 'badge-deadline-passed',
-        diffDays,
-        isPast: true
+        badgeClass: 'badge-deadline-countdown',
+        diffDays: deadline.diffDays,
+        isPast: true,
+        isExpired: true
       };
     }
 
-    // Same day
-    const isToday = dueDateTime.toDateString() === now.toDateString();
-    if (isToday) {
+    // Same day: 0 calendar days difference (active during the whole day)
+    if (deadline.diffDays === 0) {
       return {
         text: 'Hari ini',
         fullText: formattedFull,
+        shortText: formattedShort,
         urgency: 'critical',
-        badgeClass: 'badge-deadline-critical',
+        badgeClass: 'badge-deadline-countdown',
         diffDays: 0,
-        isPast: false
+        isPast: false,
+        isExpired: false
       };
     }
 
-    // Tomorrow
-    const tomorrow = new Date(now);
-    tomorrow.setDate(now.getDate() + 1);
-    const isTomorrow = dueDateTime.toDateString() === tomorrow.toDateString();
-    if (isTomorrow) {
+    // Tomorrow: 1 calendar day difference
+    if (deadline.diffDays === 1) {
       return {
         text: 'Besok',
         fullText: formattedFull,
+        shortText: formattedShort,
         urgency: 'urgent',
-        badgeClass: 'badge-deadline-urgent',
+        badgeClass: 'badge-deadline-countdown',
         diffDays: 1,
-        isPast: false
+        isPast: false,
+        isExpired: false
       };
     }
 
     // 2-3 days
-    if (diffDays <= 3) {
+    if (deadline.diffDays <= 3) {
       return {
-        text: `${diffDays} hari lagi`,
+        text: `${deadline.diffDays} hari lagi`,
         fullText: formattedFull,
+        shortText: formattedShort,
         urgency: 'warning',
-        badgeClass: 'badge-deadline-warning',
-        diffDays,
-        isPast: false
+        badgeClass: 'badge-deadline-countdown',
+        diffDays: deadline.diffDays,
+        isPast: false,
+        isExpired: false
       };
     }
 
-    // Normal
+    // Normal: 4+ days
     return {
-      text: `${diffDays} hari lagi`,
+      text: `${deadline.diffDays} hari lagi`,
       fullText: formattedFull,
+      shortText: formattedShort,
       urgency: 'normal',
-      badgeClass: 'badge-deadline-normal',
-      diffDays,
-      isPast: false
+      badgeClass: 'badge-deadline-countdown',
+      diffDays: deadline.diffDays,
+      isPast: false,
+      isExpired: false
     };
   }
 
-  // Get all assignments sorted by deadline
+  // Get all assignments sorted by deadline (excluding expired tasks)
   function getAllAssignments() {
-    return [...assignmentsCache].sort((a, b) => {
+    const valid = assignmentsCache.filter((a) => !isAssignmentExpired(a.dueDate, a.dueTime));
+    if (valid.length !== assignmentsCache.length) {
+      setTimeout(() => { cleanupExpiredAssignments(); }, 0);
+    }
+    return [...valid].sort((a, b) => {
       return parseDueTimestamp(a.dueDate, a.dueTime) - parseDueTimestamp(b.dueDate, b.dueTime);
     });
   }
@@ -422,14 +569,28 @@
     togglePersonalCompletion: togglePersonalCompletion,
     isPersonalCompleted: isPersonalCompleted,
     createAssignment: createAssignment,
-    deleteAssignment: deleteAssignment
+    deleteAssignment: deleteAssignment,
+    isAssignmentExpired: isAssignmentExpired,
+    getAssignmentDeadline: getAssignmentDeadline,
+    cleanupExpiredAssignments: cleanupExpiredAssignments
   };
 
   if (typeof document !== 'undefined') {
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initAssignmentsListener);
+      document.addEventListener('DOMContentLoaded', () => {
+        initAssignmentsListener();
+        cleanupExpiredAssignments();
+      });
     } else {
       initAssignmentsListener();
+      cleanupExpiredAssignments();
     }
+
+    // Periodic cleanup on tab reactivation
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        cleanupExpiredAssignments();
+      }
+    });
   }
 })();

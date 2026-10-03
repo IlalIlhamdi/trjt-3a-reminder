@@ -4674,23 +4674,32 @@ select,
   }
 }
 
-/* 2. Task Card Structural & Visual Refinements */
+/* 2. Task Card Structural & Visual Refinements (Clean Minimal Navy/White/Soft-Blue Theme) */
 .assignment-card {
-  background: var(--color-surface-card) !important;
-  border: 1px solid var(--color-border-subtle) !important;
-  border-radius: var(--radius-card, 18px) !important;
-  padding: 16px 16px !important;
+  background: #FFFFFF !important;
+  border: 1px solid #E5EBF2 !important;
+  border-radius: 16px !important;
+  padding: 14px 16px !important;
+  box-shadow: 0 3px 10px rgba(23, 63, 122, 0.04) !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 8px !important;
-  transition: all var(--transition-normal, 220ms cubic-bezier(0.4, 0, 0.2, 1)) !important;
-  box-shadow: 0 4px 16px rgba(15, 61, 145, 0.05) !important;
+  gap: 0 !important;
+  margin-bottom: 12px !important;
+  transition: all 0.2s ease !important;
   position: relative !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+}
+
+[data-theme="dark"] .assignment-card {
+  background: #1E293B !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2) !important;
 }
 
 .assignment-card.completed {
   opacity: 0.72 !important;
-  background: rgba(241, 245, 249, 0.75) !important;
+  background: #F8FAFC !important;
 }
 
 [data-theme="dark"] .assignment-card.completed {
@@ -4699,246 +4708,267 @@ select,
 
 .assignment-card.completed .assignment-card-title {
   text-decoration: line-through !important;
-  color: var(--color-text-muted) !important;
+  color: #718096 !important;
 }
 
+/* ROW 1: Judul tugas (left) & Tombol delete (right) */
 .assignment-card-header {
   display: flex !important;
   align-items: flex-start !important;
+  justify-content: space-between !important;
   gap: 12px !important;
   width: 100% !important;
+  margin-bottom: 5px !important;
 }
 
-.task-check-btn {
-  min-width: 44px !important;
-  min-height: 44px !important;
-  width: 44px !important;
-  height: 44px !important;
-  border-radius: 12px !important;
-  border: 2px solid var(--color-primary-blue) !important;
-  background: transparent !important;
-  display: grid !important;
-  place-items: center !important;
-  cursor: pointer !important;
-  color: #ffffff !important;
-  transition: all 0.2s !important;
-  flex-shrink: 0 !important;
-}
-
-.task-check-btn.checked {
-  background: var(--color-primary-blue) !important;
-  border-color: var(--color-primary-blue) !important;
-}
-
-.task-check-btn:focus-visible {
-  outline: 2px solid var(--color-primary-blue) !important;
-  outline-offset: 2px !important;
-}
-
-.assignment-title-wrap {
+.assignment-card-title {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: #172B4D !important;
+  line-height: 1.3 !important;
+  margin: 0 !important;
   flex: 1 1 auto !important;
   min-width: 0 !important;
   word-break: break-word !important;
   overflow-wrap: anywhere !important;
-  padding-top: 2px !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
 }
 
-.assignment-card-title {
-  font-size: 15.5px !important;
-  font-weight: 600 !important;
-  color: var(--color-primary-navy) !important;
-  line-height: 1.38 !important;
-  margin: 0 !important;
-  word-break: break-word !important;
-  overflow-wrap: anywhere !important;
+[data-theme="dark"] .assignment-card-title {
+  color: #F1F5F9 !important;
 }
 
+/* Tombol delete manual (kanan atas) */
+.btn-task-delete {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  border-radius: 10px !important;
+  background: #FFF3F3 !important;
+  color: #E85B5B !important;
+  border: 1px solid rgba(232, 91, 91, 0.15) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  flex-shrink: 0 !important;
+  padding: 0 !important;
+}
+
+.btn-task-delete:hover {
+  background: #FEE2E2 !important;
+  color: #DC2626 !important;
+}
+
+.btn-task-delete:focus-visible {
+  outline: 2px solid #E85B5B !important;
+  outline-offset: 2px !important;
+}
+
+[data-theme="dark"] .btn-task-delete {
+  background: rgba(232, 91, 91, 0.12) !important;
+  border-color: rgba(232, 91, 91, 0.25) !important;
+  color: #F87171 !important;
+}
+
+[data-theme="dark"] .btn-task-delete:hover {
+  background: rgba(232, 91, 91, 0.22) !important;
+  color: #FCA5A5 !important;
+}
+
+/* ROW 2: Icon buku kecil + Nama mata kuliah */
 .assignment-course-name {
-  font-size: 13.5px !important;
-  font-weight: 500 !important;
-  color: var(--color-text-blue) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #315F9A !important;
   display: flex !important;
   align-items: center !important;
   gap: 6px !important;
-  margin-top: 4px !important;
   line-height: 1.3 !important;
+  margin: 0 0 10px 0 !important;
+  min-width: 0 !important;
+  word-break: break-word !important;
+}
+
+.assignment-course-name i,
+.assignment-course-name svg {
+  width: 14px !important;
+  height: 14px !important;
+  color: #173F7A !important;
+  flex-shrink: 0 !important;
 }
 
 [data-theme="dark"] .assignment-course-name {
   color: #93C5FD !important;
 }
 
-.btn-task-delete {
-  min-width: 44px !important;
-  min-height: 44px !important;
-  width: 44px !important;
-  height: 44px !important;
-  border-radius: 12px !important;
-  border: none !important;
-  background: rgba(254, 242, 242, 0.6) !important;
-  color: #DC2626 !important;
-  display: grid !important;
-  place-items: center !important;
-  cursor: pointer !important;
-  transition: all 0.2s !important;
-  flex-shrink: 0 !important;
+[data-theme="dark"] .assignment-course-name i,
+[data-theme="dark"] .assignment-course-name svg {
+  color: #60A5FA !important;
 }
 
-.btn-task-delete:hover {
-  background: #FEE2E2 !important;
-}
-
-.btn-task-delete:focus-visible {
-  outline: 2px solid #DC2626 !important;
-  outline-offset: 2px !important;
-}
-
+/* Optional Deskripsi Tugas */
 .assignment-card-desc {
-  font-size: 13.5px !important;
-  color: var(--color-text-secondary) !important;
-  line-height: 1.45 !important;
-  margin: 6px 0 0 56px !important;
+  font-size: 12px !important;
+  color: #718096 !important;
+  line-height: 1.4 !important;
+  margin: -4px 0 8px 0 !important;
   word-break: break-word !important;
+  padding-left: 0 !important;
 }
 
-@media (max-width: 480px) {
-  .assignment-card-desc {
-    margin-left: 0 !important;
-  }
+[data-theme="dark"] .assignment-card-desc {
+  color: #94A3B8 !important;
 }
 
-/* 3. Deadline & Due Date Row */
+/* ROW 3: Countdown + Deadline Row */
 .assignment-deadline-row {
   display: flex !important;
   align-items: center !important;
   gap: 10px !important;
   flex-wrap: wrap !important;
-  margin-top: 6px !important;
-  padding-left: 56px !important;
+  margin: 0 0 10px 0 !important;
+  padding-left: 0 !important;
 }
 
-@media (max-width: 480px) {
-  .assignment-deadline-row {
-    padding-left: 0 !important;
-  }
-}
-
-/* Status Deadline Badges */
+.badge-deadline-countdown,
 .badge-deadline {
+  background: #EEF4FB !important;
+  color: #173F7A !important;
+  border: 1px solid #DCE7F3 !important;
+  border-radius: 8px !important;
+  padding: 4px 8px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
   display: inline-flex !important;
   align-items: center !important;
   gap: 5px !important;
-  padding: 4px 10px !important;
-  border-radius: 9999px !important;
-  font-size: 12.5px !important;
-  font-weight: 700 !important;
-  line-height: 1.2 !important;
   white-space: nowrap !important;
+  line-height: 1.2 !important;
 }
 
-/* Soft Red/Orange for Overdue */
-.badge-deadline.deadline-overdue,
-.badge-deadline.soft-badge-danger {
-  background: #FEE2E2 !important;
-  border: 1px solid #FCA5A5 !important;
-  color: #991B1B !important;
+.badge-deadline-countdown i,
+.badge-deadline-countdown svg,
+.badge-deadline i,
+.badge-deadline svg {
+  color: #173F7A !important;
+  width: 12px !important;
+  height: 12px !important;
+  flex-shrink: 0 !important;
 }
 
-[data-theme="dark"] .badge-deadline.deadline-overdue,
-[data-theme="dark"] .badge-deadline.soft-badge-danger {
-  background: rgba(127, 29, 29, 0.45) !important;
-  border-color: rgba(239, 68, 68, 0.5) !important;
-  color: #FECACA !important;
+[data-theme="dark"] .badge-deadline-countdown,
+[data-theme="dark"] .badge-deadline {
+  background: rgba(30, 58, 102, 0.35) !important;
+  color: #93C5FD !important;
+  border-color: rgba(147, 197, 253, 0.25) !important;
 }
 
-/* Soft Amber for Approaching Deadline */
-.badge-deadline.deadline-critical,
-.badge-deadline.deadline-warning,
-.badge-deadline.soft-badge-warning {
-  background: #FEF3C7 !important;
-  border: 1px solid #FCD34D !important;
-  color: #92400E !important;
-}
-
-[data-theme="dark"] .badge-deadline.deadline-critical,
-[data-theme="dark"] .badge-deadline.deadline-warning,
-[data-theme="dark"] .badge-deadline.soft-badge-warning {
-  background: rgba(120, 53, 15, 0.45) !important;
-  border-color: rgba(245, 158, 11, 0.5) !important;
-  color: #FDE68A !important;
-}
-
-/* Soft Green for Completed / Safe */
-.badge-deadline.deadline-completed,
-.badge-deadline.soft-badge-success {
-  background: #DCFCE7 !important;
-  border: 1px solid #86EFAC !important;
-  color: #166534 !important;
-}
-
-[data-theme="dark"] .badge-deadline.deadline-completed,
-[data-theme="dark"] .badge-deadline.soft-badge-success {
-  background: rgba(20, 83, 45, 0.45) !important;
-  border-color: rgba(34, 197, 94, 0.5) !important;
-  color: #BBF7D0 !important;
-}
-
-/* Neutral/Normal Deadline */
-.badge-deadline.soft-badge-neutral {
-  background: var(--color-very-light-blue) !important;
-  border: 1px solid var(--color-border-subtle) !important;
-  color: var(--color-deep-blue) !important;
+[data-theme="dark"] .badge-deadline-countdown i,
+[data-theme="dark"] .badge-deadline-countdown svg,
+[data-theme="dark"] .badge-deadline i,
+[data-theme="dark"] .badge-deadline svg {
+  color: #93C5FD !important;
 }
 
 .assignment-due-date-text {
   display: inline-flex !important;
   align-items: center !important;
   gap: 5px !important;
-  font-size: 13px !important;
+  font-size: 11px !important;
   font-weight: 500 !important;
-  color: var(--color-text-secondary) !important;
+  color: #718096 !important;
+  white-space: nowrap !important;
+  line-height: 1.2 !important;
 }
 
-/* 4. Footer Meta Info */
+.assignment-due-date-text i,
+.assignment-due-date-text svg {
+  color: #718096 !important;
+  width: 14px !important;
+  height: 14px !important;
+  flex-shrink: 0 !important;
+}
+
+[data-theme="dark"] .assignment-due-date-text {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .assignment-due-date-text i,
+[data-theme="dark"] .assignment-due-date-text svg {
+  color: #94A3B8 !important;
+}
+
+/* ROW 4: Divider tipis */
+.assignment-card-divider {
+  border: none !important;
+  border-top: 1px solid #E8EEF4 !important;
+  margin: 0 0 8px 0 !important;
+  width: 100% !important;
+  height: 0 !important;
+}
+
+[data-theme="dark"] .assignment-card-divider {
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ROW 5: Metadata Footer (Tipe pengerjaan + metode pengumpulan) */
 .assignment-meta-footer {
   display: flex !important;
   align-items: center !important;
-  justify-content: space-between !important;
-  gap: 10px !important;
-  border-top: 1px solid var(--color-border-subtle) !important;
-  padding-top: 10px !important;
-  margin-top: 6px !important;
-  padding-left: 56px !important;
-}
-
-@media (max-width: 480px) {
-  .assignment-meta-footer {
-    padding-left: 0 !important;
-  }
+  justify-content: flex-start !important;
+  width: 100% !important;
+  padding: 0 !important;
+  border: none !important;
+  margin: 0 !important;
 }
 
 .assignment-meta-details {
   display: flex !important;
   align-items: center !important;
-  gap: 8px !important;
+  gap: 6px !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  color: #718096 !important;
   flex-wrap: wrap !important;
-  color: var(--color-text-secondary) !important;
-  font-size: 13px !important;
 }
 
 .assignment-meta-item {
   display: inline-flex !important;
   align-items: center !important;
   gap: 5px !important;
-  font-size: 13px !important;
+  font-size: 11px !important;
   font-weight: 500 !important;
-  color: var(--color-text-secondary) !important;
+  color: #718096 !important;
+}
+
+.assignment-meta-item i,
+.assignment-meta-item svg {
+  width: 13px !important;
+  height: 13px !important;
+  color: #8A98A8 !important;
+  flex-shrink: 0 !important;
 }
 
 .assignment-meta-divider {
-  color: var(--color-text-muted) !important;
-  font-size: 12px !important;
-  opacity: 0.7 !important;
+  color: #CBD5E1 !important;
+  font-size: 10px !important;
+  user-select: none !important;
+}
+
+[data-theme="dark"] .assignment-meta-details,
+[data-theme="dark"] .assignment-meta-item {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .assignment-meta-item i,
+[data-theme="dark"] .assignment-meta-item svg {
+  color: #64748B !important;
 }
 
 /* 5. Add Assignment Form Refinements */

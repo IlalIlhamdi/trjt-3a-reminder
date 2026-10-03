@@ -7,6 +7,23 @@ Semua perubahan penting pada proyek **TRJT 3A Reminder** dicatat dalam dokumen i
 ## [Unreleased]
 
 ### Added
+- **Menu Galeri Kelas & Integrasi Google Drive via Apps Script (v9.2):**
+  - Mengubah tombol navigasi bawah tengah menjadi **Galeri** (menggantikan Jadwal) dengan mempertahankan gaya tombol apung lingkaran (*elevated floating circle* `.nav-item.nav-primary`, warna Navy `#173F7A`, ikon Lucide `images`, tanpa emoji).
+  - Menghubungkan antarmuka galeri dengan folder Google Drive kelas (`Folder ID: 1612E_PgMWjnuAJ9WXDZHdPj5bbP32Ps-`) melalui backend mandiri Google Apps Script Web App (`google-apps-script/GaleriDriveBackend.gs`) yang dieksekusi dengan akun Google pemilik folder tanpa memerlukan login ataupun izin Editor dari mahasiswa.
+  - Kompresi foto sisi klien menggunakan HTML5 Canvas (target dimensi terpanjang ~1920px, kualitas 0.82 JPEG) untuk efisiensi penyimpanan dan percepatan pengunggahan.
+  - Validasi berkas ketat: hanya format gambar (JPG, PNG, WEBP), batasan ukuran maksimal 10 MB, dan penolakan berkas non-gambar dengan pemberitahuan ramah.
+  - Modal pratinjau foto (*bottom sheet*) sebelum upload dilengkapi tampilan ukuran berkas dan input keterangan (*caption*) opsional.
+  - *Fullscreen Lightbox Viewer* dengan latar belakang gelap `rgba(0,0,0,0.92)`, safe-area iPhone, tombol tutup berdaya kontras tinggi, navigasi keyboard panah/Escape, serta gestur usap layar (*swipe left/right*).
+  - Tampilan *skeleton shimmer loading*, *empty state* informatif ("Belum ada foto"), dan penanganan kendala jaringan dengan tombol coba lagi.
+  - Pengunggahan foto otomatis menyisipkan berkas di posisi teratas galeri tanpa mengharuskan muat ulang peramban secara manual.
+  - Seluruh fungsi jadwal kuliah (kartu Jadwal Hari Ini di Beranda, kartu hero ringkasan perkuliahan, timeline kelas, dan data jadwal) dipertahankan secara utuh dan tetap dapat diakses melalui tombol pintasan jadwal di Beranda.
+  - Panduan 2 menit deployment Google Apps Script disediakan di `docs/GOOGLE_APPS_SCRIPT_GALERI.md`.
+
+### Added
+- **Fitur Auto-Delete Tugas Setelah Deadline (v9.1):** Otomatisasi pembersihan tugas yang telah melewati tanggal deadline (setelah pukul 23:59:59 WIB pada hari tenggat) dengan integrasi multi-layer:
+  - *Client-side fallback:* Helper `isAssignmentExpired()`, `getAssignmentDeadline()`, dan `cleanupExpiredAssignments()` yang aktif saat aplikasi dimuat, snapshot Firestore diperbarui, dan tab aktif kembali. Tugas expired otomatis disaring (*filter*) sebelum render sehingga tidak sempat berkedip di antarmuka mahasiswa.
+  - *Server-side Cloud Scheduler:* Fungsi terjadwal `cleanupExpiredAssignmentsScheduled` di `firebase/functions/index.js` dengan timezone `Asia/Jakarta` yang berjalan setiap 1 jam untuk menghapus dokumen tugas kedaluwarsa langsung di Firestore tanpa mengharuskan pengguna membuka aplikasi.
+  - *Endpoint Vercel Serverless Cron:* `/api/cron/cleanup-tasks` disiapkan sebagai opsi tambahan scheduler backend.
 - **Shortcut Tugas Kuliah pada Menu Akses Cepat Beranda:** Menambahkan kartu pintasan "Tugas kuliah" ke `.home-shortcuts` berdampingan dengan Piket kelas, Kelompok, dan Materi kuliah, lengkap dengan label dinamis status tugas aktif/selesai dan grid adaptif (2 kolom pada mobile, 4 kolom pada tablet/desktop).
 - **Web Doorprize BISFEST mandiri:** `doorprize/index.html` dengan palet HIMABIS oranye–hitam–putih, formulir responsif, status proses/gagal/berhasil, dan salin nomor. Hook Google Apps Script disiapkan untuk dikonfigurasi pengguna; backend tidak dibuat. CSS/JS inline pada halaman terpisah, tanpa perubahan aset PWA TRJT.
 - **Dokumentasi Komprehensif Berbahasa Indonesia:**
@@ -23,6 +40,7 @@ Semua perubahan penting pada proyek **TRJT 3A Reminder** dicatat dalam dokumen i
   - `scratch/test-modals.js`: Pengujian interaksi pembukaan modal bottom sheet (Tambah Tugas, Piket, Kelompok).
 
 ### Removed
+- **Penghapusan Avatar/Profil Besar pada Card Tugas (v9.1):** Menghapus seluruh tombol/avatar/kotak besar 44x44px di sisi kiri card tugas mahasiswa, mengeliminasi margin/padding kiri 56px, dan menggeser seluruh isi informasi tugas rapat ke kiri untuk pemanfaatan ruang layar yang optimal.
 - **Penghapusan Bagian Ringkasan Hari Ini di Beranda (v8.4):** Menghapus seksi *"Ringkasan hari ini"* (`.home-overview` / `#dashboard-summary`) yang memuat kartu metrik jumlah kelas selesai/tersisa, sehingga tata letak Beranda mengalir langsung dari menu pintasan ke agenda kelas hari ini dan daftar tugas kuliah dengan tampilan yang jauh lebih bersih, ringkas, dan fokus.
 - **Penghapusan Baris Tombol Aksi di Kartu Jadwal:** Menghapus seluruh deretan tombol aksi (`btn-schedule-actions-row` yang berisi tombol Tugas, Materi, dan Kelompok) dari kartu jadwal mingguan (`renderWeeklySchedule`), sehingga kartu jadwal tampil bersih, luas, dan rapi sesuai desain kartu modern. Kartu tetap interaktif dan dapat diklik untuk membuka modal tugas/detail mata kuliah terkait.
 - **Penyederhanaan Tampilan Beranda & Jadwal Mahasiswa:**
@@ -33,6 +51,12 @@ Semua perubahan penting pada proyek **TRJT 3A Reminder** dicatat dalam dokumen i
 - **Penghapusan Tombol Lonceng Notifikasi di Header (v9.0):** Menghapus tombol lonceng notifikasi (`#btn-header-bell`) dari header atas aplikasi untuk mengeliminasi redundansi visual dan navigasi, mengingat fitur Notifikasi telah terintegrasi secara mudah melalui menu 8 pintasan di Beranda (`.home-shortcuts`) serta bilah navigasi bawah (`.bottom-nav`). Header kini tampil jauh lebih bersih, seimbang, dan elegan dengan fokus penuh pada identitas kampus TRJT 3A.
 
 ### Changed
+- **Penyempurnaan Struktur & Estetika Card Tugas (v9.1):** Menata ulang hierarki card tugas menjadi 5 baris yang bersih, minimalis, dan sesuai dengan tema navy/putih/soft-blue TRJT 3A:
+  - **ROW 1:** Judul tugas (14px bold `#172B4D`, wrap maksimal 2 baris) & Tombol delete manual (36x36px, rounded 10px, background `#FFF3F3`, icon `#E85B5B` di kanan atas).
+  - **ROW 2:** Icon buku kecil Lucide `book-open` (14px `#173F7A`) + Nama mata kuliah (12px `#315F9A`).
+  - **ROW 3:** Countdown dalam badge kecil soft-blue (11px semi-bold `#173F7A`, background `#EEF4FB`, border `#DCE7F3`, radius 8px) + Batas tanggal Indonesia (`Batas: Sel, 6 Okt 2026`, 11px `#718096`).
+  - **ROW 4:** Divider tipis (`1px solid #E8EEF4`, margin 0 0 8px).
+  - **ROW 5:** Metadata bawah bersih (`[users] Kelompok • [map-pin] Kumpul Fisik`, 11px `#718096`, icon `#8A98A8`).
 - **Penyempurnaan Minimalis & Modern Card Jadwal Kuliah (v8.9):**
   - **Struktur 2 Kolom Bersih:** Menyederhanakan kartu jadwal (`.schedule-glass-card`) menjadi tata letak 2 kolom elegan:
     - **Kolom Kiri (Waktu):** Lebar tetap 56px tanpa kotak/card internal tebal (`background: transparent`, `border: none`). Jam mulai `07.30` (15px bold `#172B4D`), jam selesai `10.00` (11px `#8A98A8`), dan durasi `150 mnt` (10px semi-bold `#173F7A`, pill `#EEF4FB`, radius 6px).
