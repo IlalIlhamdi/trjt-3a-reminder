@@ -393,6 +393,10 @@
     const isMock = !apiUrl || apiUrl.includes('URL_APPS_SCRIPT_EXEC');
 
     if (!isMock) {
+      let serverConfirmed = false;
+      let lastErrorMessage = '';
+
+      // 1. Coba hapus via POST
       try {
         const response = await fetch(apiUrl, {
           method: 'POST',
@@ -409,16 +413,46 @@
 
         if (response.ok) {
           const result = await response.json();
-          if (result && !result.success) {
-            console.warn('Backend delete notice:', result.error);
+          if (result && result.success) {
+            serverConfirmed = true;
+          } else if (result && result.error) {
+            lastErrorMessage = result.error;
           }
         }
-      } catch (err) {
-        console.warn('Network notice when deleting photo:', err);
+      } catch (postErr) {
+        lastErrorMessage = postErr.message;
+      }
+
+      // 2. Jika POST belum berhasil, coba via GET (Fallback)
+      if (!serverConfirmed) {
+        try {
+          const getDeleteUrl = `${apiUrl}?` + new URLSearchParams({
+            action: 'delete',
+            id: photoId,
+            t: Date.now()
+          }).toString();
+
+          const getRes = await fetch(getDeleteUrl, { redirect: 'follow' });
+          if (getRes.ok) {
+            const getResult = await getRes.json();
+            if (getResult && getResult.success) {
+              serverConfirmed = true;
+            } else if (getResult && getResult.error) {
+              lastErrorMessage = getResult.error;
+            }
+          }
+        } catch (getErr) {
+          lastErrorMessage = getErr.message;
+        }
+      }
+
+      // Jika Google Apps Script menolak atau belum diupdate kodenya:
+      if (!serverConfirmed) {
+        throw new Error(lastErrorMessage || 'Gagal menghapus foto dari Google Drive. Pastikan script di script.google.com sudah diperbarui.');
       }
     }
 
-    // Instantly remove from local cache and dispatch update
+    // Jika server Google Drive sudah mengonfirmasi penghapusan:
     photosCache = photosCache.filter((p) => p.id !== photoId);
     savePhotosToCache(photosCache);
     window.dispatchEvent(new CustomEvent('trjt:gallery-updated', { detail: photosCache }));
@@ -426,7 +460,7 @@
     return {
       success: true,
       id: photoId,
-      message: 'Foto berhasil dihapus.'
+      message: 'Foto berhasil dipindahkan ke tempat sampah Google Drive.'
     };
   }
 

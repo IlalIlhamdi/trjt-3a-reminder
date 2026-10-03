@@ -7,24 +7,45 @@
  *
  * PANDUAN UPDATE DI SCRIPT.GOOGLE.COM:
  * 1. Salin seluruh isi file ini.
- * 2. Buka project script teman Anda di https://script.google.com/
- * 3. Hapus seluruh isi editor yang lama, lalu paste seluruh kode ini.
+ * 2. Buka project script di https://script.google.com/
+ * 3. Hapus seluruh isi editor lama, lalu paste seluruh kode ini.
  * 4. Klik ikon Save (Ctrl+S).
- * 5. Klik tombol "Deploy" (kanan atas) -> pilih "Manage deployments" (Kelola deployment).
- * 6. Klik ikon Pensil (Edit) di sebelah deployment aktif.
+ * 5. Klik "Deploy" -> "Manage deployments" (Kelola penerapan).
+ * 6. Klik ikon Pensil (Edit) pada deployment aktif.
  * 7. Pada dropdown "Version", pilih "New version" (Versi baru).
  * 8. Klik tombol "Deploy".
- * -> URL Web App tetap sama persis dan fitur Upload Foto langsung aktif!
  * =============================================================================
  */
 
 const FOLDER_ID = "1612E_PgMWjnuAJ9WXDZHdPj5bbP32Ps-";
 
 /**
- * Handle HTTP GET Requests — Mengambil daftar foto dari Google Drive
+ * Handle HTTP GET Requests:
+ * 1. Ambil daftar foto dari Google Drive (default)
+ * 2. Hapus foto via GET parameter ?action=delete&id=... (fallback)
  */
-function doGet() {
+function doGet(e) {
   try {
+    // -------------------------------------------------------------
+    // FITUR HAPUS FOTO VIA GET (Fallback jika POST terkendala)
+    // -------------------------------------------------------------
+    if (e && e.parameter && (e.parameter.action === 'delete' || e.parameter.delete)) {
+      const fileId = e.parameter.id || e.parameter.fileId;
+      if (!fileId) throw new Error("ID foto tidak ditemukan.");
+      const file = DriveApp.getFileById(fileId);
+      file.setTrashed(true);
+      return ContentService
+        .createTextOutput(JSON.stringify({
+          success: true,
+          id: fileId,
+          message: "Foto berhasil dipindahkan ke tempat sampah Google Drive."
+        }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // -------------------------------------------------------------
+    // DAFTAR FOTO DI GOOGLE DRIVE (Default)
+    // -------------------------------------------------------------
     const folder = DriveApp.getFolderById(FOLDER_ID);
     const files = folder.getFiles();
     const images = [];
@@ -71,7 +92,9 @@ function doGet() {
 }
 
 /**
- * Handle HTTP POST Requests — Upload foto baru langsung ke Google Drive
+ * Handle HTTP POST Requests:
+ * 1. Hapus foto dari Google Drive (action: 'delete')
+ * 2. Upload foto baru ke Google Drive (action: 'upload' atau base64)
  */
 function doPost(e) {
   try {
@@ -81,18 +104,27 @@ function doPost(e) {
 
     const data = JSON.parse(e.postData.contents);
 
+    // -------------------------------------------------------------
+    // 1. FITUR HAPUS FOTO DARI GOOGLE DRIVE
+    // -------------------------------------------------------------
     if (data.action === 'delete') {
       const fileId = data.id || data.fileId;
-      if (!fileId) throw new Error('ID foto tidak ditemukan.');
+      if (!fileId) throw new Error("ID foto tidak ditemukan.");
       const file = DriveApp.getFileById(fileId);
+      // Pindahkan ke tempat sampah Google Drive
       file.setTrashed(true);
-      return ContentService.createTextOutput(JSON.stringify({
-        success: true,
-        id: fileId,
-        message: 'Foto berhasil dipindahkan ke tempat sampah Google Drive.'
-      })).setMimeType(ContentService.MimeType.JSON);
+      return ContentService
+        .createTextOutput(JSON.stringify({
+          success: true,
+          id: fileId,
+          message: "Foto berhasil dipindahkan ke tempat sampah Google Drive."
+        }))
+        .setMimeType(ContentService.MimeType.JSON);
     }
 
+    // -------------------------------------------------------------
+    // 2. FITUR UPLOAD FOTO KE GOOGLE DRIVE
+    // -------------------------------------------------------------
     if (!data.base64) {
       throw new Error("Data gambar base64 tidak ditemukan.");
     }
@@ -122,7 +154,7 @@ function doPost(e) {
       file.setDescription(data.caption.trim());
     }
 
-    // Berikan izin view agar thumbnail & foto bisa tampil langsung di aplikasi
+    // Penanganan izin sharing yang aman
     try {
       file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
     } catch (shareErr) {
@@ -151,18 +183,4 @@ function doPost(e) {
       }))
       .setMimeType(ContentService.MimeType.JSON);
   }
-}
-
-/**
- * Jalankan fungsi ini SEKALI di script.google.com untuk memberikan izin upload (DriveApp.Folder.createFile)
- * 1. Di dropdown fungsi (sebelah tombol 'Debug'), pilih 'testAuth'
- * 2. Klik tombol 'Run' (Jalankan)
- * 3. Klik 'Review permissions' -> Pilih Akun Google -> 'Advanced' -> 'Go to ... (unsafe)' -> 'Allow'
- */
-function testAuth() {
-  const folder = DriveApp.getFolderById(FOLDER_ID);
-  const testBlob = Utilities.newBlob('test auth', 'text/plain', 'test_auth.txt');
-  const file = folder.createFile(testBlob);
-  file.setTrashed(true);
-  Logger.log('Izin upload Google Drive berhasil diaktifkan!');
 }
