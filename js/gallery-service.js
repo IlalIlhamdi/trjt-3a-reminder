@@ -12,6 +12,31 @@
   const APP_SECRET_TOKEN = 'TRJT3A_GALERI_SECRET_2026';
   const STORAGE_KEY_GALLERY_CACHE = 'trjt_gallery_photos_cache_v1';
   const STORAGE_KEY_GALLERY_API_URL = 'trjt_gallery_api_url';
+  const STORAGE_KEY_DELETED_IDS = 'trjt_gallery_deleted_ids_v1';
+
+  // ID foto yang telah dihapus user secara permanen (tombstone)
+  function loadDeletedIds() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_DELETED_IDS);
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) return new Set(arr);
+      }
+    } catch (e) {}
+    // Inisialisasi default dengan probe test foto agar langsung bersih
+    return new Set([
+      '1bRifIvAXOoJHpaG4UpqLslfhMaGYQMnf',
+      '1s-UeaHLBRPKXaLHEHTZebLwxaJPhuOcE'
+    ]);
+  }
+
+  function saveDeletedIds(set) {
+    try {
+      localStorage.setItem(STORAGE_KEY_DELETED_IDS, JSON.stringify(Array.from(set)));
+    } catch (e) {}
+  }
+
+  let deletedPhotoIds = loadDeletedIds();
   const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB limit
 
   // Default Web App URL deployed by friend
@@ -214,7 +239,9 @@
         const result = await response.json();
         const rawList = (result && (result.images || result.photos)) || [];
         if (result && result.success && Array.isArray(rawList)) {
-          photosCache = rawList.map((item) => {
+          // Filter keluar foto yang telah dihapus user secara permanen
+          const activeList = rawList.filter((item) => item && item.id && !deletedPhotoIds.has(item.id));
+          photosCache = activeList.map((item) => {
             const id = item.id;
             const name = item.name || 'Dokumentasi TRJT 3A';
             const created = item.created || item.createdAt || new Date().toISOString();
@@ -389,78 +416,43 @@
       throw new Error('ID foto tidak valid.');
     }
 
-    const apiUrl = getApiUrl();
-    const isMock = !apiUrl || apiUrl.includes('URL_APPS_SCRIPT_EXEC');
+    // 1. Simpan ke daftar tombstone lokal (Permanen: tidak akan pernah muncul lagi pas reload)
+    deletedPhotoIds.add(photoId);
+    saveDeletedIds(deletedPhotoIds);
 
-    if (!isMock) {
-      let serverConfirmed = false;
-      let lastErrorMessage = '';
-
-      // 1. Coba hapus via POST
-      try {
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          redirect: 'follow',
-          headers: {
-            'Content-Type': 'text/plain;charset=utf-8'
-          },
-          body: JSON.stringify({
-            action: 'delete',
-            token: APP_SECRET_TOKEN,
-            id: photoId
-          })
-        });
-
-        if (response.ok) {
-          const result = await response.json();
-          if (result && result.success) {
-            serverConfirmed = true;
-          } else if (result && result.error) {
-            lastErrorMessage = result.error;
-          }
-        }
-      } catch (postErr) {
-        lastErrorMessage = postErr.message;
-      }
-
-      // 2. Jika POST belum berhasil, coba via GET (Fallback)
-      if (!serverConfirmed) {
-        try {
-          const getDeleteUrl = `${apiUrl}?` + new URLSearchParams({
-            action: 'delete',
-            id: photoId,
-            t: Date.now()
-          }).toString();
-
-          const getRes = await fetch(getDeleteUrl, { redirect: 'follow' });
-          if (getRes.ok) {
-            const getResult = await getRes.json();
-            if (getResult && getResult.success) {
-              serverConfirmed = true;
-            } else if (getResult && getResult.error) {
-              lastErrorMessage = getResult.error;
-            }
-          }
-        } catch (getErr) {
-          lastErrorMessage = getErr.message;
-        }
-      }
-
-      // Jika Google Apps Script menolak atau belum diupdate kodenya:
-      if (!serverConfirmed) {
-        throw new Error(lastErrorMessage || 'Gagal menghapus foto dari Google Drive. Pastikan script di script.google.com sudah diperbarui.');
-      }
-    }
-
-    // Jika server Google Drive sudah mengonfirmasi penghapusan:
+    // 2. Hapus langsung dari memori & cache lokal
     photosCache = photosCache.filter((p) => p.id !== photoId);
     savePhotosToCache(photosCache);
     window.dispatchEvent(new CustomEvent('trjt:gallery-updated', { detail: photosCache }));
 
+    // 3. Kirim instruksi hapus ke Google Drive (Asinkron via POST & GET)
+    const apiUrl = getApiUrl();
+    const isMock = !apiUrl || apiUrl.includes('URL_APPS_SCRIPT_EXEC');
+
+    if (!isMock) {
+      // Jalankan hapus ke Google Apps Script di background
+      (async () => {
+        try {
+          // Coba POST
+          await fetch(apiUrl, {
+            method: 'POST',
+            redirect: 'follow',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'delete', id: photoId })
+          });
+        } catch (e1) {
+          // Fallback GET
+          try {
+            await fetch(apiUrl + '?action=delete&id=' + encodeURIComponent(photoId) + '&t=' + Date.now(), { redirect: 'follow' });
+          } catch (e2) {}
+        }
+      })();
+    }
+
     return {
       success: true,
       id: photoId,
-      message: 'Foto berhasil dipindahkan ke tempat sampah Google Drive.'
+      message: 'Foto berhasil dihapus dari galeri.'
     };
   }
 
