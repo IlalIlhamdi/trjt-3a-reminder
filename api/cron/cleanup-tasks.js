@@ -66,7 +66,7 @@ export default async function handler(req, res) {
 
     snapshot.forEach((doc) => {
       const data = doc.data();
-      const dueDate = data.dueDate;
+      const dueDate = data.deadline || data.dueDate;
       if (!dueDate) return;
 
       let dYear, dMonth, dDay;

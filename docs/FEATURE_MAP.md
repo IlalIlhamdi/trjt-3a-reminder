@@ -106,10 +106,10 @@ Setiap fitur dalam sistem diklasifikasikan ke dalam tipe aksi berikut:
   - Tombol Quick Date: `.quick-date-btn[data-days="1|3|7"]`
   - List Container: `#all-tasks-list-container`, `#course-tasks-list-container`
 - **Fungsi Renderer:** `renderAllAssignmentsList()`, `renderCourseAssignmentsList()` di [js/app.js](file:///c:/laragon/www/TRJT%203A/js/app.js)
-- **Event Handler:** `handleSaveAssignment(e)`, `toggleAssignmentTask(id)`, `deleteAssignmentTask(id)`
-- **Service yang Digunakan:** `assignmentService` di [js/assignment-service.js](file:///c:/laragon/www/TRJT%203A/js/assignment-service.js)
-- **Sumber Data:** Koleksi Firestore `courseAssignments` dengan fallback cache `trjt_assignments_cache`
-- **Cara Memeriksa:** Buka form "Tambah Tugas", isi mata kuliah, judul, dan pilih batas waktu. Simpan dan periksa apakah muncul di daftar.
+- **Event Handler:** `handleSaveAssignment(e)`, `openEditAssignmentModal(taskOrId)`, `toggleAssignmentTask(id)`, `deleteAssignmentTask(id)`
+- **Service yang Digunakan:** `assignmentService` di [js/assignment-service.js](file:///c:/laragon/www/TRJT%203A/js/assignment-service.js) (`createAssignment`, `updateAssignment`, `deleteAssignment`)
+- **Sumber Data:** Koleksi Firestore `courseAssignments` (Single Source of Truth untuk aplikasi TRJT 3A Reminder dan WhatsApp Bot dengan field terstandarisasi: `id`, `title`, `courseId`, `courseName`, `deadline`, `dueDate`, `assignmentType`, `type`, `submissionMethod`, `createdAt`, `updatedAt`)
+- **Cara Memeriksa:** Buka form "Tambah Tugas", isi mata kuliah, judul, dan pilih batas waktu. Simpan dan periksa apakah muncul di daftar; jalankan `node scratch/test-whatsapp-bot-firestore-integration.js`.
 
 ---
 
@@ -152,20 +152,54 @@ Setiap fitur dalam sistem diklasifikasikan ke dalam tipe aksi berikut:
 
 ---
 
-### 10. Direktori Dosen Pengampu
+### 10. Menu Tools & Utilitas Akademik
+- **Tujuan:** Pusat utilitas mahasiswa TRJT 3A berisi kartu akses fitur Generator Cover Laporan dan alat bantu akademik lainnya.
+- **Tipe Aksi:** 🎨 UI Action & Navigation
+- **Halaman / Modal:** Tab Tools (`#view-tools`)
+- **Container / ID DOM:** `#view-tools`, `.tools-cards-grid`, `.tool-action-card`
+- **Fungsi Renderer:** Markup di `index.html`, diaktifkan via pintasan "Tools" di Beranda (`switchTab('tools')`)
+- **Event Handler:** Klik kartu Generator Cover membuka form cover (`switchTab('cover-generator')`)
+- **Service yang Digunakan:** *None*
+- **Sumber Data:** Statis di `index.html`
+- **Cara Memeriksa:** Klik pintasan "Tools" pada menu akses cepat Beranda.
+
+---
+
+### 11. Generator Cover Laporan Resmi
+- **Tujuan:** Membuat cover laporan praktikum & tugas akademik secara otomatis mengikuti template resmi `COVER.docx` (A4 Portrait, margin 4-3-3-3 cm, logo Prodi TRJT & PNL asli), menyediakan input mata kuliah terintegrasi jadwal dengan status loading & coba lagi, pemilihan dosen pengampu via *searchable combobox* dengan auto-select dosen per MK, penghitung karakter/baris real-time, pratinjau interaktif proporsional, unduhan Word (.docx) asli via JSZip, serta cetak/simpan PDF tepat 1 halaman (*single-page* A4) berformat akademik murni Times New Roman.
+- **Tipe Aksi:** 🎨 UI Display, 💾 Local Preference, 📄 File Export (.docx / PDF)
+- **Halaman / Modal:** Halaman Cover Generator (`#view-cover-generator`), print container `#cover-print-container` (`.cover-page`)
+- **Container / ID DOM:** `#cover-title-input`, `#cover-title-counter`, `#cover-course-select`, `#cover-course-loading`, `#cover-course-error-box`, `#btn-retry-course`, `#cover-manual-course-group`, `#cover-manual-course-input`, `#cover-dosen-combobox`, `#cover-dosen-trigger`, `#cover-dosen-dropdown`, `#cover-dosen-search-input`, `#cover-dosen-options-list`, `#cover-name-input`, `#cover-nim-input`, `#cover-year-input`, `#cover-remember-identity`, `#cover-status-banner`, `#cover-a4-sheet`, `#btn-download-docx`, `#btn-print-cover`, `#btn-reset-cover`
+- **Fungsi Renderer:** `CoverGenerator.init()`, `CoverGenerator.updatePreview()` di [js/cover-generator.js](file:///c:/laragon/www/TRJT%203A/js/cover-generator.js)
+- **Event Handler:**
+  - Input listeners pada field form memicu pembaruan reaktif preview & penghitung karakter/baris secara instan pada event typing, cut, paste, draft restore, dan reset.
+  - Perubahan dropdown mata kuliah otomatis memilih dosen pengampu terkait atau menyematkan lencana *"Pengampu MK"* di posisi teratas combobox.
+  - Combobox dosen mendukung pencarian real-time (nama, gelar, NIP) dan pemilihan fleksibel dari daftar.
+  - `btn-download-docx` memicu `CoverGenerator.exportDocx()` untuk membuat DOCX via `lib/jszip.min.js`.
+  - `btn-print-cover` memicu `CoverGenerator.printPdf()` yang menyelaraskan `#cover-print-container` dan memanggil `window.print()` (menghasilkan PDF tepat 1 halaman A4 tanpa halaman kosong).
+  - `btn-reset-cover` memicu `CoverGenerator.resetForm()` dengan konfirmasi pengguna.
+  - Zoom controls (`btn-zoom-in`, `btn-zoom-out`, `btn-zoom-fit`) menyesuaikan skala visual pratinjau A4 responsif.
+  - Tab mobile (`btn-tab-form`, `btn-tab-prev`) beralih antara "Isi Data" dan "Pratinjau Cover" tanpa scroll horizontal.
+- **Service yang Digunakan:** `lib/jszip.min.js` (dimuat lokal/offline)
+- **Sumber Data:** `TRJT_SCHEDULE.classes` dan `TRJT_DOSEN` di [js/data.js](file:///c:/laragon/www/TRJT%203A/js/data.js), template `assets/templates/cover-template.docx`, `localStorage` (`trjt_cover_identity_v1`, `trjt_cover_courses_cache_v1`), `sessionStorage` (`trjt_cover_draft_v1`)
+- **Cara Memeriksa:** Jalankan `node scratch/test-cover-academic-pdf.js` dan `node scratch/test-cover-form-fixes.js`.
+
+---
+
+### 12. Direktori Dosen Pengampu
 - **Tujuan:** Menampilkan profil 6 dosen pengampu, NIP berformat resmi, dan daftar mata kuliah yang diampu dilengkapi pencarian real-time.
 - **Tipe Aksi:** 🎨 UI Display Only
 - **Halaman / Modal:** Tab Dosen (`#view-dosen`)
 - **Container / ID DOM:** `#dosen-search-input`, `#dosen-cards-container`
 - **Fungsi Renderer:** `renderDosenList()` di [js/app.js](../js/app.js)
-- **Event Handler:** Input listener `#dosen-search-input` untuk pencarian nama, NIP, atau mata kuliah
+- **Event Handler:** Input listener `#dosen-search-input` untuk pencarian nama, NIP, atau mata kuliah.
 - **Service yang Digunakan:** *None*
 - **Sumber Data:** `LECTURERS` di [js/data.js](file:///c:/laragon/www/TRJT%203A/js/data.js)
-- **Cara Memeriksa:** Klik tab "Dosen" di navigasi bawah; jalankan `node scratch/test-dosen-feature.js`.
+- **Cara Memeriksa:** Klik tab "Dosen" di bilah navigasi bawah; jalankan `node scratch/test-dosen-feature.js`.
 
 ---
 
-### 11. Pengaturan & Switch Tema
+### 13. Pengaturan & Switch Tema
 - **Tujuan:** Mengelola preferensi alarm suara, getar, izin notifikasi sistem, dan memilih tema aplikasi (Terang, Gelap, Sistem).
 - **Tipe Aksi:** 💾 Local Preference & 🔔 Notification Trigger
 - **Halaman / Modal:** Tab Pengaturan (`#view-pengaturan`), `#modal-theme-selector`

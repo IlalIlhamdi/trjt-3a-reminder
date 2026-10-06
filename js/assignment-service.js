@@ -44,7 +44,7 @@
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
           // Filter out legacy dummy sample tasks, deleted tombstones & expired tasks
-          const cleaned = parsed.filter((t) => t && !DUMMY_TASK_IDS.has(t.id) && !deletedSet.has(t.id) && !isAssignmentExpired(t.dueDate, t.dueTime));
+          const cleaned = parsed.filter((t) => t && !DUMMY_TASK_IDS.has(t.id) && !deletedSet.has(t.id) && !isAssignmentExpired(t.deadline || t.dueDate, t.dueTime));
           if (cleaned.length !== parsed.length) {
             saveAssignmentsToCache(cleaned);
           }
@@ -145,10 +145,34 @@
             const list = [];
             let foundExpired = false;
             snapshot.forEach((doc) => {
-              const item = { id: doc.id, ...doc.data() };
+              const rawData = doc.data() || {};
+              const targetDueDate = normalizeDateStr(rawData.deadline || rawData.dueDate);
+              const typePair = normalizeAssignmentType(rawData.assignmentType, rawData.type);
+              const subMethod = normalizeSubmissionMethod(rawData.submissionMethod, rawData.submissionPlace);
+
+              let createdAtStr = rawData.createdAt;
+              if (rawData.createdAt && typeof rawData.createdAt.toDate === 'function') {
+                createdAtStr = rawData.createdAt.toDate().toISOString();
+              }
+              let updatedAtStr = rawData.updatedAt;
+              if (rawData.updatedAt && typeof rawData.updatedAt.toDate === 'function') {
+                updatedAtStr = rawData.updatedAt.toDate().toISOString();
+              }
+
+              const item = {
+                id: doc.id,
+                ...rawData,
+                deadline: targetDueDate,
+                dueDate: targetDueDate,
+                assignmentType: typePair.assignmentType,
+                type: typePair.type,
+                submissionMethod: subMethod,
+                createdAt: createdAtStr || rawData.createdAt,
+                updatedAt: updatedAtStr || rawData.updatedAt
+              };
               if (item && !DUMMY_TASK_IDS.has(item.id) && !deletedSet.has(item.id)) {
                 // Section W: Filter expired tasks before adding to display list
-                if (isAssignmentExpired(item.dueDate, item.dueTime)) {
+                if (isAssignmentExpired(item.deadline || item.dueDate, item.dueTime)) {
                   foundExpired = true;
                 } else {
                   list.push(item);
@@ -174,6 +198,65 @@
       console.warn('Assignments init error:', err);
       isFirestoreListening = false;
     }
+  }
+
+  function getFirestoreServerTimestamp() {
+    try {
+      if (typeof window !== 'undefined' && window.firebase && window.firebase.firestore && window.firebase.firestore.FieldValue) {
+        return window.firebase.firestore.FieldValue.serverTimestamp();
+      }
+      if (typeof globalThis !== 'undefined' && globalThis.firebase && globalThis.firebase.firestore && globalThis.firebase.firestore.FieldValue) {
+        return globalThis.firebase.firestore.FieldValue.serverTimestamp();
+      }
+    } catch (_) {}
+    return new Date().toISOString();
+  }
+
+  function normalizeDateStr(input) {
+    if (!input) return '';
+    if (typeof input === 'string') {
+      const trimmed = input.trim();
+      if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) {
+        return trimmed.split('T')[0];
+      }
+    }
+    const parts = getJakartaDateParts(input);
+    if (!isNaN(parts.year) && !isNaN(parts.month) && !isNaN(parts.day)) {
+      const y = parts.year;
+      const m = String(parts.month + 1).padStart(2, '0');
+      const d = String(parts.day).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+    return '';
+  }
+
+  function normalizeAssignmentType(assignmentType, type) {
+    const raw = (assignmentType || type || 'individu').toString().toLowerCase().trim();
+    if (raw === 'kelompok') {
+      return { assignmentType: 'Kelompok', type: 'kelompok' };
+    }
+    return { assignmentType: 'Individu', type: 'individu' };
+  }
+
+  function normalizeSubmissionMethod(method, place) {
+    const raw = (method || place || 'Kumpul Fisik').toString().trim();
+    const low = raw.toLowerCase();
+    if (low === 'lab' || low === 'kumpul-fisik' || low === 'fisik' || low === 'kumpul fisik') {
+      return 'Kumpul Fisik';
+    }
+    if (low === 'classroom' || low === 'google classroom') {
+      return 'Google Classroom';
+    }
+    if (low === 'email' || low === 'email dosen') {
+      return 'Email Dosen';
+    }
+    if (low === 'drive' || low === 'google drive') {
+      return 'Google Drive';
+    }
+    if (low === 'lainnya') {
+      return 'Lainnya';
+    }
+    return raw || 'Kumpul Fisik';
   }
 
   // Calculate timestamp for sorting
@@ -273,7 +356,7 @@
     try {
       const all = [...assignmentsCache];
       const expiredTasks = all.filter((task) => {
-        return task && task.id && isAssignmentExpired(task.dueDate, task.dueTime);
+        return task && task.id && isAssignmentExpired(task.deadline || task.dueDate, task.dueTime);
       });
 
       if (expiredTasks.length === 0) {
@@ -413,12 +496,14 @@
 
   // Get all assignments sorted by deadline (excluding expired tasks)
   function getAllAssignments() {
-    const valid = assignmentsCache.filter((a) => !isAssignmentExpired(a.dueDate, a.dueTime));
+    const valid = assignmentsCache.filter((a) => !isAssignmentExpired(a.deadline || a.dueDate, a.dueTime));
     if (valid.length !== assignmentsCache.length) {
       setTimeout(() => { cleanupExpiredAssignments(); }, 0);
     }
     return [...valid].sort((a, b) => {
-      return parseDueTimestamp(a.dueDate, a.dueTime) - parseDueTimestamp(b.dueDate, b.dueTime);
+      const tsA = parseDueTimestamp(a.deadline || a.dueDate, a.dueTime);
+      const tsB = parseDueTimestamp(b.deadline || b.dueDate, b.dueTime);
+      return tsA - tsB;
     });
   }
 
@@ -486,21 +571,33 @@
     if (!data || !data.title || !data.courseName) {
       throw new Error('Mata kuliah dan judul tugas wajib diisi.');
     }
+    const targetDate = normalizeDateStr(data.deadline || data.dueDate);
+    if (!targetDate && !data.dueDate && !data.deadline) {
+      throw new Error('Batas tanggal (deadline) tugas wajib diisi.');
+    }
+    const finalDate = targetDate || getRelativeDateStr(3);
 
     const newId = 'task-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6);
+    const typePair = normalizeAssignmentType(data.assignmentType, data.type);
+    const subMethod = normalizeSubmissionMethod(data.submissionMethod, data.submissionPlace);
+
+    const nowIso = new Date().toISOString();
     const assignment = {
       id: newId,
       courseId: data.courseId || data.courseName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
       courseName: data.courseName.trim(),
       title: data.title.trim(),
       description: (data.description || '').trim(),
-      dueDate: data.dueDate || getRelativeDateStr(3),
+      deadline: finalDate,
+      dueDate: finalDate,
       dueTime: data.dueTime || '23:59',
-      type: data.type || 'individu',
-      submissionMethod: data.submissionMethod || 'lab',
-      submissionPlace: (data.submissionPlace || '').trim(),
+      assignmentType: typePair.assignmentType,
+      type: typePair.type,
+      submissionMethod: subMethod,
+      submissionPlace: (data.submissionPlace || (subMethod === 'Kumpul Fisik' ? '' : subMethod)).trim(),
       createdBy: (data.createdBy || 'Mahasiswa TRJT 3A').trim(),
-      createdAt: new Date().toISOString()
+      createdAt: nowIso,
+      updatedAt: nowIso
     };
 
     // Ensure ID is not marked as deleted
@@ -515,7 +612,24 @@
     const db = getFirestoreDb();
     if (db) {
       try {
-        await db.collection('courseAssignments').doc(newId).set(assignment);
+        const firestorePayload = {
+          id: assignment.id,
+          courseId: assignment.courseId,
+          courseName: assignment.courseName,
+          title: assignment.title,
+          description: assignment.description,
+          deadline: assignment.deadline,
+          dueDate: assignment.dueDate,
+          dueTime: assignment.dueTime,
+          assignmentType: assignment.assignmentType,
+          type: assignment.type,
+          submissionMethod: assignment.submissionMethod,
+          submissionPlace: assignment.submissionPlace,
+          createdBy: assignment.createdBy,
+          createdAt: getFirestoreServerTimestamp(),
+          updatedAt: getFirestoreServerTimestamp()
+        };
+        await db.collection('courseAssignments').doc(newId).set(firestorePayload);
         console.log('✅ Assignment successfully saved to Firestore:', newId);
       } catch (err) {
         console.error('⚠️ Firestore save assignment error:', err);
@@ -525,6 +639,114 @@
 
     window.dispatchEvent(new CustomEvent('trjt:assignments-updated', { detail: assignmentsCache }));
     return assignment;
+  }
+
+  // Update / Edit Assignment
+  async function updateAssignment(assignmentId, updates) {
+    if (!assignmentId) {
+      throw new Error('ID tugas wajib disertakan untuk pembaruan.');
+    }
+    if (!updates || typeof updates !== 'object') {
+      throw new Error('Data pembaruan tugas tidak valid.');
+    }
+
+    const existingIndex = assignmentsCache.findIndex((a) => a.id === assignmentId);
+    const existing = existingIndex !== -1 ? assignmentsCache[existingIndex] : null;
+
+    const payload = {};
+    const localUpdated = existing ? { ...existing } : { id: assignmentId };
+
+    if (updates.title !== undefined) {
+      const val = String(updates.title).trim();
+      if (!val) throw new Error('Judul tugas tidak boleh kosong.');
+      payload.title = val;
+      localUpdated.title = val;
+    }
+
+    if (updates.courseName !== undefined) {
+      const val = String(updates.courseName).trim();
+      if (!val) throw new Error('Mata kuliah tidak boleh kosong.');
+      payload.courseName = val;
+      localUpdated.courseName = val;
+      if (!updates.courseId) {
+        const cId = val.toLowerCase().replace(/[^a-z0-9]/g, '-');
+        payload.courseId = cId;
+        localUpdated.courseId = cId;
+      }
+    }
+
+    if (updates.courseId !== undefined) {
+      payload.courseId = String(updates.courseId).trim();
+      localUpdated.courseId = payload.courseId;
+    }
+
+    if (updates.deadline !== undefined || updates.dueDate !== undefined) {
+      const dStr = normalizeDateStr(updates.deadline || updates.dueDate);
+      if (!dStr) throw new Error('Format batas tanggal (deadline) tidak valid.');
+      payload.deadline = dStr;
+      payload.dueDate = dStr;
+      localUpdated.deadline = dStr;
+      localUpdated.dueDate = dStr;
+    }
+
+    if (updates.dueTime !== undefined) {
+      payload.dueTime = updates.dueTime || '23:59';
+      localUpdated.dueTime = payload.dueTime;
+    }
+
+    if (updates.assignmentType !== undefined || updates.type !== undefined) {
+      const typePair = normalizeAssignmentType(updates.assignmentType, updates.type);
+      payload.assignmentType = typePair.assignmentType;
+      payload.type = typePair.type;
+      localUpdated.assignmentType = typePair.assignmentType;
+      localUpdated.type = typePair.type;
+    }
+
+    if (updates.submissionMethod !== undefined || updates.submissionPlace !== undefined) {
+      const subMethod = normalizeSubmissionMethod(
+        updates.submissionMethod !== undefined ? updates.submissionMethod : (existing ? existing.submissionMethod : ''),
+        updates.submissionPlace !== undefined ? updates.submissionPlace : (existing ? existing.submissionPlace : '')
+      );
+      payload.submissionMethod = subMethod;
+      localUpdated.submissionMethod = subMethod;
+      if (updates.submissionPlace !== undefined) {
+        payload.submissionPlace = String(updates.submissionPlace).trim();
+        localUpdated.submissionPlace = payload.submissionPlace;
+      }
+    }
+
+    if (updates.description !== undefined) {
+      payload.description = String(updates.description).trim();
+      localUpdated.description = payload.description;
+    }
+
+    const nowIso = new Date().toISOString();
+    localUpdated.updatedAt = nowIso;
+
+    // Update in memory cache & localStorage
+    if (existingIndex !== -1) {
+      assignmentsCache[existingIndex] = localUpdated;
+    } else {
+      assignmentsCache.unshift(localUpdated);
+    }
+    saveAssignmentsToCache(assignmentsCache);
+
+    // Update in Firestore
+    const db = getFirestoreDb();
+    if (db) {
+      try {
+        const firestorePayload = { ...payload };
+        firestorePayload.updatedAt = getFirestoreServerTimestamp();
+        await db.collection('courseAssignments').doc(assignmentId).set(firestorePayload, { merge: true });
+        console.log('✅ Assignment updated in Firestore:', assignmentId);
+      } catch (err) {
+        console.error('⚠️ Firestore update assignment error:', err);
+        throw new Error('Gagal memperbarui tugas di database: ' + (err.message || err));
+      }
+    }
+
+    window.dispatchEvent(new CustomEvent('trjt:assignments-updated', { detail: assignmentsCache }));
+    return localUpdated;
   }
 
   // Delete Assignment
@@ -569,6 +791,8 @@
     togglePersonalCompletion: togglePersonalCompletion,
     isPersonalCompleted: isPersonalCompleted,
     createAssignment: createAssignment,
+    updateAssignment: updateAssignment,
+    editAssignment: updateAssignment,
     deleteAssignment: deleteAssignment,
     isAssignmentExpired: isAssignmentExpired,
     getAssignmentDeadline: getAssignmentDeadline,

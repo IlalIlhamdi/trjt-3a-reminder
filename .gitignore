@@ -34,5 +34,11 @@ build/
 client_secret*.json
 google-credentials.json
 
-# Scratch temporary screenshots
+# Scratch temporary test outputs & office lock files
+~$*
 scratch/*.png
+scratch/*.pdf
+scratch/*.docx
+scratch/cover_extracted/
+scratch/*.xml
+scratch/*.txt

@@ -42,7 +42,7 @@ console.log('➕ Creating a new assignment for Teknik Instalasi Fiber Optik...')
 const newTask = await service.createAssignment({
   courseName: 'Teknik Instalasi Fiber Optik',
   title: 'Laporan Splicing Kabel FO Core 12',
-  dueDate: '2026-09-15',
+  dueDate: new Date(Date.now() + 5*86400000).toISOString().split('T')[0],
   dueTime: '23:59',
   type: 'individu',
   submissionMethod: 'lab',

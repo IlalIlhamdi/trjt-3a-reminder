@@ -1205,6 +1205,8 @@ function getErrorFallbackHtml(message, retryFuncStr) {
       renderNotifications();
     } else if (tabId === 'dosen') {
       renderDosenList();
+    } else if (tabId === 'cover-generator') {
+      if (window.CoverGenerator) window.CoverGenerator.init();
     } else if (tabId === 'pengaturan') {
       renderSettingsUI();
     } else if (tabId === 'galeri') {
@@ -2904,11 +2906,24 @@ function getErrorFallbackHtml(message, retryFuncStr) {
   }
   window.syncQuickDateButtons = syncQuickDateButtons;
 
+  let editingTaskId = null;
+
   function openAddAssignmentModal(defaultCourseName) {
+    editingTaskId = null;
     const modal = document.getElementById('modal-add-assignment');
     const form = document.getElementById('form-add-assignment');
     if (form) form.reset();
     clearAssignmentFormErrors();
+
+    const titleEl = document.getElementById('modal-add-task-title');
+    if (titleEl) titleEl.innerText = 'Tambah Tugas Kuliah';
+    const submitBtn = document.getElementById('btn-submit-task');
+    if (submitBtn) {
+      submitBtn.innerHTML = `
+        <i data-lucide="check-circle" style="width: 18px; height: 18px;"></i>
+        <span>Simpan Tugas Kuliah</span>
+      `;
+    }
 
     // Safely resolve course target (handles undefined, Event object, or string)
     let courseTarget = '';
@@ -2966,10 +2981,98 @@ function getErrorFallbackHtml(message, retryFuncStr) {
     if (window.lucide) window.lucide.createIcons();
   }
 
+  function openEditAssignmentModal(taskOrId) {
+    let task = null;
+    if (typeof taskOrId === 'object' && taskOrId) {
+      task = taskOrId;
+    } else if (typeof taskOrId === 'string' && window.TRJT_ASSIGNMENTS) {
+      const all = window.TRJT_ASSIGNMENTS.getAllAssignments();
+      task = all.find((t) => t.id === taskOrId);
+    }
+    if (!task) {
+      showToast('Data tugas tidak ditemukan.', 'warning');
+      return;
+    }
+
+    const modal = document.getElementById('modal-add-assignment');
+    const form = document.getElementById('form-add-assignment');
+    if (form) form.reset();
+    clearAssignmentFormErrors();
+
+    editingTaskId = task.id;
+
+    // Set course dropdown
+    const courseSelect = document.getElementById('task-input-course');
+    if (courseSelect && task.courseName) {
+      courseSelect.value = task.courseName;
+      if (!courseSelect.value) {
+        for (let i = 0; i < courseSelect.options.length; i++) {
+          if (courseSelect.options[i].text.toLowerCase().includes(task.courseName.toLowerCase())) {
+            courseSelect.selectedIndex = i;
+            break;
+          }
+        }
+      }
+    }
+
+    // Set title
+    const titleInput = document.getElementById('task-input-title');
+    if (titleInput) titleInput.value = task.title || '';
+
+    // Set date
+    const targetDate = task.deadline || task.dueDate || '';
+    const dateInput = document.getElementById('task-input-due-date');
+    if (dateInput && targetDate) {
+      dateInput.value = targetDate;
+      updateDueDatePreview(targetDate);
+      syncQuickDateButtons(targetDate);
+    }
+
+    // Set type
+    const isKelompok = (task.assignmentType === 'Kelompok' || task.type === 'kelompok');
+    selectTaskType(isKelompok ? 'kelompok' : 'individu');
+
+    // Set place
+    const placeInput = document.getElementById('task-input-place');
+    if (placeInput) {
+      placeInput.value = task.submissionPlace || (task.submissionMethod && task.submissionMethod !== 'Kumpul Fisik' ? task.submissionMethod : '') || '';
+    }
+
+    // Set desc
+    const descInput = document.getElementById('task-input-desc');
+    if (descInput) {
+      descInput.value = task.description || '';
+    }
+
+    // Update modal title & submit button
+    const titleEl = document.getElementById('modal-add-task-title');
+    if (titleEl) titleEl.innerText = 'Edit Tugas Kuliah';
+    const submitBtn = document.getElementById('btn-submit-task');
+    if (submitBtn) {
+      submitBtn.innerHTML = `
+        <i data-lucide="check-circle" style="width: 18px; height: 18px;"></i>
+        <span>Simpan Perubahan</span>
+      `;
+    }
+
+    if (modal) modal.classList.add('is-open');
+    if (window.lucide) window.lucide.createIcons();
+  }
+
   function closeAddAssignmentModal() {
     const modal = document.getElementById('modal-add-assignment');
     if (modal) modal.classList.remove('is-open');
     clearAssignmentFormErrors();
+    editingTaskId = null;
+    const titleEl = document.getElementById('modal-add-task-title');
+    if (titleEl) titleEl.innerText = 'Tambah Tugas Kuliah';
+    const submitBtn = document.getElementById('btn-submit-task');
+    if (submitBtn) {
+      submitBtn.innerHTML = `
+        <i data-lucide="check-circle" style="width: 18px; height: 18px;"></i>
+        <span>Simpan Tugas Kuliah</span>
+      `;
+    }
   }
 
   function selectTaskType(type) {
@@ -3161,17 +3264,35 @@ function getErrorFallbackHtml(message, retryFuncStr) {
 
     try {
       isSavingAssignment = true;
-      const savePromise = window.TRJT_ASSIGNMENTS.createAssignment({
-        courseName: course,
-        title: title,
-        dueDate: dueDate,
-        dueTime: dueTime,
-        type: type,
-        submissionMethod: submissionMethod,
-        submissionPlace: submissionPlace,
-        description: description,
-        createdBy: createdBy
-      });
+      let savePromise;
+      if (editingTaskId) {
+        savePromise = window.TRJT_ASSIGNMENTS.updateAssignment(editingTaskId, {
+          courseName: course,
+          title: title,
+          deadline: dueDate,
+          dueDate: dueDate,
+          dueTime: dueTime,
+          type: type,
+          assignmentType: type === 'kelompok' ? 'Kelompok' : 'Individu',
+          submissionMethod: submissionPlace || 'Kumpul Fisik',
+          submissionPlace: submissionPlace,
+          description: description
+        });
+      } else {
+        savePromise = window.TRJT_ASSIGNMENTS.createAssignment({
+          courseName: course,
+          title: title,
+          deadline: dueDate,
+          dueDate: dueDate,
+          dueTime: dueTime,
+          type: type,
+          assignmentType: type === 'kelompok' ? 'Kelompok' : 'Individu',
+          submissionMethod: submissionPlace || 'Kumpul Fisik',
+          submissionPlace: submissionPlace,
+          description: description,
+          createdBy: createdBy
+        });
+      }
 
       // Provide natural visual feedback of at least 400ms for spinner animation
       await Promise.all([
@@ -3179,7 +3300,10 @@ function getErrorFallbackHtml(message, retryFuncStr) {
         new Promise((resolve) => setTimeout(resolve, 400))
       ]);
 
-      showToast('Tugas berhasil disimpan dan disinkronkan ke seluruh kelas!', 'success');
+      const successMsg = editingTaskId
+        ? 'Tugas berhasil diperbarui dan disinkronkan!'
+        : 'Tugas berhasil disimpan dan disinkronkan ke seluruh kelas!';
+      showToast(successMsg, 'success');
       closeAddAssignmentModal();
 
       // Reset form fields only on confirmed success
@@ -3187,6 +3311,7 @@ function getErrorFallbackHtml(message, retryFuncStr) {
       if (document.getElementById('task-input-place')) document.getElementById('task-input-place').value = '';
       if (document.getElementById('task-input-desc')) document.getElementById('task-input-desc').value = '';
       clearAssignmentFormErrors();
+      editingTaskId = null;
 
       renderUpcomingTasksWidget();
       renderWeeklySchedule();
@@ -4199,6 +4324,8 @@ function getErrorFallbackHtml(message, retryFuncStr) {
   window.getCurrentWeekPiketInfo = getCurrentWeekPiketInfo;
 
   window.openAddAssignmentModal = openAddAssignmentModal;
+  window.openEditAssignmentModal = openEditAssignmentModal;
+  window.editAssignmentTask = openEditAssignmentModal;
   window.closeAddAssignmentModal = closeAddAssignmentModal;
   window.selectTaskType = selectTaskType;
   window.handleSaveAssignment = handleSaveAssignment;

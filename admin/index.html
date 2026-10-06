@@ -2011,10 +2011,20 @@
         if (currentVal) select.value = currentVal;
       }
 
+      let editingAdminTaskId = null;
+
       function openAdminAddTaskModal(defaultCourse) {
+        editingAdminTaskId = null;
         const modal = document.getElementById('modal-admin-add-task');
         const form = document.getElementById('form-admin-add-task');
         if (form) form.reset();
+
+        const titleEl = modal?.querySelector('h3');
+        if (titleEl) titleEl.innerText = 'Tambah Tugas Kuliah Baru';
+        const submitBtn = form?.querySelector('button[type="submit"]');
+        if (submitBtn) {
+          submitBtn.innerHTML = '<i data-lucide="check" style="width: 15px; height: 15px;"></i> Simpan Tugas';
+        }
 
         const courseSelect = document.getElementById('admin-task-course-select');
         if (courseSelect && defaultCourse) {
@@ -2036,9 +2046,68 @@
         if (window.lucide) window.lucide.createIcons();
       }
 
+      function openAdminEditTaskModal(id) {
+        if (!window.TRJT_ASSIGNMENTS) return;
+        const task = window.TRJT_ASSIGNMENTS.getAllAssignments().find(t => t.id === id);
+        if (!task) {
+          alert('Tugas tidak ditemukan.');
+          return;
+        }
+
+        editingAdminTaskId = id;
+        const modal = document.getElementById('modal-admin-add-task');
+        const form = document.getElementById('form-admin-add-task');
+        if (form) form.reset();
+
+        const titleEl = modal?.querySelector('h3');
+        if (titleEl) titleEl.innerText = 'Edit Tugas Kuliah';
+        const submitBtn = form?.querySelector('button[type="submit"]');
+        if (submitBtn) {
+          submitBtn.innerHTML = '<i data-lucide="check" style="width: 15px; height: 15px;"></i> Simpan Perubahan';
+        }
+
+        const courseSelect = document.getElementById('admin-task-course-select');
+        if (courseSelect) courseSelect.value = task.courseName || '';
+
+        const titleInput = document.getElementById('admin-task-title');
+        if (titleInput) titleInput.value = task.title || '';
+
+        const dateInput = document.getElementById('admin-task-due-date');
+        if (dateInput) dateInput.value = task.deadline || task.dueDate || '';
+
+        const typeSelect = document.getElementById('admin-task-type');
+        if (typeSelect) typeSelect.value = (task.assignmentType === 'Kelompok' || task.type === 'kelompok') ? 'kelompok' : 'individu';
+
+        const methodSelect = document.getElementById('admin-task-method');
+        if (methodSelect) {
+          const m = (task.submissionMethod || '').toLowerCase();
+          if (m.includes('classroom')) methodSelect.value = 'classroom';
+          else if (m.includes('email')) methodSelect.value = 'email';
+          else if (m.includes('drive')) methodSelect.value = 'drive';
+          else if (m.includes('fisik') || m.includes('lab')) methodSelect.value = 'lab';
+          else methodSelect.value = 'lainnya';
+        }
+
+        const placeInput = document.getElementById('admin-task-place');
+        if (placeInput) placeInput.value = task.submissionPlace || '';
+
+        const descInput = document.getElementById('admin-task-desc');
+        if (descInput) descInput.value = task.description || '';
+
+        if (modal) modal.classList.add('is-open');
+        if (window.lucide) window.lucide.createIcons();
+      }
+
       function closeAdminAddTaskModal() {
         const modal = document.getElementById('modal-admin-add-task');
         if (modal) modal.classList.remove('is-open');
+        editingAdminTaskId = null;
+        const titleEl = modal?.querySelector('h3');
+        if (titleEl) titleEl.innerText = 'Tambah Tugas Kuliah Baru';
+        const submitBtn = modal?.querySelector('button[type="submit"]');
+        if (submitBtn) {
+          submitBtn.innerHTML = '<i data-lucide="check" style="width: 15px; height: 15px;"></i> Simpan Tugas';
+        }
       }
 
       async function handleAdminSaveAssignment(e) {
@@ -2075,28 +2144,56 @@
           `;
         }
 
+        const methodMap = {
+          'lab': 'Kumpul Fisik',
+          'classroom': 'Google Classroom',
+          'email': 'Email Dosen',
+          'drive': 'Google Drive',
+          'lainnya': 'Lainnya'
+        };
+        const resolvedMethod = methodMap[submissionMethod] || submissionPlace || 'Kumpul Fisik';
+
         try {
           if (window.TRJT_ASSIGNMENTS) {
-            const savePromise = window.TRJT_ASSIGNMENTS.createAssignment({
-              courseName: course,
-              title: title,
-              dueDate: dueDate,
-              dueTime: dueTime,
-              type: type,
-              submissionMethod: submissionMethod,
-              submissionPlace: submissionPlace,
-              description: description,
-              createdBy: 'Admin / Komti'
-            });
+            let savePromise;
+            if (editingAdminTaskId) {
+              savePromise = window.TRJT_ASSIGNMENTS.updateAssignment(editingAdminTaskId, {
+                courseName: course,
+                title: title,
+                deadline: dueDate,
+                dueDate: dueDate,
+                dueTime: dueTime,
+                type: type,
+                assignmentType: type === 'kelompok' ? 'Kelompok' : 'Individu',
+                submissionMethod: resolvedMethod,
+                submissionPlace: submissionPlace,
+                description: description
+              });
+            } else {
+              savePromise = window.TRJT_ASSIGNMENTS.createAssignment({
+                courseName: course,
+                title: title,
+                deadline: dueDate,
+                dueDate: dueDate,
+                dueTime: dueTime,
+                type: type,
+                assignmentType: type === 'kelompok' ? 'Kelompok' : 'Individu',
+                submissionMethod: resolvedMethod,
+                submissionPlace: submissionPlace,
+                description: description,
+                createdBy: 'Admin / Komti'
+              });
+            }
 
             await Promise.all([
               savePromise,
               new Promise((resolve) => setTimeout(resolve, 450))
             ]);
           }
+          const isEdit = !!editingAdminTaskId;
           closeAdminAddTaskModal();
           renderAdminAssignmentsTable();
-          alert('✅ Tugas berhasil ditambahkan ke database Firestore!');
+          alert(isEdit ? '✅ Perubahan tugas berhasil disimpan ke Firestore!' : '✅ Tugas berhasil ditambahkan ke database Firestore!');
         } catch (err) {
           alert('Gagal menyimpan tugas: ' + err.message);
         } finally {
@@ -2162,7 +2259,10 @@
               </td>
               <td><span class="soft-badge-neutral">${typeLabel}</span></td>
               <td style="color: var(--color-secondary-text);">${placeLabel}</td>
-              <td style="text-align: center;">
+              <td style="text-align: center; white-space: nowrap;">
+                <button type="button" class="btn-secondary" style="padding: 4px 8px; font-size: 11px; color: var(--color-primary-blue); border-color: #BFDBFE; margin-right: 4px;" onclick="openAdminEditTaskModal('${task.id}')" title="Edit Tugas">
+                  <i data-lucide="edit-3" style="width: 13px; height: 13px;"></i> Edit
+                </button>
                 <button type="button" class="btn-secondary" style="padding: 4px 8px; font-size: 11px; color: #DC2626; border-color: #FECACA;" onclick="handleAdminDeleteAssignment('${task.id}')" title="Hapus Tugas">
                   <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i> Hapus
                 </button>
@@ -2175,6 +2275,7 @@
       }
 
       window.openAdminAddTaskModal = openAdminAddTaskModal;
+      window.openAdminEditTaskModal = openAdminEditTaskModal;
       window.closeAdminAddTaskModal = closeAdminAddTaskModal;
       window.handleAdminSaveAssignment = handleAdminSaveAssignment;
       window.handleAdminDeleteAssignment = handleAdminDeleteAssignment;

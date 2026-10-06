@@ -252,6 +252,7 @@
     .piket-member-name { font-size: 12.5px; font-weight: 600; color: var(--color-primary-navy); line-height: 1.25; }
   </style>
   <link rel="stylesheet" href="./css/student-ui.css?v=9.8">
+  <link rel="stylesheet" href="./css/cover-generator.css?v=10.1">
 </head>
 <body class="student-app home-active">
 
@@ -303,7 +304,7 @@
             <button class="class-shortcut" type="button" onclick="openCourseMaterialsModal()" aria-label="Buka materi kuliah"><span class="shortcut-icon"><i data-lucide="book-open"></i></span><span class="shortcut-copy"><strong>Materi</strong></span></button>
             <button class="class-shortcut" type="button" onclick="openPiketModal()" aria-label="Lihat daftar piket kelas"><span class="shortcut-icon"><i data-lucide="clipboard-list"></i></span><span class="shortcut-copy"><strong>Piket</strong></span></button>
             <button class="class-shortcut" type="button" onclick="openCourseGroupsModal()" aria-label="Lihat kelompok praktikum"><span class="shortcut-icon"><i data-lucide="users"></i></span><span class="shortcut-copy"><strong>Kelompok</strong></span></button>
-            <button class="class-shortcut" type="button" onclick="document.querySelector('[data-tab=dosen]').click()" aria-label="Lihat daftar dosen"><span class="shortcut-icon"><i data-lucide="contact-round"></i></span><span class="shortcut-copy"><strong>Dosen</strong></span></button>
+            <button class="class-shortcut" type="button" onclick="switchTab('tools')" aria-label="Buka tools mahasiswa"><span class="shortcut-icon"><i data-lucide="wrench"></i></span><span class="shortcut-copy"><strong>Tools</strong></span></button>
             <button class="class-shortcut" type="button" onclick="document.querySelector('[data-tab=notifikasi]').click()" aria-label="Lihat notifikasi"><span class="shortcut-icon"><i data-lucide="bell"></i></span><span class="shortcut-copy"><strong>Notifikasi</strong></span></button>
             <button class="class-shortcut" type="button" onclick="document.querySelector('[data-tab=pengaturan]').click()" aria-label="Buka pengaturan"><span class="shortcut-icon"><i data-lucide="settings-2"></i></span><span class="shortcut-copy"><strong>Pengaturan</strong></span></button>
           </div>
@@ -496,7 +497,330 @@
         <!-- ==========================================
              VIEW 4: DOSEN (LECTURERS DIRECTORY)
              ========================================== -->
+        <!-- ==========================================
+             VIEW 4A: TOOLS (ACADEMIC UTILITIES)
+             ========================================== -->
+        <section id="view-tools" class="view-section">
+          
+          <button type="button" class="btn-back-link" onclick="switchTab('beranda')">
+            <i data-lucide="arrow-left"></i> Kembali ke Beranda
+          </button>
+          
+          <!-- Header with Subtitle & Badge -->
+          <div class="view-title-row">
+            <div>
+              <h2 class="view-page-title">Tools &amp; Utilitas</h2>
+              <p class="notif-subtitle-text" style="margin-top: 2px;">Alat bantu perkuliahan &amp; direktori mahasiswa TRJT 3A</p>
+            </div>
+            <span class="badge-semester" style="background: rgba(47, 128, 237, 0.1); color: var(--color-primary-blue);">Akademik</span>
+          </div>
+
+          <!-- Tools Cards Grid -->
+          <div class="tools-cards-grid">
+            <!-- Card 1: Generator Cover Laporan -->
+            <div class="tool-action-card" onclick="switchTab('cover-generator')" role="button" tabindex="0" aria-label="Buka Generator Cover Laporan">
+              <div class="tool-card-icon-box">
+                <i data-lucide="file-text"></i>
+              </div>
+              <div class="tool-card-body">
+                <div class="tool-card-title-row">
+                  <h3 class="tool-card-title">Generator Cover Laporan</h3>
+                  <span class="tool-card-badge">Template Kampus</span>
+                </div>
+                <p class="tool-card-desc">Buat cover laporan otomatis sesuai template kampus</p>
+              </div>
+              <div class="tool-card-arrow">
+                <i data-lucide="chevron-right"></i>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ==========================================
+             VIEW 4B: COVER GENERATOR
+             ========================================== -->
+        <section id="view-cover-generator" class="view-section">
+          
+          <button type="button" class="btn-back-link" onclick="switchTab('tools')">
+            <i data-lucide="arrow-left"></i> Kembali ke Tools
+          </button>
+
+          <div class="view-title-row" style="margin-bottom: 8px;">
+            <div>
+              <h2 class="view-page-title">Generator Cover Laporan</h2>
+              <p class="notif-subtitle-text" style="margin-top: 2px;">Format cover standar D4 TRJT Jurusan Teknik Elektro PNL</p>
+            </div>
+            <span class="badge-semester" style="background: rgba(47, 128, 237, 0.1); color: var(--color-primary-blue);">A4 Portrait</span>
+          </div>
+
+          <!-- Mobile Segmented Tabs Switcher -->
+          <div class="cover-mobile-tabs" role="tablist" aria-label="Tampilan Cover">
+            <button type="button" id="btn-tab-form" class="cover-mobile-tab-btn active" role="tab" aria-selected="true">
+              <i data-lucide="file-edit"></i> Isi Data
+            </button>
+            <button type="button" id="btn-tab-prev" class="cover-mobile-tab-btn" role="tab" aria-selected="false">
+              <i data-lucide="eye"></i> Pratinjau Cover
+            </button>
+          </div>
+
+          <!-- Main Responsive Workspace -->
+          <div class="cover-workspace-grid">
+            
+            <!-- LEFT PANEL: FORM -->
+            <div class="cover-panel-form">
+              <div class="cover-card-box">
+                
+                <!-- Field: Judul Laporan -->
+                <div class="cover-form-group">
+                  <label for="cover-title-input" class="cover-form-label">
+                    <span>Judul Laporan <span class="required-star">*</span></span>
+                    <span class="cover-form-hint">Mendukung multi-baris</span>
+                  </label>
+                  <textarea id="cover-title-input" class="cover-textarea" rows="3" placeholder="Contoh:&#10;LAPORAN PRAKTIKUM ANTENA DAN PROPAGASI&#10;PENGUKURAN POLA RADIASI ANTENA DIPOLE"></textarea>
+                  <div class="cover-counter-wrap">
+                    <span id="cover-title-counter">0 karakter · 0 baris</span>
+                    <span style="font-size: 11px; color: var(--color-text-secondary);">Ideal: 1-3 baris</span>
+                  </div>
+                  <div id="cover-title-warning" class="cover-warn-pill" style="display: none;">
+                    <i data-lucide="alert-triangle" style="width: 14px; height: 14px; flex-shrink: 0;"></i>
+                    <span>Judul cukup panjang, pastikan tetap ringkas agar cover muat 1 halaman.</span>
+                  </div>
+                  <span id="error-cover-title" class="cover-field-error"></span>
+                </div>
+
+                <!-- Field: Mata Kuliah -->
+                <div class="cover-form-group">
+                  <label for="cover-course-select" class="cover-form-label">
+                    <span>Mata Kuliah <span class="required-star">*</span></span>
+                  </label>
+                  <div class="cover-select-wrap">
+                    <select id="cover-course-select" class="cover-select" aria-label="Pilih Mata Kuliah">
+                      <option value="">-- Pilih Mata Kuliah --</option>
+                    </select>
+                    <div id="cover-course-loading" class="cover-field-loading" style="display: none;">
+                      <i data-lucide="loader-2"></i> <span>Memuat mata kuliah…</span>
+                    </div>
+                  </div>
+                  <div id="cover-course-error-box" class="cover-field-retry-box" style="display: none;">
+                    <span class="error-text">Gagal memuat daftar mata kuliah.</span>
+                    <button type="button" id="btn-retry-course" class="btn-retry-pill">
+                      <i data-lucide="rotate-cw"></i> Coba lagi
+                    </button>
+                  </div>
+                  <span id="error-cover-course" class="cover-field-error"></span>
+                </div>
+
+                <!-- Field: Mata Kuliah Manual (Hidden unless selected) -->
+                <div id="cover-manual-course-group" class="cover-form-group" style="display: none;">
+                  <label for="cover-manual-course-input" class="cover-form-label">
+                    <span>Nama Mata Kuliah (Manual) <span class="required-star">*</span></span>
+                  </label>
+                  <input type="text" id="cover-manual-course-input" class="cover-input" placeholder="Ketik nama mata kuliah...">
+                </div>
+
+                <!-- Field: Dosen Pengampu (Searchable Combobox) -->
+                <div class="cover-form-group" id="cover-dosen-form-group">
+                  <label id="cover-dosen-label" class="cover-form-label" for="cover-dosen-trigger">
+                    <span>Dosen Pengampu <span class="required-star">*</span></span>
+                    <span class="cover-form-hint">Daftar dosen TRJT 3A</span>
+                  </label>
+
+                  <!-- Hidden select for programmatic & accessible fallback -->
+                  <select id="cover-dosen-select" class="cover-select sr-only" aria-hidden="true" tabindex="-1">
+                    <option value="">Pilih dosen pengampu</option>
+                  </select>
+
+                  <!-- Searchable Combobox Component -->
+                  <div class="cover-searchable-combobox" id="cover-dosen-combobox">
+                    <button type="button" id="cover-dosen-trigger" class="cover-combobox-trigger" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="cover-dosen-label cover-dosen-trigger-text">
+                      <span id="cover-dosen-trigger-text" class="cover-combobox-trigger-text placeholder">Pilih dosen pengampu</span>
+                      <i data-lucide="chevron-down" class="cover-combobox-arrow"></i>
+                    </button>
+
+                    <div id="cover-dosen-dropdown" class="cover-combobox-menu" role="listbox" aria-label="Daftar Dosen Pengampu" style="display: none;">
+                      <div class="cover-combobox-search-row">
+                        <i data-lucide="search" class="cover-combobox-search-icon"></i>
+                        <input type="text" id="cover-dosen-search-input" class="cover-combobox-search-input" placeholder="Cari nama dosen / gelar..." autocomplete="off" spellcheck="false">
+                        <button type="button" id="cover-dosen-search-clear" class="cover-combobox-clear-btn" aria-label="Hapus pencarian" style="display: none;">&times;</button>
+                      </div>
+                      <div id="cover-dosen-options-list" class="cover-combobox-options-list" role="presentation">
+                        <!-- Populated dynamically by CoverGenerator -->
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Manual Lecturer Subgroup (Shown if "Ketik Manual" chosen) -->
+                  <div id="cover-manual-dosen-group" class="cover-manual-dosen-subgroup" style="display: none;">
+                    <input type="text" id="cover-manual-dosen-input" class="cover-input" placeholder="Ketik nama lengkap dosen & gelar...">
+                  </div>
+
+                  <span id="error-cover-dosen" class="cover-field-error"></span>
+                </div>
+
+                <!-- Field: Nama Mahasiswa -->
+                <div class="cover-form-group">
+                  <label for="cover-name-input" class="cover-form-label">
+                    <span>Nama Mahasiswa <span class="required-star">*</span></span>
+                  </label>
+                  <input type="text" id="cover-name-input" class="cover-input" placeholder="Contoh: Muhammad Raihan">
+                  <span id="error-cover-name" class="cover-field-error"></span>
+                </div>
+
+                <!-- Field: NIM -->
+                <div class="cover-form-group">
+                  <label for="cover-nim-input" class="cover-form-label">
+                    <span>NIM Mahasiswa <span class="required-star">*</span></span>
+                    <span class="cover-form-hint">Angka 0 di depan tetap tersimpan</span>
+                  </label>
+                  <input type="text" id="cover-nim-input" class="cover-input" inputmode="numeric" placeholder="Contoh: 220401001 atau 020230001">
+                  <span id="error-cover-nim" class="cover-field-error"></span>
+                </div>
+
+                <!-- Field: Tahun -->
+                <div class="cover-form-group">
+                  <label for="cover-year-input" class="cover-form-label">
+                    <span>Tahun <span class="required-star">*</span></span>
+                  </label>
+                  <input type="text" id="cover-year-input" class="cover-input" maxlength="4" value="2026" placeholder="2026">
+                  <span id="error-cover-year" class="cover-field-error"></span>
+                </div>
+
+                <!-- Remember Identity Checkbox -->
+                <label class="cover-remember-box" for="cover-remember-identity">
+                  <input type="checkbox" id="cover-remember-identity" class="cover-checkbox">
+                  <div class="cover-remember-text">
+                    <span class="cover-remember-title">Ingat nama dan NIM di perangkat ini</span>
+                    <span class="cover-remember-desc">Disimpan di peramban lokal untuk pengisian otomatis cover berikutnya.</span>
+                    <button type="button" id="cover-clear-identity-btn" class="cover-clear-id-btn" style="display: none;">Hapus identitas tersimpan</button>
+                  </div>
+                </label>
+
+                <!-- Feedback / Status Banner -->
+                <div id="cover-status-banner" class="cover-status-banner">
+                  <span id="cover-status-spinner" class="cover-spinner"></span>
+                  <span id="cover-status-message"></span>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="cover-action-buttons">
+                  <button type="button" id="btn-download-docx" class="btn-cover-download">
+                    <i data-lucide="file-down"></i>
+                    <span>Unduh Word (.docx)</span>
+                  </button>
+                  <button type="button" id="btn-print-cover" class="btn-cover-print">
+                    <i data-lucide="printer"></i>
+                    <span>Cetak / Simpan PDF</span>
+                  </button>
+                  <button type="button" id="btn-reset-cover" class="btn-cover-reset">
+                    <i data-lucide="rotate-ccw"></i>
+                    <span>Reset Formulir</span>
+                  </button>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- RIGHT PANEL: PREVIEW -->
+            <div class="cover-panel-preview mobile-hidden">
+              <div class="cover-preview-toolbar">
+                <span class="preview-toolbar-title">
+                  <i data-lucide="file-check"></i> Pratinjau Dokumen A4
+                </span>
+                <div class="preview-zoom-controls">
+                  <button type="button" id="btn-zoom-out" class="btn-zoom" title="Perkecil" aria-label="Perkecil">−</button>
+                  <button type="button" id="btn-zoom-fit" class="btn-zoom" title="Pas Ukuran" aria-label="Pas Ukuran">Fit</button>
+                  <button type="button" id="btn-zoom-in" class="btn-zoom" title="Perbesar" aria-label="Perbesar">+</button>
+                  <span id="cover-zoom-text" class="zoom-level-text">100%</span>
+                </div>
+              </div>
+
+              <div class="cover-canvas-container">
+                <div id="cover-scale-wrapper" class="cover-scale-wrapper">
+                  <div id="cover-sheet-scaler" class="cover-sheet-scaler">
+                    <div id="cover-a4-sheet" class="cover-page cover-a4-sheet" role="document" aria-label="Pratinjau Cover Laporan A4">
+                      
+                      <!-- 1. Header Section: Judul, Matkul, Dosen -->
+                      <div class="cover-block-header">
+                        <!-- 1. Judul Praktikum/Laporan (14 pt, Bold, UPPERCASE, Center) -->
+                        <h1 id="prev-title" class="cover-title prev-placeholder">INPUT JUDUL LAPORAN</h1>
+                        <div class="cover-spacing-title-subhead"></div>
+                        
+                        <!-- 2. Keterangan tugas mata kuliah (12 pt, Bold, Center) -->
+                        <p class="cover-subhead">Laporan ini disusun untuk memenuhi tugas mata kuliah:</p>
+                        
+                        <!-- 3. Nama mata kuliah (12 pt, Bold, Center) -->
+                        <p id="prev-course-name" class="cover-course prev-placeholder">Input Mata Kuliah</p>
+                        <div class="cover-spacing-course-dosen"></div>
+                        
+                        <!-- 4. Dosen Pengampu (12 pt, Bold, Center) -->
+                        <p class="cover-dosen-lbl">Dosen Pengampu:</p>
+                        
+                        <!-- 5. Nama dosen (12 pt, Normal, Center) -->
+                        <p id="prev-lecturer-name" class="cover-dosen-name prev-placeholder">Input Nama Dosen</p>
+                      </div>
+
+                      <!-- 6. Logo TRJT (Center, proporsional, object-fit: contain) -->
+                      <div class="cover-block-logo-trjt">
+                        <img src="./assets/images/cover/logo-prodi.jpeg" alt="Logo TRJT" class="cover-logo-trjt">
+                      </div>
+
+                      <!-- 7-9. Identitas Mahasiswa -->
+                      <div class="cover-block-student">
+                        <!-- 7. Oleh: (12 pt, Normal, Center) -->
+                        <p class="cover-oleh">Oleh:</p>
+                        <!-- 8. Nama Mahasiswa (12 pt, Bold, UPPERCASE, Center) -->
+                        <p id="prev-student-name" class="cover-student-name prev-placeholder">INPUT NAMA MAHASISWA</p>
+                        <!-- 9. NIM (12 pt, Normal, Center) -->
+                        <p id="prev-student-nim" class="cover-student-nim prev-placeholder">(NIM : INPUT NIM)</p>
+                      </div>
+
+                      <!-- 10-14. Logo PNL & Identitas Institusi -->
+                      <div class="cover-block-footer">
+                        <!-- 10. Logo PNL (30-40 mm, Center, object-fit: contain) -->
+                        <div class="cover-block-logo-pnl">
+                          <img src="./assets/images/cover/logo-pnl.png" alt="Logo Politeknik Negeri Lhokseumawe" class="cover-logo-pnl">
+                        </div>
+                        <!-- 11-13. Institusi (12 pt, Bold, UPPERCASE, Center, Line-height 1.2-1.4) -->
+                        <div class="cover-inst-text">
+                          <p class="cover-inst-line">PRODI DIV TEKNOLOGI REKAYASA JARINGAN TELEKOMUNIKASI</p>
+                          <p class="cover-inst-line">JURUSAN TEKNIK ELEKTRO</p>
+                          <p class="cover-inst-line">POLITEKNIK NEGERI LHOKSEUMAWE</p>
+                        </div>
+                        <!-- 14. Tahun (12 pt, Bold, Center) -->
+                        <p id="prev-year" class="cover-year">2026</p>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Actions for Mobile Preview Tab -->
+              <div class="cover-preview-actions">
+                <button type="button" class="btn-cover-download" onclick="CoverGenerator.exportDocx()">
+                  <i data-lucide="file-down"></i>
+                  <span>Unduh Word (.docx)</span>
+                </button>
+                <button type="button" class="btn-cover-print" onclick="CoverGenerator.printPdf()">
+                  <i data-lucide="printer"></i>
+                  <span>Cetak / Simpan PDF</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- ==========================================
+             VIEW 4C: DOSEN (LECTURERS DIRECTORY)
+             ========================================== -->
         <section id="view-dosen" class="view-section">
+          
+
+
+
           
           <!-- Header with Subtitle & Badge -->
           <div class="view-title-row">
@@ -1450,5 +1774,9 @@
   <script src="./js/assignment-service.js?v=9.1"></script>
   <script src="./js/gallery-service.js?v=9.6"></script>
   <script src="./js/app.js?v=9.8"></script>
+  <!-- Dedicated pristine print container for Cover A4 (@media print) -->
+  <div id="cover-print-container" class="cover-page" style="display: none;"></div>
+
+  <script src="./js/cover-generator.js?v=10.1"></script>
 </body>
 </html>
